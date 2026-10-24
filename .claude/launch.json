@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gt-reviewer",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "--project", "backend", "python", "backend/tools/gt_review.py", "serve", "--port", "8765"],
+      "port": 8765
+    },
+    {
+      "name": "gt-reviewer-scratch",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "--project", "backend", "python", "backend/tools/gt_review.py",
+                      "--db", "C:/Users/albmu/AppData/Local/Temp/claude/C--Code-ai-electrical-takeoff/f2f5c2eb-0004-4d92-8d41-a6cf79761cc5/scratchpad/gt_manual/manual_test.sqlite",
+                      "--exports", "C:/Users/albmu/AppData/Local/Temp/claude/C--Code-ai-electrical-takeoff/f2f5c2eb-0004-4d92-8d41-a6cf79761cc5/scratchpad/gt_manual/exports",
+                      "--reviewer", "claude-manual-test", "serve", "--port", "8766"],
+      "port": 8766
+    }
+  ]
+}

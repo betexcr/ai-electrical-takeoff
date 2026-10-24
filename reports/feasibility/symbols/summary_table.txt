@@ -1,0 +1,46 @@
+Raster candidate counts per class at NCC thresholds ('0.5', '0.6', '0.7', '0.8', '0.9') (unvalidated candidates, not counts of components)
+plain = 300dpi render; nowm = same with watermark text blanked in memory; thick = image+template eroded 5x5
+
+SHEET 1  vector segments raw=4665 dedup=3328 components=457
+  switch_standard                        plain 190/85/11/5/4      nowm 190/85/11/5/4      thick 177/13/13/11/5     vec(key n=15, dims=[5.28, 10.2]) hits=12
+  receptacle_gfi_duplex                  plain 28/21/11/7/2       nowm 28/21/11/7/2       thick 53/22/19/11/6      vec(key n=14, dims=[7.8, 12.24]) hits=25
+  light_recessed_downlight               plain 11/10/8/7/0        nowm 11/10/8/7/0        thick 13/9/9/7/0         vec(key n=4, dims=[8.88, 9.0]) hits=7
+  light_pendant_high_efficacy            plain 11/11/6/2/1        nowm 11/11/6/2/1        thick 15/11/7/2/2        vec(key n=14, dims=[8.76, 8.88]) hits=13
+  light_wall_mounted_high_efficacy       plain 11/8/2/1/0         nowm 11/8/2/1/0         thick 13/9/4/2/0         vec(key n=14, dims=[8.76, 8.88]) hits=13
+  ceiling_fan_optional_pre_wire          plain 0/0/0/0/0          nowm 0/0/0/0/0          thick 1/1/0/0/0          vec(key n=50, dims=[14.04, 114.84]) hits=0
+  fan_exhaust                            plain 39/4/3/3/2         nowm 14/4/3/3/2         thick 8/4/3/3/1          vec(key n=263, dims=[8.88, 9.0]) hits=0
+  detector_smoke                         plain 2/2/2/2/1          nowm 2/2/2/2/1          thick 6/2/2/2/2          vec(key n=17, dims=[13.32, 13.44]) hits=2
+  junction_box_electrical                plain 12/0/0/0/0         nowm 12/0/0/0/0         thick 29/22/12/0/0       vec(key n=13, dims=[7.8, 7.8]) hits=0
+
+SHEET 2  vector segments raw=5681 dedup=4098 components=550
+  switch_standard                        plain 195/116/7/3/1      nowm 195/116/7/3/1      thick 209/14/13/8/2      vec(key n=15, dims=[5.28, 10.08]) hits=13
+  receptacle_gfi_duplex                  plain 27/24/17/7/3       nowm 27/24/17/7/3       thick 57/27/24/16/7      vec(key n=14, dims=[7.8, 12.36]) hits=32
+  light_recessed_downlight               plain 14/13/12/11/2      nowm 14/13/12/11/2      thick 16/13/12/10/1      vec(key n=4, dims=[8.88, 9.0]) hits=11
+  light_pendant_high_efficacy            plain 15/15/12/1/0       nowm 15/15/12/1/0       thick 19/15/12/2/1       vec(key n=14, dims=[8.88, 8.88]) hits=12
+  light_wall_mounted_high_efficacy       plain 15/14/2/0/0        nowm 15/14/2/0/0        thick 16/15/4/1/0        vec(key n=14, dims=[8.76, 8.88]) hits=12
+  ceiling_fan_optional_pre_wire          plain 2/2/0/0/0          nowm 2/2/0/0/0          thick 2/2/2/2/0          vec(key n=50, dims=[14.04, 114.84]) hits=2
+  fan_exhaust                            plain 12/1/0/0/0         nowm 12/1/0/0/0         thick 10/4/3/1/0         vec(key n=263, dims=[8.88, 9.0]) hits=0
+  detector_smoke                         plain 3/3/3/3/2          nowm 3/3/3/3/2          thick 11/3/3/3/3         vec(key n=17, dims=[13.32, 13.44]) hits=3
+  junction_box_electrical                plain 16/1/0/0/0         nowm 16/1/0/0/0         thick 34/25/16/0/0       vec(key n=13, dims=[7.8, 7.8]) hits=0
+
+SHEET 3  vector segments raw=8326 dedup=4923 components=711
+  switch_standard                        plain 282/129/10/4/1     nowm 282/129/10/4/1     thick 203/21/18/11/1     vec(key n=15, dims=[5.16, 10.08]) hits=20
+  receptacle_gfi_duplex                  plain 33/20/13/7/3       nowm 33/20/13/7/3       thick 80/28/22/13/3      vec(key n=14, dims=[7.68, 12.36]) hits=33
+  light_recessed_downlight               plain 16/14/14/12/2      nowm 16/14/14/12/2      thick 18/14/13/11/2      vec(key n=4, dims=[8.88, 9.0]) hits=13
+  light_pendant_high_efficacy            plain 20/15/3/1/1        nowm 20/15/3/1/1        thick 21/19/4/1/1        vec(key n=14, dims=[8.76, 9.0]) hits=18
+  light_wall_mounted_high_efficacy       plain 19/13/1/1/0        nowm 19/13/1/1/0        thick 21/16/3/1/0        vec(key n=14, dims=[8.76, 9.0]) hits=18
+  ceiling_fan_optional_pre_wire          plain 2/2/2/2/2          nowm 2/2/2/2/2          thick 2/2/2/2/2          vec(key n=50, dims=[14.16, 114.84]) hits=2
+  fan_exhaust                            plain 50/6/4/4/2         nowm 16/5/4/4/2         thick 11/7/4/4/1         vec(key n=263, dims=[8.88, 9.0]) hits=0
+  detector_smoke                         plain 3/3/3/3/1          nowm 3/3/3/3/1          thick 12/4/3/3/3         vec(key n=17, dims=[13.32, 13.44]) hits=4
+  junction_box_electrical                plain 14/1/0/0/0         nowm 14/1/0/0/0         thick 41/28/14/0/0       vec(key n=13, dims=[7.68, 7.8]) hits=0
+
+SHEET 4  vector segments raw=9797 dedup=6104 components=830
+  switch_standard                        plain 420/17/7/1/0       nowm 432/17/7/1/0       thick 50/28/18/12/0      vec(key n=15, dims=[5.28, 10.08]) hits=22
+  receptacle_gfi_duplex                  plain 38/26/20/11/5      nowm 38/26/20/11/5      thick 96/48/28/17/6      vec(key n=14, dims=[7.8, 12.36]) hits=40
+  light_recessed_downlight               plain 26/19/19/16/7      nowm 26/19/19/16/7      thick 26/22/18/17/1      vec(key n=4, dims=[9.0, 9.0]) hits=18
+  light_pendant_high_efficacy            plain 26/23/17/1/1       nowm 26/23/17/1/1       thick 30/23/15/1/1       vec(key n=14, dims=[8.76, 9.0]) hits=24
+  light_wall_mounted_high_efficacy       plain 24/21/1/1/0        nowm 24/21/1/1/0        thick 27/23/8/1/1        vec(key n=14, dims=[8.88, 9.0]) hits=24
+  ceiling_fan_optional_pre_wire          plain 3/3/3/0/0          nowm 3/3/3/1/0          thick 3/3/3/3/0          vec(key n=50, dims=[14.04, 114.84]) hits=3
+  fan_exhaust                            plain 62/6/0/0/0         nowm 20/6/0/0/0         thick 21/6/4/0/0         vec(key n=266, dims=[8.88, 9.0]) hits=0
+  detector_smoke                         plain 5/5/5/4/2          nowm 5/5/5/4/2          thick 18/5/5/5/4         vec(key n=17, dims=[13.32, 13.44]) hits=5
+  junction_box_electrical                plain 17/0/0/0/0         nowm 17/0/0/0/0         thick 54/31/17/0/0       vec(key n=13, dims=[7.8, 7.8]) hits=0

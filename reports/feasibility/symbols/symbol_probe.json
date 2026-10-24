@@ -1,0 +1,7549 @@
+{
+ "tool_version": "symbol_probe/0.1.0",
+ "pymupdf_version": "2.0",
+ "opencv_version": "5.0.0",
+ "match_dpi": 300,
+ "status": "candidate locations only; no ground truth exists; not detections or counts",
+ "watermark_streams_blanked_in_memory": 2,
+ "references": {
+  "switch_standard.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    11,
+    20
+   ],
+   "icon_core_box": [
+    11,
+    9,
+    20,
+    30
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    49,
+    136
+   ],
+   "column_clusters": 2,
+   "category": "switch",
+   "subtype": "standard",
+   "shape_px": [
+    46,
+    148
+   ],
+   "px_per_pt_estimate": 1.418,
+   "ncc_core_vs_native_resized": 0.334,
+   "aspect_core_vs_native": [
+    0.43,
+    0.44
+   ]
+  },
+  "switch_three_way_dimmer.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    6,
+    19
+   ],
+   "icon_core_box": [
+    6,
+    11,
+    19,
+    39
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    46,
+    155
+   ],
+   "column_clusters": 2,
+   "category": "switch",
+   "subtype": "three_way_dimmer",
+   "shape_px": [
+    61,
+    172
+   ],
+   "px_per_pt_estimate": 1.432,
+   "ncc_core_vs_native_resized": 0.102,
+   "aspect_core_vs_native": [
+    0.46,
+    0.44
+   ]
+  },
+  "switch_vacancy_sensor.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    14,
+    28
+   ],
+   "icon_core_box": [
+    14,
+    17,
+    23,
+    39
+   ],
+   "annotation_bands": [
+    [
+     7,
+     14
+    ]
+   ],
+   "label_cols": [
+    48,
+    136
+   ],
+   "column_clusters": 2,
+   "category": "switch",
+   "subtype": "vacancy_sensor",
+   "shape_px": [
+    78,
+    156
+   ],
+   "px_per_pt_estimate": 1.435,
+   "ncc_core_vs_native_resized": 0.537,
+   "aspect_core_vs_native": [
+    0.41,
+    0.44
+   ]
+  },
+  "switch_dimmer.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    14,
+    24
+   ],
+   "icon_core_box": [
+    14,
+    20,
+    24,
+    41
+   ],
+   "annotation_bands": [
+    [
+     9,
+     16
+    ]
+   ],
+   "label_cols": [
+    52,
+    170
+   ],
+   "column_clusters": 2,
+   "category": "switch",
+   "subtype": "dimmer",
+   "shape_px": [
+    53,
+    181
+   ],
+   "px_per_pt_estimate": 1.48,
+   "ncc_core_vs_native_resized": 0.61,
+   "aspect_core_vs_native": [
+    0.48,
+    0.44
+   ]
+  },
+  "switch_fan.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    11,
+    21
+   ],
+   "icon_core_box": [
+    11,
+    15,
+    21,
+    37
+   ],
+   "annotation_bands": [
+    [
+     5,
+     12
+    ]
+   ],
+   "label_cols": [
+    46,
+    134
+   ],
+   "column_clusters": 2,
+   "category": "switch",
+   "subtype": "fan_switch",
+   "shape_px": [
+    44,
+    157
+   ],
+   "px_per_pt_estimate": 1.435,
+   "ncc_core_vs_native_resized": 0.648,
+   "aspect_core_vs_native": [
+    0.45,
+    0.44
+   ]
+  },
+  "switch_astronomical_time_or_motion_sensor.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    10,
+    19
+   ],
+   "icon_core_box": [
+    10,
+    15,
+    19,
+    37
+   ],
+   "annotation_bands": [
+    [
+     5,
+     12
+    ]
+   ],
+   "label_cols": [
+    47,
+    174
+   ],
+   "column_clusters": 2,
+   "category": "switch",
+   "subtype": "astronomical_time_or_motion_sensor",
+   "shape_px": [
+    77,
+    184
+   ],
+   "px_per_pt_estimate": 1.489,
+   "ncc_core_vs_native_resized": 0.477,
+   "aspect_core_vs_native": [
+    0.41,
+    0.44
+   ]
+  },
+  "light_pendant_high_efficacy.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    5,
+    35
+   ],
+   "icon_core_box": [
+    5,
+    9,
+    35,
+    33
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    53,
+    166
+   ],
+   "column_clusters": 2,
+   "category": "light",
+   "subtype": "pendant",
+   "shape_px": [
+    44,
+    176
+   ],
+   "px_per_pt_estimate": 1.481,
+   "ncc_core_vs_native_resized": -0.03,
+   "aspect_core_vs_native": [
+    1.25,
+    0.98
+   ]
+  },
+  "light_wall_mounted_high_efficacy.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    3,
+    21
+   ],
+   "icon_core_box": [
+    3,
+    9,
+    21,
+    30
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    50,
+    165
+   ],
+   "column_clusters": 2,
+   "category": "light",
+   "subtype": "wall_mounted",
+   "shape_px": [
+    59,
+    170
+   ],
+   "px_per_pt_estimate": 1.393,
+   "ncc_core_vs_native_resized": 0.484,
+   "aspect_core_vs_native": [
+    0.86,
+    0.87
+   ]
+  },
+  "light_exterior_wall_photosensor.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    10,
+    29
+   ],
+   "icon_core_box": [
+    10,
+    9,
+    29,
+    47
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    59,
+    196
+   ],
+   "column_clusters": 2,
+   "category": "light",
+   "subtype": "exterior_wall_photosensor",
+   "shape_px": [
+    81,
+    204
+   ],
+   "px_per_pt_estimate": 1.447,
+   "ncc_core_vs_native_resized": 0.009,
+   "aspect_core_vs_native": [
+    0.5,
+    0.88
+   ]
+  },
+  "light_recessed_downlight.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    6,
+    24
+   ],
+   "icon_core_box": [
+    6,
+    6,
+    24,
+    24
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    54,
+    167
+   ],
+   "column_clusters": 2,
+   "category": "light",
+   "subtype": "recessed_downlight",
+   "shape_px": [
+    58,
+    177
+   ],
+   "px_per_pt_estimate": 1.429,
+   "ncc_core_vs_native_resized": 0.62,
+   "aspect_core_vs_native": [
+    1.0,
+    1.0
+   ]
+  },
+  "light_recessed_vapor_proof_downlight.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    9,
+    42
+   ],
+   "icon_core_box": [
+    9,
+    22,
+    42,
+    46
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    57,
+    253
+   ],
+   "column_clusters": 2,
+   "category": "light",
+   "subtype": "recessed_vapor_proof_downlight",
+   "shape_px": [
+    57,
+    267
+   ],
+   "px_per_pt_estimate": 1.458,
+   "ncc_core_vs_native_resized": 0.008,
+   "aspect_core_vs_native": [
+    1.38,
+    1.02
+   ]
+  },
+  "ceiling_fan_optional_pre_wire.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    11,
+    184
+   ],
+   "icon_core_box": [
+    11,
+    18,
+    184,
+    191
+   ],
+   "annotation_bands": [
+    [
+     212,
+     223
+    ],
+    [
+     229,
+     259
+    ]
+   ],
+   "label_cols": null,
+   "column_clusters": 1,
+   "category": "ceiling_fan",
+   "subtype": "optional_pre_wire",
+   "shape_px": [
+    266,
+    202
+   ],
+   "ncc_core_vs_native_resized": 0.672,
+   "aspect_core_vs_native": [
+    1.0,
+    1.0
+   ]
+  },
+  "receptacle_afi_duplex_arc_fault.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    14,
+    29
+   ],
+   "icon_core_box": [
+    15,
+    31,
+    28,
+    51
+   ],
+   "annotation_bands": [
+    [
+     21,
+     28
+    ]
+   ],
+   "label_cols": [
+    48,
+    190
+   ],
+   "column_clusters": 2,
+   "category": "receptacle",
+   "subtype": "afi_duplex",
+   "shape_px": [
+    81,
+    201
+   ],
+   "px_per_pt_estimate": 1.459,
+   "ncc_core_vs_native_resized": 0.543,
+   "aspect_core_vs_native": [
+    0.65,
+    0.67
+   ]
+  },
+  "receptacle_gfi_240v_duplex.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    8,
+    31
+   ],
+   "icon_core_box": [
+    13,
+    31,
+    26,
+    51
+   ],
+   "annotation_bands": [
+    [
+     10,
+     17
+    ],
+    [
+     20,
+     27
+    ]
+   ],
+   "label_cols": [
+    47,
+    164
+   ],
+   "column_clusters": 2,
+   "category": "receptacle",
+   "subtype": "gfi_240v",
+   "shape_px": [
+    55,
+    186
+   ],
+   "px_per_pt_estimate": 1.494,
+   "ncc_core_vs_native_resized": 0.328,
+   "aspect_core_vs_native": [
+    0.65,
+    1.0
+   ]
+  },
+  "receptacle_gfi_duplex.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    14,
+    29
+   ],
+   "icon_core_box": [
+    15,
+    18,
+    28,
+    38
+   ],
+   "annotation_bands": [
+    [
+     7,
+     14
+    ]
+   ],
+   "label_cols": [
+    49,
+    165
+   ],
+   "column_clusters": 2,
+   "category": "receptacle",
+   "subtype": "gfi",
+   "shape_px": [
+    62,
+    178
+   ],
+   "px_per_pt_estimate": 1.481,
+   "ncc_core_vs_native_resized": 0.541,
+   "aspect_core_vs_native": [
+    0.65,
+    0.67
+   ]
+  },
+  "receptacle_gfi_weatherproof_duplex.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    15,
+    32
+   ],
+   "icon_core_box": [
+    17,
+    28,
+    30,
+    48
+   ],
+   "annotation_bands": [
+    [
+     7,
+     14
+    ],
+    [
+     18,
+     25
+    ]
+   ],
+   "label_cols": [
+    51,
+    168
+   ],
+   "column_clusters": 2,
+   "category": "receptacle",
+   "subtype": "gfi_weatherproof",
+   "shape_px": [
+    71,
+    197
+   ],
+   "px_per_pt_estimate": 1.494,
+   "ncc_core_vs_native_resized": 0.583,
+   "aspect_core_vs_native": [
+    0.65,
+    0.67
+   ]
+  },
+  "receptacle_afci_half_hot_duplex.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    8,
+    22
+   ],
+   "icon_core_box": [
+    8,
+    11,
+    22,
+    31
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    41,
+    159
+   ],
+   "column_clusters": 2,
+   "category": "receptacle",
+   "subtype": "afci_half_hot",
+   "shape_px": [
+    48,
+    173
+   ],
+   "px_per_pt_estimate": 1.506,
+   "ncc_core_vs_native_resized": 0.673,
+   "aspect_core_vs_native": [
+    0.7,
+    0.67
+   ]
+  },
+  "receptacle_gfi_microwave_duplex.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    12,
+    29
+   ],
+   "icon_core_box": [
+    14,
+    36,
+    27,
+    56
+   ],
+   "annotation_bands": [
+    [
+     15,
+     22
+    ],
+    [
+     26,
+     33
+    ]
+   ],
+   "label_cols": [
+    48,
+    165
+   ],
+   "column_clusters": 2,
+   "category": "receptacle",
+   "subtype": "gfi_microwave",
+   "shape_px": [
+    76,
+    181
+   ],
+   "px_per_pt_estimate": 1.494,
+   "ncc_core_vs_native_resized": 0.599,
+   "aspect_core_vs_native": [
+    0.65,
+    0.67
+   ]
+  },
+  "receptacle_gfi_dishwasher_duplex.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    7,
+    22
+   ],
+   "icon_core_box": [
+    8,
+    40,
+    21,
+    60
+   ],
+   "annotation_bands": [
+    [
+     19,
+     26
+    ],
+    [
+     30,
+     37
+    ]
+   ],
+   "label_cols": [
+    42,
+    159
+   ],
+   "column_clusters": 2,
+   "category": "receptacle",
+   "subtype": "gfi_dishwasher",
+   "shape_px": [
+    79,
+    164
+   ],
+   "px_per_pt_estimate": 1.494,
+   "ncc_core_vs_native_resized": 0.58,
+   "aspect_core_vs_native": [
+    0.65,
+    0.67
+   ]
+  },
+  "receptacle_range_hood_duplex.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    14,
+    27
+   ],
+   "icon_core_box": [
+    14,
+    22,
+    27,
+    42
+   ],
+   "annotation_bands": [
+    [
+     11,
+     18
+    ]
+   ],
+   "label_cols": [
+    48,
+    165
+   ],
+   "column_clusters": 2,
+   "category": "receptacle",
+   "subtype": "range_hood",
+   "shape_px": [
+    45,
+    173
+   ],
+   "px_per_pt_estimate": 1.494,
+   "ncc_core_vs_native_resized": 0.597,
+   "aspect_core_vs_native": [
+    0.65,
+    0.67
+   ]
+  },
+  "fan_exhaust.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    10,
+    26
+   ],
+   "icon_core_box": [
+    10,
+    8,
+    26,
+    22
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    57,
+    155
+   ],
+   "column_clusters": 2,
+   "category": "fan",
+   "subtype": "exhaust_fan",
+   "shape_px": [
+    29,
+    177
+   ],
+   "px_per_pt_estimate": 1.47,
+   "ncc_core_vs_native_resized": 0.733,
+   "aspect_core_vs_native": [
+    1.14,
+    1.02
+   ]
+  },
+  "fan_indoor_air_quality_iaq.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    7,
+    36
+   ],
+   "icon_core_box": [
+    7,
+    8,
+    36,
+    29
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    53,
+    145
+   ],
+   "column_clusters": 2,
+   "category": "fan",
+   "subtype": "iaq_fan",
+   "shape_px": [
+    43,
+    169
+   ],
+   "px_per_pt_estimate": 1.481,
+   "ncc_core_vs_native_resized": 0.334,
+   "aspect_core_vs_native": [
+    1.38,
+    1.02
+   ]
+  },
+  "detector_smoke.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    10,
+    31
+   ],
+   "icon_core_box": [
+    10,
+    17,
+    31,
+    47
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    47,
+    178
+   ],
+   "column_clusters": 2,
+   "category": "detector",
+   "subtype": "smoke_detector",
+   "shape_px": [
+    57,
+    192
+   ],
+   "px_per_pt_estimate": 1.487,
+   "ncc_core_vs_native_resized": 0.015,
+   "aspect_core_vs_native": [
+    0.7,
+    1.0
+   ]
+  },
+  "detector_combined_smoke_carbon_monoxide.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    7,
+    38
+   ],
+   "icon_core_box": [
+    7,
+    9,
+    38,
+    39
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    49,
+    165
+   ],
+   "column_clusters": 2,
+   "category": "detector",
+   "subtype": "combined_smoke_co",
+   "shape_px": [
+    63,
+    183
+   ],
+   "px_per_pt_estimate": 1.434,
+   "ncc_core_vs_native_resized": 0.013,
+   "aspect_core_vs_native": [
+    1.03,
+    0.98
+   ]
+  },
+  "junction_box_electrical.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    15,
+    29
+   ],
+   "icon_core_box": [
+    15,
+    14,
+    29,
+    27
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    49,
+    155
+   ],
+   "column_clusters": 2,
+   "category": "junction_box",
+   "subtype": "electrical_junction_box",
+   "shape_px": [
+    59,
+    174
+   ],
+   "px_per_pt_estimate": 1.489,
+   "ncc_core_vs_native_resized": 0.55,
+   "aspect_core_vs_native": [
+    1.08,
+    1.0
+   ]
+  },
+  "wiring_run_electrical_REFERENCE_BOM.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    11,
+    98
+   ],
+   "icon_core_box": [
+    24,
+    37,
+    31,
+    61
+   ],
+   "annotation_bands": [
+    [
+     10,
+     26
+    ],
+    [
+     67,
+     78
+    ],
+    [
+     83,
+     94
+    ]
+   ],
+   "label_cols": null,
+   "column_clusters": 1,
+   "category": "reference_only",
+   "subtype": "electrical_wiring_run",
+   "shape_px": [
+    107,
+    109
+   ],
+   "ncc_core_vs_native_resized": -0.021,
+   "aspect_core_vs_native": [
+    0.29,
+    0.99
+   ]
+  },
+  "fan_coil_unit_dedicated_outlet_REFERENCE.png": {
+   "ok": true,
+   "icon_cluster_cols": [
+    9,
+    79
+   ],
+   "icon_core_box": [
+    9,
+    11,
+    79,
+    47
+   ],
+   "annotation_bands": [],
+   "label_cols": [
+    99,
+    249
+   ],
+   "column_clusters": 2,
+   "category": "reference_only",
+   "subtype": "fan_coil_dedicated_outlet",
+   "shape_px": [
+    92,
+    264
+   ],
+   "px_per_pt_estimate": 1.452,
+   "ncc_core_vs_native_resized": 0.137,
+   "aspect_core_vs_native": [
+    1.94,
+    1.42
+   ]
+  }
+ },
+ "pages": {
+  "1": {
+   "electrical_bbox_searched": [
+    854.4,
+    37.08,
+    1439.04,
+    843.73
+   ],
+   "legend_entries": {
+    "switch_standard.png": {
+     "label": "ELECTRICAL SWITCH",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      121.56,
+      1546.94,
+      141.45
+     ],
+     "search_window": [
+      1451.6,
+      113.56,
+      1484.1,
+      143.45
+     ],
+     "icon_bbox": [
+      1460.16,
+      117.84,
+      1466.64,
+      132.6
+     ],
+     "icon_strokes_bbox": [
+      1460.16,
+      117.84,
+      1466.64,
+      132.6
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_three_way_dimmer.png": {
+     "label": "ELECTRICAL SWITCH-THREE WAY-DIMMER",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      148.8,
+      1561.7,
+      179.49
+     ],
+     "search_window": [
+      1451.6,
+      140.8,
+      1484.1,
+      181.49
+     ],
+     "icon_bbox": [
+      1458.36,
+      147.89,
+      1467.9,
+      167.88
+     ],
+     "icon_strokes_bbox": [
+      1460.76,
+      153.0,
+      1467.24,
+      167.88
+     ],
+     "icon_px": [
+      63,
+      28
+     ]
+    },
+    "switch_vacancy_sensor.png": {
+     "label": "ELECTRICAL SWITCH- VACANCY SENSOR",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      191.04,
+      1546.94,
+      232.65
+     ],
+     "search_window": [
+      1451.6,
+      183.04,
+      1484.1,
+      234.65
+     ],
+     "icon_bbox": [
+      1462.56,
+      186.53,
+      1473.08,
+      208.56
+     ],
+     "icon_strokes_bbox": [
+      1462.56,
+      193.8,
+      1469.04,
+      208.56
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_dimmer.png": {
+     "label": "ELECTRICAL SWITCH-DIMMER",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      243.6,
+      1565.35,
+      263.49
+     ],
+     "search_window": [
+      1451.6,
+      235.6,
+      1484.1,
+      265.49
+     ],
+     "icon_bbox": [
+      1460.64,
+      236.21,
+      1467.0,
+      258.48
+     ],
+     "icon_strokes_bbox": [
+      1460.64,
+      243.72,
+      1467.0,
+      258.48
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_fan.png": {
+     "label": "ELECTRICAL SWITCH-FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      275.04,
+      1546.94,
+      294.93
+     ],
+     "search_window": [
+      1451.6,
+      267.04,
+      1484.1,
+      296.93
+     ],
+     "icon_bbox": [
+      1462.56,
+      270.17,
+      1469.04,
+      292.2
+     ],
+     "icon_strokes_bbox": [
+      1462.56,
+      277.44,
+      1469.04,
+      292.2
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_astronomical_time_or_motion_sensor.png": {
+     "label": "ASTRONOMICAL TIME OR MOTION SENSOR SWITCH (AT LEAST 1 REQ.)",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      305.04,
+      1570.87,
+      346.65
+     ],
+     "search_window": [
+      1451.6,
+      297.04,
+      1484.1,
+      348.65
+     ],
+     "icon_bbox": [
+      1460.64,
+      300.77,
+      1467.0,
+      323.04
+     ],
+     "icon_strokes_bbox": [
+      1460.64,
+      308.28,
+      1467.0,
+      323.04
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "light_pendant_high_efficacy.png": {
+     "label": "PENDANT LIGHT HIGH-EFFICACY",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      408.36,
+      1561.88,
+      428.25
+     ],
+     "search_window": [
+      1451.6,
+      400.36,
+      1484.1,
+      430.25
+     ],
+     "icon_bbox": [
+      1453.68,
+      406.2,
+      1474.44,
+      424.25
+     ],
+     "icon_strokes_bbox": [
+      1453.68,
+      406.2,
+      1466.16,
+      418.68
+     ],
+     "icon_px": [
+      53,
+      52
+     ]
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "label": "WALL MOUNTED HIGH-EFFICACY LIGHT",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      445.08,
+      1568.18,
+      475.77
+     ],
+     "search_window": [
+      1451.6,
+      437.08,
+      1484.1,
+      477.77
+     ],
+     "icon_bbox": [
+      1453.68,
+      443.4,
+      1466.16,
+      457.68
+     ],
+     "icon_strokes_bbox": [
+      1453.68,
+      443.4,
+      1466.16,
+      457.68
+     ],
+     "icon_px": [
+      60,
+      52
+     ]
+    },
+    "light_exterior_wall_photosensor.png": {
+     "label": "EXTERIOR WALL MOUNTED HIGH- EFFICACY LIGHT W/ PHOTO SENSOR",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.28,
+      486.0,
+      1578.98,
+      527.61
+     ],
+     "search_window": [
+      1450.28,
+      478.0,
+      1482.78,
+      529.61
+     ],
+     "icon_bbox": [
+      1451.4,
+      482.45,
+      1465.27,
+      508.8
+     ],
+     "icon_strokes_bbox": [
+      1452.36,
+      494.52,
+      1464.84,
+      508.8
+     ],
+     "icon_px": [
+      60,
+      53
+     ]
+    },
+    "light_recessed_downlight.png": {
+     "label": "RECESSED HIGH- EFFICACY DOWNLIGHT",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      538.56,
+      1564.7,
+      569.25
+     ],
+     "search_window": [
+      1451.6,
+      530.56,
+      1484.1,
+      571.25
+     ],
+     "icon_bbox": [
+      1453.68,
+      537.36,
+      1466.16,
+      549.72
+     ],
+     "icon_strokes_bbox": [
+      1453.68,
+      537.36,
+      1466.16,
+      549.72
+     ],
+     "icon_px": [
+      52,
+      52
+     ]
+    },
+    "light_recessed_vapor_proof_downlight.png": {
+     "label": "RECESSED HIGH- EFFICACY DOWNLIGHT-VAPOR PROOF",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.28,
+      584.52,
+      1618.7,
+      604.41
+     ],
+     "search_window": [
+      1450.28,
+      576.52,
+      1482.78,
+      606.41
+     ],
+     "icon_bbox": [
+      1452.36,
+      587.76,
+      1475.35,
+      605.69
+     ],
+     "icon_strokes_bbox": [
+      1452.36,
+      587.76,
+      1464.84,
+      600.24
+     ],
+     "icon_px": [
+      52,
+      53
+     ]
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "label": "CEILING FAN OPTIONAL (PRE WIRE FOR CEILING FAN ONLY)",
+     "label_hits": 1,
+     "label_bbox": [
+      1591.2,
+      452.39,
+      1707.74,
+      483.09
+     ],
+     "search_window": [
+      1583.2,
+      317.39,
+      1715.74,
+      451.39
+     ],
+     "icon_bbox": [
+      1589.76,
+      321.6,
+      1705.8,
+      437.64
+     ],
+     "icon_strokes_bbox": [
+      1589.76,
+      321.6,
+      1705.8,
+      437.64
+     ],
+     "icon_px": [
+      484,
+      484
+     ]
+    },
+    "receptacle_afi_duplex_arc_fault.png": {
+     "label": "DUPLEX OUTLET ARC-FAULT CIRCUIT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.91,
+      121.55,
+      1854.26,
+      152.25
+     ],
+     "search_window": [
+      1722.91,
+      113.55,
+      1755.41,
+      154.25
+     ],
+     "icon_bbox": [
+      1733.16,
+      118.01,
+      1744.35,
+      139.08
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      125.52,
+      1743.12,
+      139.08
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_240v_duplex.png": {
+     "label": "DUPLEX OUTLET 240 VOLTS",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      164.04,
+      1835.24,
+      183.93
+     ],
+     "search_window": [
+      1722.92,
+      156.04,
+      1755.42,
+      185.93
+     ],
+     "icon_bbox": [
+      1730.64,
+      160.01,
+      1746.91,
+      183.72
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      174.72,
+      1743.12,
+      183.72
+     ],
+     "icon_px": [
+      38,
+      38
+     ]
+    },
+    "receptacle_gfi_duplex.png": {
+     "label": "DUPLEX OUTLET GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      197.87,
+      1835.24,
+      228.57
+     ],
+     "search_window": [
+      1722.92,
+      189.87,
+      1755.42,
+      230.57
+     ],
+     "icon_bbox": [
+      1732.8,
+      197.33,
+      1744.83,
+      218.28
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      204.84,
+      1743.12,
+      218.28
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_weatherproof_duplex.png": {
+     "label": "DUPLEX OUTLET WATERPROOF GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      239.64,
+      1835.24,
+      281.25
+     ],
+     "search_window": [
+      1722.92,
+      231.64,
+      1755.42,
+      283.25
+     ],
+     "icon_bbox": [
+      1732.56,
+      239.21,
+      1744.87,
+      267.48
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      253.92,
+      1743.12,
+      267.48
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_afci_half_hot_duplex.png": {
+     "label": "DUPLEX OUTLET AFCI-HALF HOT",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.91,
+      292.68,
+      1835.24,
+      312.57
+     ],
+     "search_window": [
+      1722.91,
+      284.68,
+      1755.41,
+      314.57
+     ],
+     "icon_bbox": [
+      1734.36,
+      291.0,
+      1743.36,
+      304.56
+     ],
+     "icon_strokes_bbox": [
+      1734.36,
+      291.0,
+      1743.36,
+      304.56
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_microwave_duplex.png": {
+     "label": "DUPLEX OUTLET MICROWAVE GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      325.8,
+      1835.24,
+      367.41
+     ],
+     "search_window": [
+      1722.92,
+      317.8,
+      1755.42,
+      369.41
+     ],
+     "icon_bbox": [
+      1732.08,
+      327.65,
+      1744.87,
+      355.92
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      342.24,
+      1743.12,
+      355.92
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_dishwasher_duplex.png": {
+     "label": "DUPLEX OUTLET DISH WASHER GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      376.08,
+      1835.24,
+      417.69
+     ],
+     "search_window": [
+      1722.92,
+      368.08,
+      1755.42,
+      419.69
+     ],
+     "icon_bbox": [
+      1732.44,
+      380.93,
+      1744.82,
+      409.2
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      395.64,
+      1743.12,
+      409.2
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_range_hood_duplex.png": {
+     "label": "DUPLEX OUTLET RANGE HOOD",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      431.88,
+      1835.24,
+      451.77
+     ],
+     "search_window": [
+      1722.92,
+      423.88,
+      1755.42,
+      453.77
+     ],
+     "icon_bbox": [
+      1734.12,
+      431.93,
+      1743.12,
+      453.0
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      439.44,
+      1743.12,
+      453.0
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "fan_exhaust.png": {
+     "label": "EXHAUST FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.28,
+      361.16,
+      1550.94,
+      370.18
+     ],
+     "search_window": [
+      1450.28,
+      353.16,
+      1482.78,
+      372.18
+     ],
+     "icon_bbox": [
+      1453.56,
+      356.88,
+      1463.76,
+      366.96
+     ],
+     "icon_strokes_bbox": [
+      1453.56,
+      356.88,
+      1463.76,
+      366.96
+     ],
+     "icon_px": [
+      42,
+      43
+     ]
+    },
+    "fan_indoor_air_quality_iaq.png": {
+     "label": "INDOOR AIR QUALITY FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.28,
+      379.2,
+      1546.38,
+      399.09
+     ],
+     "search_window": [
+      1450.28,
+      371.2,
+      1482.78,
+      401.09
+     ],
+     "icon_bbox": [
+      1453.56,
+      377.52,
+      1473.57,
+      392.45
+     ],
+     "icon_strokes_bbox": [
+      1453.56,
+      377.52,
+      1463.76,
+      387.6
+     ],
+     "icon_px": [
+      42,
+      43
+     ]
+    },
+    "detector_smoke.png": {
+     "label": "SMOKE DETECTOR/ALARM",
+     "label_hits": 1,
+     "label_bbox": [
+      1620.36,
+      198.36,
+      1708.48,
+      218.25
+     ],
+     "search_window": [
+      1586.36,
+      190.36,
+      1618.86,
+      220.25
+     ],
+     "icon_bbox": [
+      1595.16,
+      197.04,
+      1609.68,
+      218.93
+     ],
+     "icon_strokes_bbox": [
+      1595.16,
+      197.04,
+      1609.68,
+      211.68
+     ],
+     "icon_px": [
+      61,
+      61
+     ]
+    },
+    "detector_combined_smoke_carbon_monoxide.png": {
+     "label": "COMBINATION SMOKE/CARBON MONOXIDE",
+     "label_hits": 1,
+     "label_bbox": [
+      1620.36,
+      233.28,
+      1701.26,
+      263.97
+     ],
+     "search_window": [
+      1586.36,
+      225.28,
+      1618.86,
+      265.97
+     ],
+     "icon_bbox": [
+      1591.32,
+      231.24,
+      1613.23,
+      253.01
+     ],
+     "icon_strokes_bbox": [
+      1595.16,
+      231.24,
+      1609.68,
+      245.88
+     ],
+     "icon_px": [
+      62,
+      61
+     ]
+    },
+    "junction_box_electrical.png": {
+     "label": "ELECTRICAL JUNCTION BOX",
+     "label_hits": 1,
+     "label_bbox": [
+      1620.36,
+      278.4,
+      1691.54,
+      298.29
+     ],
+     "search_window": [
+      1586.36,
+      270.4,
+      1618.86,
+      300.29
+     ],
+     "icon_bbox": [
+      1597.68,
+      276.48,
+      1606.68,
+      285.48
+     ],
+     "icon_strokes_bbox": [
+      1597.68,
+      276.48,
+      1606.68,
+      285.48
+     ],
+     "icon_px": [
+      38,
+      38
+     ]
+    },
+    "wiring_run_electrical_REFERENCE_BOM.png": {
+     "label": "ELECTRICAL WIRING",
+     "label_hits": 1,
+     "label_bbox": [
+      1591.2,
+      533.16,
+      1652.54,
+      553.05
+     ],
+     "search_window": [
+      1581.2,
+      483.16,
+      1662.54,
+      532.16
+     ],
+     "icon_bbox": [
+      1600.08,
+      494.28,
+      1634.64,
+      528.96
+     ],
+     "icon_strokes_bbox": [
+      1600.08,
+      494.28,
+      1634.64,
+      528.96
+     ],
+     "icon_px": [
+      145,
+      144
+     ]
+    },
+    "fan_coil_unit_dedicated_outlet_REFERENCE.png": {
+     "label": "FAN COIL UNIT +80\" TO BOTTOM OF UNIT PROVIDE DEDICATED OUTLET",
+     "label_hits": 1,
+     "label_bbox": [
+      1749.72,
+      573.84,
+      1853.06,
+      615.45
+     ],
+     "search_window": [
+      1709.72,
+      565.84,
+      1748.22,
+      617.45
+     ],
+     "icon_bbox": [
+      1709.4,
+      574.32,
+      1736.04,
+      593.16
+     ],
+     "icon_strokes_bbox": [
+      1709.4,
+      574.32,
+      1736.04,
+      593.16
+     ],
+     "icon_px": [
+      79,
+      112
+     ]
+    }
+   },
+   "raster": {
+    "switch_standard.png": {
+     "template_px": [
+      62,
+      27
+     ],
+     "candidates_by_threshold": {
+      "0.5": 190,
+      "0.6": 85,
+      "0.7": 11,
+      "0.8": 5,
+      "0.9": 4
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 190,
+      "0.6": 85,
+      "0.7": 11,
+      "0.8": 5,
+      "0.9": 4
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 177,
+      "0.6": 13,
+      "0.7": 13,
+      "0.8": 11,
+      "0.9": 5
+     },
+     "seconds": 0.83,
+     "top_scores": [
+      0.93,
+      0.93,
+      0.93,
+      0.919,
+      0.893
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1208.4,
+       "cy_pt": 286.8,
+       "score": 0.93,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1208.4,
+       "cy_pt": 298.8,
+       "score": 0.93,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1208.4,
+       "cy_pt": 485.28,
+       "score": 0.93,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1139.16,
+       "cy_pt": 445.08,
+       "score": 0.919,
+       "rot": 0
+      },
+      {
+       "cx_pt": 974.16,
+       "cy_pt": 354.96,
+       "score": 0.893,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1079.16,
+       "cy_pt": 585.48,
+       "score": 0.762,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1082.88,
+       "cy_pt": 252.48,
+       "score": 0.76,
+       "rot": 90
+      },
+      {
+       "cx_pt": 974.4,
+       "cy_pt": 389.76,
+       "score": 0.76,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1082.88,
+       "cy_pt": 262.8,
+       "score": 0.758,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1208.4,
+       "cy_pt": 277.2,
+       "score": 0.725,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1208.4,
+       "cy_pt": 493.44,
+       "score": 0.725,
+       "rot": 270
+      }
+     ]
+    },
+    "receptacle_gfi_duplex.png": {
+     "template_px": [
+      57,
+      38
+     ],
+     "candidates_by_threshold": {
+      "0.5": 28,
+      "0.6": 21,
+      "0.7": 11,
+      "0.8": 7,
+      "0.9": 2
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 28,
+      "0.6": 21,
+      "0.7": 11,
+      "0.8": 7,
+      "0.9": 2
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 53,
+      "0.6": 22,
+      "0.7": 19,
+      "0.8": 11,
+      "0.9": 6
+     },
+     "seconds": 0.81,
+     "top_scores": [
+      0.904,
+      0.901,
+      0.894,
+      0.886,
+      0.882
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 995.04,
+       "cy_pt": 609.12,
+       "score": 0.904,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1122.0,
+       "cy_pt": 223.44,
+       "score": 0.901,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1187.4,
+       "cy_pt": 395.64,
+       "score": 0.894,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1083.0,
+       "cy_pt": 238.92,
+       "score": 0.886,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1187.4,
+       "cy_pt": 529.08,
+       "score": 0.882,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1208.28,
+       "cy_pt": 516.6,
+       "score": 0.837,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1221.12,
+       "cy_pt": 585.36,
+       "score": 0.809,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1146.0,
+       "cy_pt": 585.6,
+       "score": 0.786,
+       "rot": 0
+      },
+      {
+       "cx_pt": 973.08,
+       "cy_pt": 241.8,
+       "score": 0.764,
+       "rot": 270
+      },
+      {
+       "cx_pt": 973.08,
+       "cy_pt": 369.96,
+       "score": 0.732,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1208.28,
+       "cy_pt": 558.84,
+       "score": 0.709,
+       "rot": 270
+      }
+     ]
+    },
+    "light_recessed_downlight.png": {
+     "template_px": [
+      52,
+      52
+     ],
+     "candidates_by_threshold": {
+      "0.5": 11,
+      "0.6": 10,
+      "0.7": 8,
+      "0.8": 7,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 11,
+      "0.6": 10,
+      "0.7": 8,
+      "0.8": 7,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 13,
+      "0.6": 9,
+      "0.7": 9,
+      "0.8": 7,
+      "0.9": 0
+     },
+     "seconds": 0.83,
+     "top_scores": [
+      0.89,
+      0.875,
+      0.874,
+      0.872,
+      0.872
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1259.28,
+       "cy_pt": 296.52,
+       "score": 0.89,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1120.32,
+       "cy_pt": 325.56,
+       "score": 0.875,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1120.32,
+       "cy_pt": 408.84,
+       "score": 0.874,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1004.64,
+       "cy_pt": 457.08,
+       "score": 0.872,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1120.32,
+       "cy_pt": 522.6,
+       "score": 0.872,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1004.64,
+       "cy_pt": 387.48,
+       "score": 0.847,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1004.64,
+       "cy_pt": 318.12,
+       "score": 0.826,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1117.44,
+       "cy_pt": 435.96,
+       "score": 0.748,
+       "rot": 90
+      }
+     ]
+    },
+    "light_pendant_high_efficacy.png": {
+     "template_px": [
+      53,
+      52
+     ],
+     "candidates_by_threshold": {
+      "0.5": 11,
+      "0.6": 11,
+      "0.7": 6,
+      "0.8": 2,
+      "0.9": 1
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 11,
+      "0.6": 11,
+      "0.7": 6,
+      "0.8": 2,
+      "0.9": 1
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 15,
+      "0.6": 11,
+      "0.7": 7,
+      "0.8": 2,
+      "0.9": 2
+     },
+     "seconds": 0.83,
+     "top_scores": [
+      0.927,
+      0.836,
+      0.745,
+      0.735,
+      0.728
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1117.32,
+       "cy_pt": 435.96,
+       "score": 0.927,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1335.48,
+       "cy_pt": 291.96,
+       "score": 0.836,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1259.4,
+       "cy_pt": 296.52,
+       "score": 0.745,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1083.36,
+       "cy_pt": 609.36,
+       "score": 0.735,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1004.52,
+       "cy_pt": 457.08,
+       "score": 0.728,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1120.32,
+       "cy_pt": 408.72,
+       "score": 0.708,
+       "rot": 0
+      }
+     ]
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "template_px": [
+      60,
+      52
+     ],
+     "candidates_by_threshold": {
+      "0.5": 11,
+      "0.6": 8,
+      "0.7": 2,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 11,
+      "0.6": 8,
+      "0.7": 2,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 13,
+      "0.6": 9,
+      "0.7": 4,
+      "0.8": 2,
+      "0.9": 0
+     },
+     "seconds": 0.85,
+     "top_scores": [
+      0.842,
+      0.786,
+      0.666,
+      0.648,
+      0.628
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1116.48,
+       "cy_pt": 435.96,
+       "score": 0.842,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1336.32,
+       "cy_pt": 291.96,
+       "score": 0.786,
+       "rot": 90
+      }
+     ]
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "template_px": [
+      484,
+      484
+     ],
+     "candidates_by_threshold": {
+      "0.5": 0,
+      "0.6": 0,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 0,
+      "0.6": 0,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 1,
+      "0.6": 1,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "seconds": 1.11,
+     "top_scores": [],
+     "candidates_at_display_threshold": []
+    },
+    "fan_exhaust.png": {
+     "template_px": [
+      42,
+      43
+     ],
+     "candidates_by_threshold": {
+      "0.5": 39,
+      "0.6": 4,
+      "0.7": 3,
+      "0.8": 3,
+      "0.9": 2
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 14,
+      "0.6": 4,
+      "0.7": 3,
+      "0.8": 3,
+      "0.9": 2
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 8,
+      "0.6": 4,
+      "0.7": 3,
+      "0.8": 3,
+      "0.9": 1
+     },
+     "seconds": 0.82,
+     "top_scores": [
+      0.914,
+      0.912,
+      0.889,
+      0.61,
+      0.596
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 988.8,
+       "cy_pt": 420.0,
+       "score": 0.914,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1259.16,
+       "cy_pt": 272.52,
+       "score": 0.912,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1145.64,
+       "cy_pt": 258.84,
+       "score": 0.889,
+       "rot": 0
+      }
+     ]
+    },
+    "detector_smoke.png": {
+     "template_px": [
+      61,
+      61
+     ],
+     "candidates_by_threshold": {
+      "0.5": 2,
+      "0.6": 2,
+      "0.7": 2,
+      "0.8": 2,
+      "0.9": 1
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 2,
+      "0.6": 2,
+      "0.7": 2,
+      "0.8": 2,
+      "0.9": 1
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 6,
+      "0.6": 2,
+      "0.7": 2,
+      "0.8": 2,
+      "0.9": 2
+     },
+     "seconds": 0.85,
+     "top_scores": [
+      0.935,
+      0.898
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1228.68,
+       "cy_pt": 446.4,
+       "score": 0.935,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1128.36,
+       "cy_pt": 374.88,
+       "score": 0.898,
+       "rot": 0
+      }
+     ]
+    },
+    "junction_box_electrical.png": {
+     "template_px": [
+      38,
+      38
+     ],
+     "candidates_by_threshold": {
+      "0.5": 12,
+      "0.6": 0,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 12,
+      "0.6": 0,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 29,
+      "0.6": 22,
+      "0.7": 12,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "seconds": 0.8,
+     "top_scores": [
+      0.578,
+      0.558,
+      0.557,
+      0.547,
+      0.537
+     ],
+     "candidates_at_display_threshold": []
+    }
+   },
+   "vector": {
+    "region_segments_raw": 4665,
+    "region_segments_after_dedupe": 3328,
+    "region_components": 457,
+    "region_component_size_hist": {
+     "6-20": 89,
+     "2-5": 99,
+     ">100": 5,
+     "21-100": 11,
+     "1": 253
+    },
+    "switch_standard.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 15,
+      "dims_pt": [
+       5.28,
+       10.2
+      ],
+      "length_pt": 20.97
+     },
+     "matching_components_in_region": 12
+    },
+    "receptacle_gfi_duplex.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       7.8,
+       12.24
+      ],
+      "length_pt": 36.71
+     },
+     "matching_components_in_region": 25
+    },
+    "light_recessed_downlight.png": {
+     "icon_components": 6,
+     "key_component": {
+      "n_segments": 4,
+      "dims_pt": [
+       8.88,
+       9.0
+      ],
+      "length_pt": 35.76
+     },
+     "matching_components_in_region": 7
+    },
+    "light_pendant_high_efficacy.png": {
+     "icon_components": 5,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       8.76,
+       8.88
+      ],
+      "length_pt": 27.88
+     },
+     "matching_components_in_region": 13
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "icon_components": 6,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       8.76,
+       8.88
+      ],
+      "length_pt": 27.88
+     },
+     "matching_components_in_region": 13
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "icon_components": 7,
+     "key_component": {
+      "n_segments": 50,
+      "dims_pt": [
+       14.04,
+       114.84
+      ],
+      "length_pt": 258.0
+     },
+     "matching_components_in_region": 0
+    },
+    "fan_exhaust.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 263,
+      "dims_pt": [
+       8.88,
+       9.0
+      ],
+      "length_pt": 58.79
+     },
+     "matching_components_in_region": 0
+    },
+    "detector_smoke.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 17,
+      "dims_pt": [
+       13.32,
+       13.44
+      ],
+      "length_pt": 42.18
+     },
+     "matching_components_in_region": 2
+    },
+    "junction_box_electrical.png": {
+     "icon_components": 1,
+     "key_component": {
+      "n_segments": 13,
+      "dims_pt": [
+       7.8,
+       7.8
+      ],
+      "length_pt": 24.52
+     },
+     "matching_components_in_region": 0
+    }
+   },
+   "watermark_effect": {
+    "pixels_changed_fraction": 0.01944,
+    "max_abs_gray_diff": 25
+   }
+  },
+  "2": {
+   "electrical_bbox_searched": [
+    143.88,
+    37.08,
+    1439.04,
+    530.29
+   ],
+   "legend_entries": {
+    "switch_standard.png": {
+     "label": "ELECTRICAL SWITCH",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      1115.88,
+      1546.94,
+      1135.77
+     ],
+     "search_window": [
+      1451.6,
+      1107.88,
+      1484.1,
+      1137.77
+     ],
+     "icon_bbox": [
+      1460.16,
+      1112.16,
+      1466.64,
+      1126.92
+     ],
+     "icon_strokes_bbox": [
+      1460.16,
+      1112.16,
+      1466.64,
+      1126.92
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_three_way_dimmer.png": {
+     "label": "ELECTRICAL SWITCH-THREE WAY-DIMMER",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      1143.12,
+      1561.7,
+      1173.81
+     ],
+     "search_window": [
+      1451.6,
+      1135.12,
+      1484.1,
+      1175.81
+     ],
+     "icon_bbox": [
+      1458.36,
+      1142.21,
+      1467.9,
+      1162.2
+     ],
+     "icon_strokes_bbox": [
+      1460.76,
+      1147.32,
+      1467.24,
+      1162.2
+     ],
+     "icon_px": [
+      63,
+      28
+     ]
+    },
+    "switch_vacancy_sensor.png": {
+     "label": "ELECTRICAL SWITCH- VACANCY SENSOR",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      1185.36,
+      1546.94,
+      1226.97
+     ],
+     "search_window": [
+      1451.6,
+      1177.36,
+      1484.1,
+      1228.97
+     ],
+     "icon_bbox": [
+      1462.56,
+      1180.85,
+      1473.03,
+      1202.88
+     ],
+     "icon_strokes_bbox": [
+      1462.56,
+      1188.12,
+      1469.04,
+      1202.88
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_dimmer.png": {
+     "label": "ELECTRICAL SWITCH-DIMMER",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      1237.92,
+      1565.35,
+      1257.81
+     ],
+     "search_window": [
+      1451.6,
+      1229.92,
+      1484.1,
+      1259.81
+     ],
+     "icon_bbox": [
+      1460.64,
+      1230.53,
+      1467.0,
+      1252.8
+     ],
+     "icon_strokes_bbox": [
+      1460.64,
+      1238.04,
+      1467.0,
+      1252.8
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_fan.png": {
+     "label": "ELECTRICAL SWITCH-FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      1269.36,
+      1546.94,
+      1289.25
+     ],
+     "search_window": [
+      1451.6,
+      1261.36,
+      1484.1,
+      1291.25
+     ],
+     "icon_bbox": [
+      1462.56,
+      1264.49,
+      1469.04,
+      1286.52
+     ],
+     "icon_strokes_bbox": [
+      1462.56,
+      1271.76,
+      1469.04,
+      1286.52
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_astronomical_time_or_motion_sensor.png": {
+     "label": "ASTRONOMICAL TIME OR MOTION SENSOR SWITCH (AT LEAST 1 REQ.)",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      1299.36,
+      1570.87,
+      1340.97
+     ],
+     "search_window": [
+      1451.6,
+      1291.36,
+      1484.1,
+      1342.97
+     ],
+     "icon_bbox": [
+      1460.64,
+      1295.09,
+      1467.0,
+      1317.36
+     ],
+     "icon_strokes_bbox": [
+      1460.64,
+      1302.6,
+      1467.0,
+      1317.36
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "light_pendant_high_efficacy.png": {
+     "label": "PENDANT LIGHT HIGH-EFFICACY",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      1402.68,
+      1561.88,
+      1422.57
+     ],
+     "search_window": [
+      1451.6,
+      1394.68,
+      1484.1,
+      1424.57
+     ],
+     "icon_bbox": [
+      1453.68,
+      1400.52,
+      1474.44,
+      1418.45
+     ],
+     "icon_strokes_bbox": [
+      1453.68,
+      1400.52,
+      1466.16,
+      1413.0
+     ],
+     "icon_px": [
+      53,
+      52
+     ]
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "label": "WALL MOUNTED HIGH-EFFICACY LIGHT",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      1439.4,
+      1568.18,
+      1470.09
+     ],
+     "search_window": [
+      1451.6,
+      1431.4,
+      1484.1,
+      1472.09
+     ],
+     "icon_bbox": [
+      1453.68,
+      1437.72,
+      1466.16,
+      1452.0
+     ],
+     "icon_strokes_bbox": [
+      1453.68,
+      1437.72,
+      1466.16,
+      1452.0
+     ],
+     "icon_px": [
+      60,
+      52
+     ]
+    },
+    "light_exterior_wall_photosensor.png": {
+     "label": "EXTERIOR WALL MOUNTED HIGH- EFFICACY LIGHT W/ PHOTO SENSOR",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.28,
+      1480.32,
+      1578.98,
+      1521.93
+     ],
+     "search_window": [
+      1450.28,
+      1472.32,
+      1482.78,
+      1523.93
+     ],
+     "icon_bbox": [
+      1451.4,
+      1476.77,
+      1465.23,
+      1503.12
+     ],
+     "icon_strokes_bbox": [
+      1452.36,
+      1488.84,
+      1464.84,
+      1503.12
+     ],
+     "icon_px": [
+      60,
+      53
+     ]
+    },
+    "light_recessed_downlight.png": {
+     "label": "RECESSED HIGH- EFFICACY DOWNLIGHT",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.6,
+      1532.88,
+      1564.7,
+      1563.57
+     ],
+     "search_window": [
+      1451.6,
+      1524.88,
+      1484.1,
+      1565.57
+     ],
+     "icon_bbox": [
+      1453.68,
+      1531.68,
+      1466.16,
+      1544.04
+     ],
+     "icon_strokes_bbox": [
+      1453.68,
+      1531.68,
+      1466.16,
+      1544.04
+     ],
+     "icon_px": [
+      52,
+      52
+     ]
+    },
+    "light_recessed_vapor_proof_downlight.png": {
+     "label": "RECESSED HIGH- EFFICACY DOWNLIGHT-VAPOR PROOF",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.28,
+      1578.72,
+      1618.7,
+      1598.61
+     ],
+     "search_window": [
+      1450.28,
+      1570.72,
+      1482.78,
+      1600.61
+     ],
+     "icon_bbox": [
+      1452.36,
+      1582.08,
+      1475.31,
+      1600.01
+     ],
+     "icon_strokes_bbox": [
+      1452.36,
+      1582.08,
+      1464.84,
+      1594.56
+     ],
+     "icon_px": [
+      52,
+      53
+     ]
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "label": "CEILING FAN OPTIONAL (PRE WIRE FOR CEILING FAN ONLY)",
+     "label_hits": 1,
+     "label_bbox": [
+      1591.2,
+      1446.72,
+      1707.74,
+      1477.41
+     ],
+     "search_window": [
+      1583.2,
+      1311.72,
+      1715.74,
+      1445.72
+     ],
+     "icon_bbox": [
+      1589.76,
+      1315.92,
+      1705.8,
+      1431.96
+     ],
+     "icon_strokes_bbox": [
+      1589.76,
+      1315.92,
+      1705.8,
+      1431.96
+     ],
+     "icon_px": [
+      484,
+      484
+     ]
+    },
+    "receptacle_afi_duplex_arc_fault.png": {
+     "label": "DUPLEX OUTLET ARC-FAULT CIRCUIT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.91,
+      1115.87,
+      1854.26,
+      1146.57
+     ],
+     "search_window": [
+      1722.91,
+      1107.87,
+      1755.41,
+      1148.57
+     ],
+     "icon_bbox": [
+      1733.16,
+      1112.33,
+      1744.34,
+      1133.4
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      1119.84,
+      1743.12,
+      1133.4
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_240v_duplex.png": {
+     "label": "DUPLEX OUTLET 240 VOLTS",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      1158.36,
+      1835.24,
+      1178.25
+     ],
+     "search_window": [
+      1722.92,
+      1150.36,
+      1755.42,
+      1180.25
+     ],
+     "icon_bbox": [
+      1730.64,
+      1154.33,
+      1746.88,
+      1178.04
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      1169.04,
+      1743.12,
+      1178.04
+     ],
+     "icon_px": [
+      38,
+      38
+     ]
+    },
+    "receptacle_gfi_duplex.png": {
+     "label": "DUPLEX OUTLET GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      1192.19,
+      1835.24,
+      1222.89
+     ],
+     "search_window": [
+      1722.92,
+      1184.19,
+      1755.42,
+      1224.89
+     ],
+     "icon_bbox": [
+      1732.8,
+      1191.53,
+      1744.83,
+      1212.6
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      1199.04,
+      1743.12,
+      1212.6
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_weatherproof_duplex.png": {
+     "label": "DUPLEX OUTLET WATERPROOF GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      1233.96,
+      1835.24,
+      1275.57
+     ],
+     "search_window": [
+      1722.92,
+      1225.96,
+      1755.42,
+      1277.57
+     ],
+     "icon_bbox": [
+      1732.56,
+      1233.53,
+      1744.88,
+      1261.8
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      1248.24,
+      1743.12,
+      1261.8
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_afci_half_hot_duplex.png": {
+     "label": "DUPLEX OUTLET AFCI-HALF HOT",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.91,
+      1286.88,
+      1835.24,
+      1306.77
+     ],
+     "search_window": [
+      1722.91,
+      1278.88,
+      1755.41,
+      1308.77
+     ],
+     "icon_bbox": [
+      1734.36,
+      1285.32,
+      1743.36,
+      1298.76
+     ],
+     "icon_strokes_bbox": [
+      1734.36,
+      1285.32,
+      1743.36,
+      1298.76
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_microwave_duplex.png": {
+     "label": "DUPLEX OUTLET MICROWAVE GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      1320.12,
+      1835.24,
+      1361.73
+     ],
+     "search_window": [
+      1722.92,
+      1312.12,
+      1755.42,
+      1363.73
+     ],
+     "icon_bbox": [
+      1732.08,
+      1321.97,
+      1744.87,
+      1350.12
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      1336.56,
+      1743.12,
+      1350.12
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_dishwasher_duplex.png": {
+     "label": "DUPLEX OUTLET DISH WASHER GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      1370.4,
+      1835.24,
+      1412.01
+     ],
+     "search_window": [
+      1722.92,
+      1362.4,
+      1755.42,
+      1414.01
+     ],
+     "icon_bbox": [
+      1732.44,
+      1375.25,
+      1744.82,
+      1403.4
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      1389.96,
+      1743.12,
+      1403.4
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_range_hood_duplex.png": {
+     "label": "DUPLEX OUTLET RANGE HOOD",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.92,
+      1426.2,
+      1835.24,
+      1446.09
+     ],
+     "search_window": [
+      1722.92,
+      1418.2,
+      1755.42,
+      1448.09
+     ],
+     "icon_bbox": [
+      1734.12,
+      1426.25,
+      1743.12,
+      1447.32
+     ],
+     "icon_strokes_bbox": [
+      1734.12,
+      1433.76,
+      1743.12,
+      1447.32
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "fan_exhaust.png": {
+     "label": "EXHAUST FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.28,
+      1355.48,
+      1550.94,
+      1364.5
+     ],
+     "search_window": [
+      1450.28,
+      1347.48,
+      1482.78,
+      1366.5
+     ],
+     "icon_bbox": [
+      1453.56,
+      1351.2,
+      1463.76,
+      1361.28
+     ],
+     "icon_strokes_bbox": [
+      1453.56,
+      1351.2,
+      1463.76,
+      1361.28
+     ],
+     "icon_px": [
+      42,
+      43
+     ]
+    },
+    "fan_indoor_air_quality_iaq.png": {
+     "label": "INDOOR AIR QUALITY FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.28,
+      1373.4,
+      1546.38,
+      1393.29
+     ],
+     "search_window": [
+      1450.28,
+      1365.4,
+      1482.78,
+      1395.29
+     ],
+     "icon_bbox": [
+      1453.56,
+      1371.72,
+      1473.57,
+      1386.65
+     ],
+     "icon_strokes_bbox": [
+      1453.56,
+      1371.72,
+      1463.76,
+      1381.8
+     ],
+     "icon_px": [
+      43,
+      43
+     ]
+    },
+    "detector_smoke.png": {
+     "label": "SMOKE DETECTOR/ALARM",
+     "label_hits": 1,
+     "label_bbox": [
+      1620.36,
+      1192.56,
+      1708.48,
+      1212.45
+     ],
+     "search_window": [
+      1586.36,
+      1184.56,
+      1618.86,
+      1214.45
+     ],
+     "icon_bbox": [
+      1595.16,
+      1191.36,
+      1609.68,
+      1213.13
+     ],
+     "icon_strokes_bbox": [
+      1595.16,
+      1191.36,
+      1609.68,
+      1206.0
+     ],
+     "icon_px": [
+      61,
+      61
+     ]
+    },
+    "detector_combined_smoke_carbon_monoxide.png": {
+     "label": "COMBINATION SMOKE/CARBON MONOXIDE",
+     "label_hits": 1,
+     "label_bbox": [
+      1620.36,
+      1227.6,
+      1701.26,
+      1258.29
+     ],
+     "search_window": [
+      1586.36,
+      1219.6,
+      1618.86,
+      1260.29
+     ],
+     "icon_bbox": [
+      1591.32,
+      1225.44,
+      1613.21,
+      1247.33
+     ],
+     "icon_strokes_bbox": [
+      1595.16,
+      1225.44,
+      1609.68,
+      1240.08
+     ],
+     "icon_px": [
+      61,
+      61
+     ]
+    },
+    "junction_box_electrical.png": {
+     "label": "ELECTRICAL JUNCTION BOX",
+     "label_hits": 1,
+     "label_bbox": [
+      1620.36,
+      1272.72,
+      1691.54,
+      1292.61
+     ],
+     "search_window": [
+      1586.36,
+      1264.72,
+      1618.86,
+      1294.61
+     ],
+     "icon_bbox": [
+      1597.68,
+      1270.8,
+      1606.68,
+      1279.8
+     ],
+     "icon_strokes_bbox": [
+      1597.68,
+      1270.8,
+      1606.68,
+      1279.8
+     ],
+     "icon_px": [
+      38,
+      38
+     ]
+    },
+    "wiring_run_electrical_REFERENCE_BOM.png": {
+     "label": "ELECTRICAL WIRING",
+     "label_hits": 1,
+     "label_bbox": [
+      1591.2,
+      1527.36,
+      1652.54,
+      1547.25
+     ],
+     "search_window": [
+      1581.2,
+      1477.36,
+      1662.54,
+      1526.36
+     ],
+     "icon_bbox": [
+      1600.08,
+      1488.6,
+      1634.64,
+      1523.16
+     ],
+     "icon_strokes_bbox": [
+      1600.08,
+      1488.6,
+      1634.64,
+      1523.16
+     ],
+     "icon_px": [
+      145,
+      144
+     ]
+    },
+    "fan_coil_unit_dedicated_outlet_REFERENCE.png": {
+     "label": "FAN COIL UNIT +80\" TO BOTTOM OF UNIT PROVIDE DEDICATED OUTLET",
+     "label_hits": 1,
+     "label_bbox": [
+      1749.72,
+      1568.16,
+      1853.06,
+      1609.77
+     ],
+     "search_window": [
+      1709.72,
+      1560.16,
+      1748.22,
+      1611.77
+     ],
+     "icon_bbox": [
+      1709.4,
+      1568.64,
+      1736.04,
+      1587.48
+     ],
+     "icon_strokes_bbox": [
+      1709.4,
+      1568.64,
+      1736.04,
+      1587.48
+     ],
+     "icon_px": [
+      79,
+      112
+     ]
+    }
+   },
+   "raster": {
+    "switch_standard.png": {
+     "template_px": [
+      62,
+      27
+     ],
+     "candidates_by_threshold": {
+      "0.5": 195,
+      "0.6": 116,
+      "0.7": 7,
+      "0.8": 3,
+      "0.9": 1
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 195,
+      "0.6": 116,
+      "0.7": 7,
+      "0.8": 3,
+      "0.9": 1
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 209,
+      "0.6": 14,
+      "0.7": 13,
+      "0.8": 8,
+      "0.9": 2
+     },
+     "seconds": 1.15,
+     "top_scores": [
+      0.904,
+      0.874,
+      0.868,
+      0.798,
+      0.791
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 904.2,
+       "cy_pt": 247.44,
+       "score": 0.904,
+       "rot": 90
+      },
+      {
+       "cx_pt": 561.0,
+       "cy_pt": 313.2,
+       "score": 0.874,
+       "rot": 90
+      },
+      {
+       "cx_pt": 893.28,
+       "cy_pt": 340.68,
+       "score": 0.868,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1034.04,
+       "cy_pt": 337.68,
+       "score": 0.798,
+       "rot": 270
+      },
+      {
+       "cx_pt": 938.4,
+       "cy_pt": 310.68,
+       "score": 0.791,
+       "rot": 0
+      },
+      {
+       "cx_pt": 904.2,
+       "cy_pt": 257.04,
+       "score": 0.733,
+       "rot": 90
+      },
+      {
+       "cx_pt": 561.0,
+       "cy_pt": 305.04,
+       "score": 0.706,
+       "rot": 90
+      }
+     ]
+    },
+    "receptacle_gfi_duplex.png": {
+     "template_px": [
+      57,
+      38
+     ],
+     "candidates_by_threshold": {
+      "0.5": 27,
+      "0.6": 24,
+      "0.7": 17,
+      "0.8": 7,
+      "0.9": 3
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 27,
+      "0.6": 24,
+      "0.7": 17,
+      "0.8": 7,
+      "0.9": 3
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 57,
+      "0.6": 27,
+      "0.7": 24,
+      "0.8": 16,
+      "0.9": 7
+     },
+     "seconds": 1.14,
+     "top_scores": [
+      0.951,
+      0.925,
+      0.901,
+      0.9,
+      0.897
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1185.24,
+       "cy_pt": 174.72,
+       "score": 0.951,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1197.6,
+       "cy_pt": 257.16,
+       "score": 0.925,
+       "rot": 90
+      },
+      {
+       "cx_pt": 582.48,
+       "cy_pt": 305.4,
+       "score": 0.901,
+       "rot": 270
+      },
+      {
+       "cx_pt": 582.48,
+       "cy_pt": 409.56,
+       "score": 0.9,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1033.68,
+       "cy_pt": 352.2,
+       "score": 0.897,
+       "rot": 270
+      },
+      {
+       "cx_pt": 905.04,
+       "cy_pt": 238.2,
+       "score": 0.871,
+       "rot": 90
+      },
+      {
+       "cx_pt": 874.68,
+       "cy_pt": 319.92,
+       "score": 0.835,
+       "rot": 0
+      },
+      {
+       "cx_pt": 707.16,
+       "cy_pt": 442.32,
+       "score": 0.795,
+       "rot": 180
+      },
+      {
+       "cx_pt": 981.0,
+       "cy_pt": 199.44,
+       "score": 0.791,
+       "rot": 180
+      },
+      {
+       "cx_pt": 607.8,
+       "cy_pt": 200.16,
+       "score": 0.784,
+       "rot": 180
+      },
+      {
+       "cx_pt": 706.68,
+       "cy_pt": 199.44,
+       "score": 0.778,
+       "rot": 180
+      },
+      {
+       "cx_pt": 560.88,
+       "cy_pt": 343.56,
+       "score": 0.744,
+       "rot": 90
+      },
+      {
+       "cx_pt": 404.4,
+       "cy_pt": 255.96,
+       "score": 0.744,
+       "rot": 270
+      },
+      {
+       "cx_pt": 404.4,
+       "cy_pt": 389.88,
+       "score": 0.743,
+       "rot": 270
+      },
+      {
+       "cx_pt": 582.72,
+       "cy_pt": 337.56,
+       "score": 0.713,
+       "rot": 270
+      },
+      {
+       "cx_pt": 841.56,
+       "cy_pt": 199.44,
+       "score": 0.709,
+       "rot": 180
+      },
+      {
+       "cx_pt": 634.68,
+       "cy_pt": 199.44,
+       "score": 0.707,
+       "rot": 180
+      }
+     ]
+    },
+    "light_recessed_downlight.png": {
+     "template_px": [
+      52,
+      52
+     ],
+     "candidates_by_threshold": {
+      "0.5": 14,
+      "0.6": 13,
+      "0.7": 12,
+      "0.8": 11,
+      "0.9": 2
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 14,
+      "0.6": 13,
+      "0.7": 12,
+      "0.8": 11,
+      "0.9": 2
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 16,
+      "0.6": 13,
+      "0.7": 12,
+      "0.8": 10,
+      "0.9": 1
+     },
+     "seconds": 1.15,
+     "top_scores": [
+      0.913,
+      0.901,
+      0.874,
+      0.861,
+      0.847
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 995.64,
+       "cy_pt": 380.52,
+       "score": 0.913,
+       "rot": 90
+      },
+      {
+       "cx_pt": 878.28,
+       "cy_pt": 380.52,
+       "score": 0.901,
+       "rot": 90
+      },
+      {
+       "cx_pt": 665.88,
+       "cy_pt": 230.28,
+       "score": 0.874,
+       "rot": 90
+      },
+      {
+       "cx_pt": 638.52,
+       "cy_pt": 364.44,
+       "score": 0.861,
+       "rot": 180
+      },
+      {
+       "cx_pt": 850.92,
+       "cy_pt": 230.28,
+       "score": 0.847,
+       "rot": 270
+      },
+      {
+       "cx_pt": 758.28,
+       "cy_pt": 364.44,
+       "score": 0.846,
+       "rot": 180
+      },
+      {
+       "cx_pt": 638.52,
+       "cy_pt": 288.36,
+       "score": 0.841,
+       "rot": 180
+      },
+      {
+       "cx_pt": 758.52,
+       "cy_pt": 230.28,
+       "score": 0.836,
+       "rot": 90
+      },
+      {
+       "cx_pt": 758.28,
+       "cy_pt": 288.36,
+       "score": 0.825,
+       "rot": 180
+      },
+      {
+       "cx_pt": 878.28,
+       "cy_pt": 288.36,
+       "score": 0.822,
+       "rot": 90
+      },
+      {
+       "cx_pt": 970.68,
+       "cy_pt": 288.36,
+       "score": 0.815,
+       "rot": 90
+      },
+      {
+       "cx_pt": 916.68,
+       "cy_pt": 301.56,
+       "score": 0.726,
+       "rot": 180
+      }
+     ]
+    },
+    "light_pendant_high_efficacy.png": {
+     "template_px": [
+      53,
+      52
+     ],
+     "candidates_by_threshold": {
+      "0.5": 15,
+      "0.6": 15,
+      "0.7": 12,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 15,
+      "0.6": 15,
+      "0.7": 12,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 19,
+      "0.6": 15,
+      "0.7": 12,
+      "0.8": 2,
+      "0.9": 1
+     },
+     "seconds": 1.13,
+     "top_scores": [
+      0.868,
+      0.735,
+      0.733,
+      0.73,
+      0.726
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 916.68,
+       "cy_pt": 301.68,
+       "score": 0.868,
+       "rot": 180
+      },
+      {
+       "cx_pt": 878.16,
+       "cy_pt": 380.52,
+       "score": 0.735,
+       "rot": 270
+      },
+      {
+       "cx_pt": 731.28,
+       "cy_pt": 443.16,
+       "score": 0.733,
+       "rot": 90
+      },
+      {
+       "cx_pt": 995.52,
+       "cy_pt": 380.52,
+       "score": 0.73,
+       "rot": 270
+      },
+      {
+       "cx_pt": 638.52,
+       "cy_pt": 288.48,
+       "score": 0.726,
+       "rot": 0
+      },
+      {
+       "cx_pt": 758.28,
+       "cy_pt": 288.48,
+       "score": 0.723,
+       "rot": 0
+      },
+      {
+       "cx_pt": 665.76,
+       "cy_pt": 230.28,
+       "score": 0.716,
+       "rot": 270
+      },
+      {
+       "cx_pt": 638.52,
+       "cy_pt": 364.56,
+       "score": 0.711,
+       "rot": 0
+      },
+      {
+       "cx_pt": 851.04,
+       "cy_pt": 230.28,
+       "score": 0.711,
+       "rot": 270
+      },
+      {
+       "cx_pt": 758.4,
+       "cy_pt": 230.28,
+       "score": 0.708,
+       "rot": 270
+      },
+      {
+       "cx_pt": 758.28,
+       "cy_pt": 364.56,
+       "score": 0.705,
+       "rot": 0
+      },
+      {
+       "cx_pt": 970.56,
+       "cy_pt": 288.6,
+       "score": 0.7,
+       "rot": 270
+      }
+     ]
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "template_px": [
+      60,
+      52
+     ],
+     "candidates_by_threshold": {
+      "0.5": 15,
+      "0.6": 14,
+      "0.7": 2,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 15,
+      "0.6": 14,
+      "0.7": 2,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 16,
+      "0.6": 15,
+      "0.7": 4,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "seconds": 1.17,
+     "top_scores": [
+      0.796,
+      0.702,
+      0.67,
+      0.657,
+      0.649
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 916.68,
+       "cy_pt": 300.84,
+       "score": 0.796,
+       "rot": 180
+      },
+      {
+       "cx_pt": 732.12,
+       "cy_pt": 443.16,
+       "score": 0.702,
+       "rot": 90
+      }
+     ]
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "template_px": [
+      484,
+      484
+     ],
+     "candidates_by_threshold": {
+      "0.5": 2,
+      "0.6": 2,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 2,
+      "0.6": 2,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 2,
+      "0.6": 2,
+      "0.7": 2,
+      "0.8": 2,
+      "0.9": 0
+     },
+     "seconds": 1.52,
+     "top_scores": [
+      0.63,
+      0.606
+     ],
+     "candidates_at_display_threshold": []
+    },
+    "fan_exhaust.png": {
+     "template_px": [
+      42,
+      43
+     ],
+     "candidates_by_threshold": {
+      "0.5": 12,
+      "0.6": 1,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 12,
+      "0.6": 1,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 10,
+      "0.6": 4,
+      "0.7": 3,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "seconds": 1.14,
+     "top_scores": [
+      0.616,
+      0.598,
+      0.591,
+      0.539,
+      0.532
+     ],
+     "candidates_at_display_threshold": []
+    },
+    "detector_smoke.png": {
+     "template_px": [
+      61,
+      61
+     ],
+     "candidates_by_threshold": {
+      "0.5": 3,
+      "0.6": 3,
+      "0.7": 3,
+      "0.8": 3,
+      "0.9": 2
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 3,
+      "0.6": 3,
+      "0.7": 3,
+      "0.8": 3,
+      "0.9": 2
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 11,
+      "0.6": 3,
+      "0.7": 3,
+      "0.8": 3,
+      "0.9": 3
+     },
+     "seconds": 1.18,
+     "top_scores": [
+      0.961,
+      0.941,
+      0.888
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 538.8,
+       "cy_pt": 268.8,
+       "score": 0.961,
+       "rot": 0
+      },
+      {
+       "cx_pt": 811.2,
+       "cy_pt": 298.08,
+       "score": 0.941,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1055.52,
+       "cy_pt": 286.8,
+       "score": 0.888,
+       "rot": 0
+      }
+     ]
+    },
+    "junction_box_electrical.png": {
+     "template_px": [
+      38,
+      38
+     ],
+     "candidates_by_threshold": {
+      "0.5": 16,
+      "0.6": 1,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 16,
+      "0.6": 1,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 34,
+      "0.6": 25,
+      "0.7": 16,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "seconds": 1.09,
+     "top_scores": [
+      0.6,
+      0.595,
+      0.592,
+      0.592,
+      0.581
+     ],
+     "candidates_at_display_threshold": []
+    }
+   },
+   "vector": {
+    "region_segments_raw": 5681,
+    "region_segments_after_dedupe": 4098,
+    "region_components": 550,
+    "region_component_size_hist": {
+     "6-20": 102,
+     "21-100": 13,
+     "2-5": 136,
+     ">100": 7,
+     "1": 292
+    },
+    "switch_standard.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 15,
+      "dims_pt": [
+       5.28,
+       10.08
+      ],
+      "length_pt": 20.82
+     },
+     "matching_components_in_region": 13
+    },
+    "receptacle_gfi_duplex.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       7.8,
+       12.36
+      ],
+      "length_pt": 36.81
+     },
+     "matching_components_in_region": 32
+    },
+    "light_recessed_downlight.png": {
+     "icon_components": 6,
+     "key_component": {
+      "n_segments": 4,
+      "dims_pt": [
+       8.88,
+       9.0
+      ],
+      "length_pt": 35.76
+     },
+     "matching_components_in_region": 11
+    },
+    "light_pendant_high_efficacy.png": {
+     "icon_components": 5,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       8.88,
+       8.88
+      ],
+      "length_pt": 27.99
+     },
+     "matching_components_in_region": 12
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "icon_components": 6,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       8.76,
+       8.88
+      ],
+      "length_pt": 28.01
+     },
+     "matching_components_in_region": 12
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "icon_components": 7,
+     "key_component": {
+      "n_segments": 50,
+      "dims_pt": [
+       14.04,
+       114.84
+      ],
+      "length_pt": 258.0
+     },
+     "matching_components_in_region": 2
+    },
+    "fan_exhaust.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 263,
+      "dims_pt": [
+       8.88,
+       9.0
+      ],
+      "length_pt": 58.63
+     },
+     "matching_components_in_region": 0
+    },
+    "detector_smoke.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 17,
+      "dims_pt": [
+       13.32,
+       13.44
+      ],
+      "length_pt": 42.24
+     },
+     "matching_components_in_region": 3
+    },
+    "junction_box_electrical.png": {
+     "icon_components": 1,
+     "key_component": {
+      "n_segments": 13,
+      "dims_pt": [
+       7.8,
+       7.8
+      ],
+      "length_pt": 24.5
+     },
+     "matching_components_in_region": 0
+    }
+   },
+   "watermark_effect": {
+    "pixels_changed_fraction": 0.0,
+    "max_abs_gray_diff": 0
+   }
+  },
+  "3": {
+   "electrical_bbox_searched": [
+    818.4,
+    37.08,
+    1439.04,
+    843.61
+   ],
+   "legend_entries": {
+    "switch_standard.png": {
+     "label": "ELECTRICAL SWITCH",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.36,
+      120.96,
+      1546.7,
+      140.85
+     ],
+     "search_window": [
+      1451.36,
+      112.96,
+      1483.86,
+      142.85
+     ],
+     "icon_bbox": [
+      1459.92,
+      117.24,
+      1466.28,
+      132.12
+     ],
+     "icon_strokes_bbox": [
+      1459.92,
+      117.24,
+      1466.28,
+      132.12
+     ],
+     "icon_px": [
+      63,
+      27
+     ]
+    },
+    "switch_three_way_dimmer.png": {
+     "label": "ELECTRICAL SWITCH-THREE WAY-DIMMER",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.36,
+      148.32,
+      1561.46,
+      179.01
+     ],
+     "search_window": [
+      1451.36,
+      140.32,
+      1483.86,
+      181.01
+     ],
+     "icon_bbox": [
+      1458.0,
+      147.41,
+      1467.54,
+      167.4
+     ],
+     "icon_strokes_bbox": [
+      1460.52,
+      152.52,
+      1467.0,
+      167.4
+     ],
+     "icon_px": [
+      63,
+      28
+     ]
+    },
+    "switch_vacancy_sensor.png": {
+     "label": "ELECTRICAL SWITCH- VACANCY SENSOR",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.36,
+      190.44,
+      1546.7,
+      232.05
+     ],
+     "search_window": [
+      1451.36,
+      182.44,
+      1483.86,
+      234.05
+     ],
+     "icon_bbox": [
+      1462.32,
+      186.05,
+      1472.84,
+      208.08
+     ],
+     "icon_strokes_bbox": [
+      1462.32,
+      193.2,
+      1468.8,
+      208.08
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_dimmer.png": {
+     "label": "ELECTRICAL SWITCH-DIMMER",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.36,
+      243.0,
+      1565.11,
+      262.89
+     ],
+     "search_window": [
+      1451.36,
+      235.0,
+      1483.86,
+      264.89
+     ],
+     "icon_bbox": [
+      1460.28,
+      235.73,
+      1466.76,
+      258.0
+     ],
+     "icon_strokes_bbox": [
+      1460.28,
+      243.12,
+      1466.76,
+      258.0
+     ],
+     "icon_px": [
+      62,
+      28
+     ]
+    },
+    "switch_fan.png": {
+     "label": "ELECTRICAL SWITCH-FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.36,
+      274.44,
+      1546.7,
+      294.33
+     ],
+     "search_window": [
+      1451.36,
+      266.44,
+      1483.86,
+      296.33
+     ],
+     "icon_bbox": [
+      1462.32,
+      269.69,
+      1468.8,
+      291.72
+     ],
+     "icon_strokes_bbox": [
+      1462.32,
+      276.84,
+      1468.8,
+      291.72
+     ],
+     "icon_px": [
+      63,
+      27
+     ]
+    },
+    "switch_astronomical_time_or_motion_sensor.png": {
+     "label": "ASTRONOMICAL TIME OR MOTION SENSOR SWITCH (AT LEAST 1 REQ.)",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.35,
+      304.44,
+      1570.62,
+      346.05
+     ],
+     "search_window": [
+      1451.35,
+      296.44,
+      1483.85,
+      348.05
+     ],
+     "icon_bbox": [
+      1460.28,
+      300.29,
+      1466.76,
+      322.56
+     ],
+     "icon_strokes_bbox": [
+      1460.28,
+      307.68,
+      1466.76,
+      322.56
+     ],
+     "icon_px": [
+      62,
+      28
+     ]
+    },
+    "light_pendant_high_efficacy.png": {
+     "label": "PENDANT LIGHT HIGH-EFFICACY",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.36,
+      407.75,
+      1561.64,
+      427.65
+     ],
+     "search_window": [
+      1451.36,
+      399.75,
+      1483.86,
+      429.65
+     ],
+     "icon_bbox": [
+      1453.44,
+      405.72,
+      1474.2,
+      423.65
+     ],
+     "icon_strokes_bbox": [
+      1453.44,
+      405.72,
+      1465.92,
+      418.08
+     ],
+     "icon_px": [
+      52,
+      52
+     ]
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "label": "WALL MOUNTED HIGH-EFFICACY LIGHT",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.36,
+      444.6,
+      1567.94,
+      475.29
+     ],
+     "search_window": [
+      1451.36,
+      436.6,
+      1483.86,
+      477.29
+     ],
+     "icon_bbox": [
+      1453.44,
+      442.8,
+      1465.92,
+      457.08
+     ],
+     "icon_strokes_bbox": [
+      1453.44,
+      442.8,
+      1465.92,
+      457.08
+     ],
+     "icon_px": [
+      60,
+      52
+     ]
+    },
+    "light_exterior_wall_photosensor.png": {
+     "label": "EXTERIOR WALL MOUNTED HIGH- EFFICACY LIGHT W/ PHOTO SENSOR",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.04,
+      485.4,
+      1578.74,
+      527.01
+     ],
+     "search_window": [
+      1450.04,
+      477.4,
+      1482.54,
+      529.01
+     ],
+     "icon_bbox": [
+      1451.16,
+      481.97,
+      1465.03,
+      508.2
+     ],
+     "icon_strokes_bbox": [
+      1452.12,
+      494.04,
+      1464.6,
+      508.2
+     ],
+     "icon_px": [
+      60,
+      53
+     ]
+    },
+    "light_recessed_downlight.png": {
+     "label": "RECESSED HIGH- EFFICACY DOWNLIGHT",
+     "label_hits": 1,
+     "label_bbox": [
+      1485.36,
+      538.07,
+      1564.46,
+      568.77
+     ],
+     "search_window": [
+      1451.36,
+      530.07,
+      1483.86,
+      570.77
+     ],
+     "icon_bbox": [
+      1453.44,
+      536.76,
+      1465.92,
+      549.24
+     ],
+     "icon_strokes_bbox": [
+      1453.44,
+      536.76,
+      1465.92,
+      549.24
+     ],
+     "icon_px": [
+      53,
+      52
+     ]
+    },
+    "light_recessed_vapor_proof_downlight.png": {
+     "label": "RECESSED HIGH- EFFICACY DOWNLIGHT-VAPOR PROOF",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.04,
+      583.92,
+      1618.46,
+      603.81
+     ],
+     "search_window": [
+      1450.04,
+      575.92,
+      1482.54,
+      605.81
+     ],
+     "icon_bbox": [
+      1452.12,
+      587.16,
+      1475.11,
+      605.21
+     ],
+     "icon_strokes_bbox": [
+      1452.12,
+      587.16,
+      1464.6,
+      599.64
+     ],
+     "icon_px": [
+      53,
+      53
+     ]
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "label": "CEILING FAN OPTIONAL (PRE WIRE FOR CEILING FAN ONLY)",
+     "label_hits": 1,
+     "label_bbox": [
+      1590.96,
+      451.79,
+      1707.5,
+      482.49
+     ],
+     "search_window": [
+      1582.96,
+      316.79,
+      1715.5,
+      450.79
+     ],
+     "icon_bbox": [
+      1589.52,
+      321.12,
+      1705.56,
+      437.16
+     ],
+     "icon_strokes_bbox": [
+      1589.52,
+      321.12,
+      1705.56,
+      437.16
+     ],
+     "icon_px": [
+      484,
+      484
+     ]
+    },
+    "receptacle_afi_duplex_arc_fault.png": {
+     "label": "DUPLEX OUTLET ARC-FAULT CIRCUIT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.55,
+      120.95,
+      1853.9,
+      151.65
+     ],
+     "search_window": [
+      1722.55,
+      112.95,
+      1755.05,
+      153.65
+     ],
+     "icon_bbox": [
+      1732.92,
+      117.41,
+      1744.11,
+      138.48
+     ],
+     "icon_strokes_bbox": [
+      1733.88,
+      124.92,
+      1742.76,
+      138.48
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_240v_duplex.png": {
+     "label": "DUPLEX OUTLET 240 VOLTS",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.56,
+      163.56,
+      1834.88,
+      183.45
+     ],
+     "search_window": [
+      1722.56,
+      155.56,
+      1755.06,
+      185.45
+     ],
+     "icon_bbox": [
+      1730.4,
+      159.41,
+      1746.67,
+      183.12
+     ],
+     "icon_strokes_bbox": [
+      1733.88,
+      174.12,
+      1742.76,
+      183.12
+     ],
+     "icon_px": [
+      38,
+      38
+     ]
+    },
+    "receptacle_gfi_duplex.png": {
+     "label": "DUPLEX OUTLET GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.56,
+      197.39,
+      1834.88,
+      228.09
+     ],
+     "search_window": [
+      1722.56,
+      189.39,
+      1755.06,
+      230.09
+     ],
+     "icon_bbox": [
+      1732.56,
+      196.73,
+      1744.59,
+      217.8
+     ],
+     "icon_strokes_bbox": [
+      1733.88,
+      204.24,
+      1742.76,
+      217.8
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_weatherproof_duplex.png": {
+     "label": "DUPLEX OUTLET WATERPROOF GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.56,
+      239.16,
+      1834.88,
+      280.77
+     ],
+     "search_window": [
+      1722.56,
+      231.16,
+      1755.06,
+      282.77
+     ],
+     "icon_bbox": [
+      1732.32,
+      238.61,
+      1744.63,
+      266.88
+     ],
+     "icon_strokes_bbox": [
+      1733.88,
+      253.44,
+      1742.76,
+      266.88
+     ],
+     "icon_px": [
+      56,
+      38
+     ]
+    },
+    "receptacle_afci_half_hot_duplex.png": {
+     "label": "DUPLEX OUTLET AFCI-HALF HOT",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.55,
+      292.08,
+      1834.88,
+      311.97
+     ],
+     "search_window": [
+      1722.55,
+      284.08,
+      1755.05,
+      313.97
+     ],
+     "icon_bbox": [
+      1734.0,
+      290.4,
+      1743.12,
+      303.96
+     ],
+     "icon_strokes_bbox": [
+      1734.0,
+      290.4,
+      1743.12,
+      303.96
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_microwave_duplex.png": {
+     "label": "DUPLEX OUTLET MICROWAVE GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.56,
+      325.32,
+      1834.88,
+      366.93
+     ],
+     "search_window": [
+      1722.56,
+      317.32,
+      1755.06,
+      368.93
+     ],
+     "icon_bbox": [
+      1731.72,
+      327.05,
+      1744.59,
+      355.32
+     ],
+     "icon_strokes_bbox": [
+      1733.88,
+      341.76,
+      1742.76,
+      355.32
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_dishwasher_duplex.png": {
+     "label": "DUPLEX OUTLET DISH WASHER GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.56,
+      375.6,
+      1834.88,
+      417.21
+     ],
+     "search_window": [
+      1722.56,
+      367.6,
+      1755.06,
+      419.21
+     ],
+     "icon_bbox": [
+      1732.08,
+      380.33,
+      1744.59,
+      408.6
+     ],
+     "icon_strokes_bbox": [
+      1733.88,
+      395.04,
+      1742.76,
+      408.6
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_range_hood_duplex.png": {
+     "label": "DUPLEX OUTLET RANGE HOOD",
+     "label_hits": 1,
+     "label_bbox": [
+      1756.56,
+      431.4,
+      1834.88,
+      451.29
+     ],
+     "search_window": [
+      1722.56,
+      423.4,
+      1755.06,
+      453.29
+     ],
+     "icon_bbox": [
+      1733.88,
+      431.45,
+      1742.76,
+      452.4
+     ],
+     "icon_strokes_bbox": [
+      1733.88,
+      438.84,
+      1742.76,
+      452.4
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "fan_exhaust.png": {
+     "label": "EXHAUST FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.04,
+      360.56,
+      1550.7,
+      369.58
+     ],
+     "search_window": [
+      1450.04,
+      352.56,
+      1482.54,
+      371.58
+     ],
+     "icon_bbox": [
+      1453.2,
+      356.4,
+      1463.4,
+      366.48
+     ],
+     "icon_strokes_bbox": [
+      1453.2,
+      356.4,
+      1463.4,
+      366.48
+     ],
+     "icon_px": [
+      42,
+      43
+     ]
+    },
+    "fan_indoor_air_quality_iaq.png": {
+     "label": "INDOOR AIR QUALITY FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1484.04,
+      378.59,
+      1546.15,
+      398.49
+     ],
+     "search_window": [
+      1450.04,
+      370.59,
+      1482.54,
+      400.49
+     ],
+     "icon_bbox": [
+      1453.2,
+      376.92,
+      1473.33,
+      391.85
+     ],
+     "icon_strokes_bbox": [
+      1453.2,
+      376.92,
+      1463.4,
+      387.0
+     ],
+     "icon_px": [
+      43,
+      43
+     ]
+    },
+    "detector_smoke.png": {
+     "label": "SMOKE DETECTOR/ALARM",
+     "label_hits": 1,
+     "label_bbox": [
+      1620.12,
+      197.76,
+      1708.24,
+      217.65
+     ],
+     "search_window": [
+      1586.12,
+      189.76,
+      1618.62,
+      219.65
+     ],
+     "icon_bbox": [
+      1594.92,
+      196.56,
+      1609.44,
+      218.33
+     ],
+     "icon_strokes_bbox": [
+      1594.92,
+      196.56,
+      1609.44,
+      211.2
+     ],
+     "icon_px": [
+      61,
+      61
+     ]
+    },
+    "detector_combined_smoke_carbon_monoxide.png": {
+     "label": "COMBINATION SMOKE/CARBON MONOXIDE",
+     "label_hits": 1,
+     "label_bbox": [
+      1620.12,
+      232.8,
+      1701.02,
+      263.49
+     ],
+     "search_window": [
+      1586.12,
+      224.8,
+      1618.62,
+      265.49
+     ],
+     "icon_bbox": [
+      1591.08,
+      230.64,
+      1612.99,
+      252.41
+     ],
+     "icon_strokes_bbox": [
+      1594.92,
+      230.64,
+      1609.44,
+      245.28
+     ],
+     "icon_px": [
+      61,
+      61
+     ]
+    },
+    "junction_box_electrical.png": {
+     "label": "ELECTRICAL JUNCTION BOX",
+     "label_hits": 1,
+     "label_bbox": [
+      1620.12,
+      277.92,
+      1691.3,
+      297.81
+     ],
+     "search_window": [
+      1586.12,
+      269.92,
+      1618.62,
+      299.81
+     ],
+     "icon_bbox": [
+      1597.44,
+      276.0,
+      1606.32,
+      285.0
+     ],
+     "icon_strokes_bbox": [
+      1597.44,
+      276.0,
+      1606.32,
+      285.0
+     ],
+     "icon_px": [
+      38,
+      37
+     ]
+    },
+    "wiring_run_electrical_REFERENCE_BOM.png": {
+     "label": "ELECTRICAL WIRING",
+     "label_hits": 1,
+     "label_bbox": [
+      1590.96,
+      532.56,
+      1652.3,
+      552.45
+     ],
+     "search_window": [
+      1580.96,
+      482.56,
+      1662.3,
+      531.56
+     ],
+     "icon_bbox": [
+      1599.84,
+      493.8,
+      1634.4,
+      528.36
+     ],
+     "icon_strokes_bbox": [
+      1599.84,
+      493.8,
+      1634.4,
+      528.36
+     ],
+     "icon_px": [
+      145,
+      144
+     ]
+    },
+    "fan_coil_unit_dedicated_outlet_REFERENCE.png": {
+     "label": "FAN COIL UNIT +80\" TO BOTTOM OF UNIT PROVIDE DEDICATED OUTLET",
+     "label_hits": 1,
+     "label_bbox": [
+      1749.48,
+      573.36,
+      1852.82,
+      614.97
+     ],
+     "search_window": [
+      1709.48,
+      565.36,
+      1747.98,
+      616.97
+     ],
+     "icon_bbox": [
+      1709.16,
+      573.72,
+      1735.8,
+      592.56
+     ],
+     "icon_strokes_bbox": [
+      1709.16,
+      573.72,
+      1735.8,
+      592.56
+     ],
+     "icon_px": [
+      79,
+      112
+     ]
+    }
+   },
+   "raster": {
+    "switch_standard.png": {
+     "template_px": [
+      63,
+      27
+     ],
+     "candidates_by_threshold": {
+      "0.5": 282,
+      "0.6": 129,
+      "0.7": 10,
+      "0.8": 4,
+      "0.9": 1
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 282,
+      "0.6": 129,
+      "0.7": 10,
+      "0.8": 4,
+      "0.9": 1
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 203,
+      "0.6": 21,
+      "0.7": 18,
+      "0.8": 11,
+      "0.9": 1
+     },
+     "seconds": 0.94,
+     "top_scores": [
+      0.909,
+      0.834,
+      0.816,
+      0.808,
+      0.794
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 894.84,
+       "cy_pt": 427.92,
+       "score": 0.909,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1056.12,
+       "cy_pt": 362.4,
+       "score": 0.834,
+       "rot": 90
+      },
+      {
+       "cx_pt": 927.72,
+       "cy_pt": 585.84,
+       "score": 0.816,
+       "rot": 0
+      },
+      {
+       "cx_pt": 894.6,
+       "cy_pt": 538.56,
+       "score": 0.808,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1108.92,
+       "cy_pt": 373.2,
+       "score": 0.794,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1056.12,
+       "cy_pt": 374.88,
+       "score": 0.773,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1150.92,
+       "cy_pt": 466.08,
+       "score": 0.757,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1141.56,
+       "cy_pt": 466.08,
+       "score": 0.757,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1093.08,
+       "cy_pt": 230.64,
+       "score": 0.727,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1056.12,
+       "cy_pt": 227.28,
+       "score": 0.719,
+       "rot": 90
+      }
+     ]
+    },
+    "receptacle_gfi_duplex.png": {
+     "template_px": [
+      57,
+      38
+     ],
+     "candidates_by_threshold": {
+      "0.5": 33,
+      "0.6": 20,
+      "0.7": 13,
+      "0.8": 7,
+      "0.9": 3
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 33,
+      "0.6": 20,
+      "0.7": 13,
+      "0.8": 7,
+      "0.9": 3
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 80,
+      "0.6": 28,
+      "0.7": 22,
+      "0.8": 13,
+      "0.9": 3
+     },
+     "seconds": 0.92,
+     "top_scores": [
+      0.99,
+      0.926,
+      0.91,
+      0.855,
+      0.853
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 893.64,
+       "cy_pt": 471.48,
+       "score": 0.99,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1278.48,
+       "cy_pt": 466.08,
+       "score": 0.926,
+       "rot": 180
+      },
+      {
+       "cx_pt": 929.04,
+       "cy_pt": 398.4,
+       "score": 0.91,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1345.08,
+       "cy_pt": 264.36,
+       "score": 0.855,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1345.08,
+       "cy_pt": 624.84,
+       "score": 0.853,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1039.92,
+       "cy_pt": 398.4,
+       "score": 0.824,
+       "rot": 180
+      },
+      {
+       "cx_pt": 909.84,
+       "cy_pt": 116.4,
+       "score": 0.804,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1172.4,
+       "cy_pt": 649.44,
+       "score": 0.755,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1190.76,
+       "cy_pt": 328.2,
+       "score": 0.75,
+       "rot": 90
+      },
+      {
+       "cx_pt": 895.56,
+       "cy_pt": 454.2,
+       "score": 0.741,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1246.8,
+       "cy_pt": 116.4,
+       "score": 0.736,
+       "rot": 180
+      },
+      {
+       "cx_pt": 893.64,
+       "cy_pt": 561.48,
+       "score": 0.724,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1179.84,
+       "cy_pt": 464.88,
+       "score": 0.715,
+       "rot": 180
+      }
+     ]
+    },
+    "light_recessed_downlight.png": {
+     "template_px": [
+      53,
+      52
+     ],
+     "candidates_by_threshold": {
+      "0.5": 16,
+      "0.6": 14,
+      "0.7": 14,
+      "0.8": 12,
+      "0.9": 2
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 16,
+      "0.6": 14,
+      "0.7": 14,
+      "0.8": 12,
+      "0.9": 2
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 18,
+      "0.6": 14,
+      "0.7": 13,
+      "0.8": 11,
+      "0.9": 2
+     },
+     "seconds": 0.93,
+     "top_scores": [
+      0.94,
+      0.908,
+      0.877,
+      0.874,
+      0.87
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 910.2,
+       "cy_pt": 334.2,
+       "score": 0.94,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1251.24,
+       "cy_pt": 427.32,
+       "score": 0.908,
+       "rot": 90
+      },
+      {
+       "cx_pt": 985.68,
+       "cy_pt": 604.32,
+       "score": 0.877,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1134.84,
+       "cy_pt": 508.44,
+       "score": 0.874,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1104.0,
+       "cy_pt": 255.84,
+       "score": 0.87,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1284.12,
+       "cy_pt": 508.44,
+       "score": 0.865,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1284.12,
+       "cy_pt": 604.44,
+       "score": 0.863,
+       "rot": 270
+      },
+      {
+       "cx_pt": 985.68,
+       "cy_pt": 508.56,
+       "score": 0.863,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1104.0,
+       "cy_pt": 345.84,
+       "score": 0.86,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1134.84,
+       "cy_pt": 604.44,
+       "score": 0.841,
+       "rot": 270
+      },
+      {
+       "cx_pt": 923.76,
+       "cy_pt": 553.44,
+       "score": 0.823,
+       "rot": 0
+      },
+      {
+       "cx_pt": 923.76,
+       "cy_pt": 472.32,
+       "score": 0.823,
+       "rot": 0
+      },
+      {
+       "cx_pt": 965.76,
+       "cy_pt": 431.52,
+       "score": 0.791,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1099.8,
+       "cy_pt": 394.92,
+       "score": 0.775,
+       "rot": 90
+      }
+     ]
+    },
+    "light_pendant_high_efficacy.png": {
+     "template_px": [
+      52,
+      52
+     ],
+     "candidates_by_threshold": {
+      "0.5": 20,
+      "0.6": 15,
+      "0.7": 3,
+      "0.8": 1,
+      "0.9": 1
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 20,
+      "0.6": 15,
+      "0.7": 3,
+      "0.8": 1,
+      "0.9": 1
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 21,
+      "0.6": 19,
+      "0.7": 4,
+      "0.8": 1,
+      "0.9": 1
+     },
+     "seconds": 0.92,
+     "top_scores": [
+      0.913,
+      0.744,
+      0.701,
+      0.69,
+      0.689
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1099.92,
+       "cy_pt": 394.92,
+       "score": 0.913,
+       "rot": 0
+      },
+      {
+       "cx_pt": 910.32,
+       "cy_pt": 334.2,
+       "score": 0.744,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1253.76,
+       "cy_pt": 190.2,
+       "score": 0.701,
+       "rot": 0
+      }
+     ]
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "template_px": [
+      60,
+      52
+     ],
+     "candidates_by_threshold": {
+      "0.5": 19,
+      "0.6": 13,
+      "0.7": 1,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 19,
+      "0.6": 13,
+      "0.7": 1,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 21,
+      "0.6": 16,
+      "0.7": 3,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "seconds": 0.93,
+     "top_scores": [
+      0.816,
+      0.659,
+      0.649,
+      0.649,
+      0.645
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1099.92,
+       "cy_pt": 395.88,
+       "score": 0.816,
+       "rot": 0
+      }
+     ]
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "template_px": [
+      484,
+      484
+     ],
+     "candidates_by_threshold": {
+      "0.5": 2,
+      "0.6": 2,
+      "0.7": 2,
+      "0.8": 2,
+      "0.9": 2
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 2,
+      "0.6": 2,
+      "0.7": 2,
+      "0.8": 2,
+      "0.9": 2
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 2,
+      "0.6": 2,
+      "0.7": 2,
+      "0.8": 2,
+      "0.9": 2
+     },
+     "seconds": 1.21,
+     "top_scores": [
+      0.911,
+      0.903
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1253.76,
+       "cy_pt": 190.44,
+       "score": 0.911,
+       "rot": 0
+      },
+      {
+       "cx_pt": 970.32,
+       "cy_pt": 190.2,
+       "score": 0.903,
+       "rot": 180
+      }
+     ]
+    },
+    "fan_exhaust.png": {
+     "template_px": [
+      42,
+      43
+     ],
+     "candidates_by_threshold": {
+      "0.5": 50,
+      "0.6": 6,
+      "0.7": 4,
+      "0.8": 4,
+      "0.9": 2
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 16,
+      "0.6": 5,
+      "0.7": 4,
+      "0.8": 4,
+      "0.9": 2
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 11,
+      "0.6": 7,
+      "0.7": 4,
+      "0.8": 4,
+      "0.9": 1
+     },
+     "seconds": 0.92,
+     "top_scores": [
+      0.934,
+      0.92,
+      0.899,
+      0.853,
+      0.664
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1278.36,
+       "cy_pt": 375.72,
+       "score": 0.934,
+       "rot": 0
+      },
+      {
+       "cx_pt": 949.08,
+       "cy_pt": 318.36,
+       "score": 0.92,
+       "rot": 0
+      },
+      {
+       "cx_pt": 965.64,
+       "cy_pt": 409.08,
+       "score": 0.899,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1154.28,
+       "cy_pt": 343.08,
+       "score": 0.853,
+       "rot": 0
+      }
+     ]
+    },
+    "detector_smoke.png": {
+     "template_px": [
+      61,
+      61
+     ],
+     "candidates_by_threshold": {
+      "0.5": 3,
+      "0.6": 3,
+      "0.7": 3,
+      "0.8": 3,
+      "0.9": 1
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 3,
+      "0.6": 3,
+      "0.7": 3,
+      "0.8": 3,
+      "0.9": 1
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 12,
+      "0.6": 4,
+      "0.7": 3,
+      "0.8": 3,
+      "0.9": 3
+     },
+     "seconds": 0.98,
+     "top_scores": [
+      0.969,
+      0.885,
+      0.878
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1171.32,
+       "cy_pt": 254.88,
+       "score": 0.969,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1082.76,
+       "cy_pt": 498.24,
+       "score": 0.885,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1036.68,
+       "cy_pt": 254.88,
+       "score": 0.878,
+       "rot": 0
+      }
+     ]
+    },
+    "junction_box_electrical.png": {
+     "template_px": [
+      38,
+      37
+     ],
+     "candidates_by_threshold": {
+      "0.5": 14,
+      "0.6": 1,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 14,
+      "0.6": 1,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 41,
+      "0.6": 28,
+      "0.7": 14,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "seconds": 0.91,
+     "top_scores": [
+      0.602,
+      0.586,
+      0.579,
+      0.576,
+      0.566
+     ],
+     "candidates_at_display_threshold": []
+    }
+   },
+   "vector": {
+    "region_segments_raw": 8326,
+    "region_segments_after_dedupe": 4923,
+    "region_components": 711,
+    "region_component_size_hist": {
+     ">100": 7,
+     "21-100": 21,
+     "2-5": 200,
+     "1": 362,
+     "6-20": 121
+    },
+    "switch_standard.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 15,
+      "dims_pt": [
+       5.16,
+       10.08
+      ],
+      "length_pt": 20.96
+     },
+     "matching_components_in_region": 20
+    },
+    "receptacle_gfi_duplex.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       7.68,
+       12.36
+      ],
+      "length_pt": 36.56
+     },
+     "matching_components_in_region": 33
+    },
+    "light_recessed_downlight.png": {
+     "icon_components": 6,
+     "key_component": {
+      "n_segments": 4,
+      "dims_pt": [
+       8.88,
+       9.0
+      ],
+      "length_pt": 35.76
+     },
+     "matching_components_in_region": 13
+    },
+    "light_pendant_high_efficacy.png": {
+     "icon_components": 5,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       8.76,
+       9.0
+      ],
+      "length_pt": 28.05
+     },
+     "matching_components_in_region": 18
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "icon_components": 6,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       8.76,
+       9.0
+      ],
+      "length_pt": 28.05
+     },
+     "matching_components_in_region": 18
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "icon_components": 7,
+     "key_component": {
+      "n_segments": 50,
+      "dims_pt": [
+       14.16,
+       114.84
+      ],
+      "length_pt": 257.58
+     },
+     "matching_components_in_region": 2
+    },
+    "fan_exhaust.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 263,
+      "dims_pt": [
+       8.88,
+       9.0
+      ],
+      "length_pt": 58.19
+     },
+     "matching_components_in_region": 0
+    },
+    "detector_smoke.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 17,
+      "dims_pt": [
+       13.32,
+       13.44
+      ],
+      "length_pt": 42.02
+     },
+     "matching_components_in_region": 4
+    },
+    "junction_box_electrical.png": {
+     "icon_components": 1,
+     "key_component": {
+      "n_segments": 13,
+      "dims_pt": [
+       7.68,
+       7.8
+      ],
+      "length_pt": 24.47
+     },
+     "matching_components_in_region": 0
+    }
+   },
+   "watermark_effect": {
+    "pixels_changed_fraction": 0.01787,
+    "max_abs_gray_diff": 25
+   }
+  },
+  "4": {
+   "electrical_bbox_searched": [
+    1007.28,
+    37.08,
+    1870.68,
+    685.45
+   ],
+   "legend_entries": {
+    "switch_standard.png": {
+     "label": "ELECTRICAL SWITCH",
+     "label_hits": 1,
+     "label_bbox": [
+      1055.16,
+      832.08,
+      1116.5,
+      851.97
+     ],
+     "search_window": [
+      1021.16,
+      824.08,
+      1053.66,
+      853.97
+     ],
+     "icon_bbox": [
+      1029.72,
+      828.36,
+      1036.2,
+      843.24
+     ],
+     "icon_strokes_bbox": [
+      1029.72,
+      828.36,
+      1036.2,
+      843.24
+     ],
+     "icon_px": [
+      63,
+      28
+     ]
+    },
+    "switch_three_way_dimmer.png": {
+     "label": "ELECTRICAL SWITCH-THREE WAY-DIMMER",
+     "label_hits": 1,
+     "label_bbox": [
+      1055.16,
+      859.32,
+      1131.26,
+      890.01
+     ],
+     "search_window": [
+      1021.16,
+      851.32,
+      1053.66,
+      892.01
+     ],
+     "icon_bbox": [
+      1027.92,
+      858.41,
+      1037.46,
+      878.4
+     ],
+     "icon_strokes_bbox": [
+      1030.32,
+      863.64,
+      1036.8,
+      878.4
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_vacancy_sensor.png": {
+     "label": "ELECTRICAL SWITCH- VACANCY SENSOR",
+     "label_hits": 1,
+     "label_bbox": [
+      1055.16,
+      901.56,
+      1116.5,
+      943.17
+     ],
+     "search_window": [
+      1021.16,
+      893.56,
+      1053.66,
+      945.17
+     ],
+     "icon_bbox": [
+      1032.12,
+      897.05,
+      1042.59,
+      919.08
+     ],
+     "icon_strokes_bbox": [
+      1032.12,
+      904.32,
+      1038.6,
+      919.08
+     ],
+     "icon_px": [
+      62,
+      28
+     ]
+    },
+    "switch_dimmer.png": {
+     "label": "ELECTRICAL SWITCH-DIMMER",
+     "label_hits": 1,
+     "label_bbox": [
+      1055.16,
+      954.12,
+      1134.91,
+      974.01
+     ],
+     "search_window": [
+      1021.16,
+      946.12,
+      1053.66,
+      976.01
+     ],
+     "icon_bbox": [
+      1030.2,
+      946.73,
+      1036.56,
+      969.12
+     ],
+     "icon_strokes_bbox": [
+      1030.2,
+      954.24,
+      1036.56,
+      969.12
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "switch_fan.png": {
+     "label": "ELECTRICAL SWITCH-FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1055.16,
+      985.56,
+      1116.5,
+      1005.45
+     ],
+     "search_window": [
+      1021.16,
+      977.56,
+      1053.66,
+      1007.45
+     ],
+     "icon_bbox": [
+      1032.12,
+      980.69,
+      1038.6,
+      1002.72
+     ],
+     "icon_strokes_bbox": [
+      1032.12,
+      987.96,
+      1038.6,
+      1002.72
+     ],
+     "icon_px": [
+      62,
+      28
+     ]
+    },
+    "switch_astronomical_time_or_motion_sensor.png": {
+     "label": "ASTRONOMICAL TIME OR MOTION SENSOR SWITCH (AT LEAST 1 REQ.)",
+     "label_hits": 1,
+     "label_bbox": [
+      1055.15,
+      1015.56,
+      1140.42,
+      1057.17
+     ],
+     "search_window": [
+      1021.15,
+      1007.56,
+      1053.65,
+      1059.17
+     ],
+     "icon_bbox": [
+      1030.2,
+      1011.29,
+      1036.56,
+      1033.68
+     ],
+     "icon_strokes_bbox": [
+      1030.2,
+      1018.8,
+      1036.56,
+      1033.68
+     ],
+     "icon_px": [
+      62,
+      27
+     ]
+    },
+    "light_pendant_high_efficacy.png": {
+     "label": "PENDANT LIGHT HIGH-EFFICACY",
+     "label_hits": 1,
+     "label_bbox": [
+      1055.16,
+      1118.88,
+      1131.44,
+      1138.77
+     ],
+     "search_window": [
+      1021.16,
+      1110.88,
+      1053.66,
+      1140.77
+     ],
+     "icon_bbox": [
+      1023.24,
+      1116.72,
+      1044.0,
+      1134.77
+     ],
+     "icon_strokes_bbox": [
+      1023.24,
+      1116.72,
+      1035.72,
+      1129.2
+     ],
+     "icon_px": [
+      52,
+      53
+     ]
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "label": "WALL MOUNTED HIGH-EFFICACY LIGHT",
+     "label_hits": 1,
+     "label_bbox": [
+      1055.16,
+      1155.6,
+      1137.74,
+      1186.29
+     ],
+     "search_window": [
+      1021.16,
+      1147.6,
+      1053.66,
+      1188.29
+     ],
+     "icon_bbox": [
+      1023.24,
+      1153.92,
+      1035.72,
+      1168.2
+     ],
+     "icon_strokes_bbox": [
+      1023.24,
+      1153.92,
+      1035.72,
+      1168.2
+     ],
+     "icon_px": [
+      60,
+      53
+     ]
+    },
+    "light_exterior_wall_photosensor.png": {
+     "label": "EXTERIOR WALL MOUNTED HIGH- EFFICACY LIGHT W/ PHOTO SENSOR",
+     "label_hits": 1,
+     "label_bbox": [
+      1053.84,
+      1196.52,
+      1148.54,
+      1238.13
+     ],
+     "search_window": [
+      1019.84,
+      1188.52,
+      1052.34,
+      1240.13
+     ],
+     "icon_bbox": [
+      1020.96,
+      1193.09,
+      1034.79,
+      1219.32
+     ],
+     "icon_strokes_bbox": [
+      1021.92,
+      1205.04,
+      1034.4,
+      1219.32
+     ],
+     "icon_px": [
+      60,
+      52
+     ]
+    },
+    "light_recessed_downlight.png": {
+     "label": "RECESSED HIGH- EFFICACY DOWNLIGHT",
+     "label_hits": 1,
+     "label_bbox": [
+      1055.16,
+      1249.08,
+      1134.26,
+      1279.77
+     ],
+     "search_window": [
+      1021.16,
+      1241.08,
+      1053.66,
+      1281.77
+     ],
+     "icon_bbox": [
+      1023.24,
+      1247.88,
+      1035.72,
+      1260.36
+     ],
+     "icon_strokes_bbox": [
+      1023.24,
+      1247.88,
+      1035.72,
+      1260.36
+     ],
+     "icon_px": [
+      53,
+      53
+     ]
+    },
+    "light_recessed_vapor_proof_downlight.png": {
+     "label": "RECESSED HIGH- EFFICACY DOWNLIGHT-VAPOR PROOF",
+     "label_hits": 1,
+     "label_bbox": [
+      1053.84,
+      1295.04,
+      1188.26,
+      1314.93
+     ],
+     "search_window": [
+      1019.84,
+      1287.04,
+      1052.34,
+      1316.93
+     ],
+     "icon_bbox": [
+      1021.92,
+      1298.28,
+      1044.87,
+      1316.21
+     ],
+     "icon_strokes_bbox": [
+      1021.92,
+      1298.28,
+      1034.4,
+      1310.76
+     ],
+     "icon_px": [
+      53,
+      52
+     ]
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "label": "CEILING FAN OPTIONAL (PRE WIRE FOR CEILING FAN ONLY)",
+     "label_hits": 1,
+     "label_bbox": [
+      1160.76,
+      1162.91,
+      1277.3,
+      1193.61
+     ],
+     "search_window": [
+      1152.76,
+      1027.91,
+      1285.3,
+      1161.91
+     ],
+     "icon_bbox": [
+      1159.32,
+      1032.12,
+      1275.36,
+      1148.16
+     ],
+     "icon_strokes_bbox": [
+      1159.32,
+      1032.12,
+      1275.36,
+      1148.16
+     ],
+     "icon_px": [
+      484,
+      484
+     ]
+    },
+    "receptacle_afi_duplex_arc_fault.png": {
+     "label": "DUPLEX OUTLET ARC-FAULT CIRCUIT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1326.35,
+      832.07,
+      1423.7,
+      862.77
+     ],
+     "search_window": [
+      1292.35,
+      824.07,
+      1324.85,
+      864.77
+     ],
+     "icon_bbox": [
+      1302.72,
+      828.53,
+      1313.9,
+      849.6
+     ],
+     "icon_strokes_bbox": [
+      1303.68,
+      836.04,
+      1312.68,
+      849.6
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_240v_duplex.png": {
+     "label": "DUPLEX OUTLET 240 VOLTS",
+     "label_hits": 1,
+     "label_bbox": [
+      1326.36,
+      874.56,
+      1404.68,
+      894.45
+     ],
+     "search_window": [
+      1292.36,
+      866.56,
+      1324.86,
+      896.45
+     ],
+     "icon_bbox": [
+      1300.2,
+      870.53,
+      1316.44,
+      894.24
+     ],
+     "icon_strokes_bbox": [
+      1303.68,
+      885.24,
+      1312.68,
+      894.24
+     ],
+     "icon_px": [
+      38,
+      38
+     ]
+    },
+    "receptacle_gfi_duplex.png": {
+     "label": "DUPLEX OUTLET GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1326.36,
+      908.39,
+      1404.68,
+      939.09
+     ],
+     "search_window": [
+      1292.36,
+      900.39,
+      1324.86,
+      941.09
+     ],
+     "icon_bbox": [
+      1302.36,
+      907.85,
+      1314.39,
+      928.92
+     ],
+     "icon_strokes_bbox": [
+      1303.68,
+      915.36,
+      1312.68,
+      928.92
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_weatherproof_duplex.png": {
+     "label": "DUPLEX OUTLET WATERPROOF GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1326.36,
+      950.16,
+      1404.68,
+      991.77
+     ],
+     "search_window": [
+      1292.36,
+      942.16,
+      1324.86,
+      993.77
+     ],
+     "icon_bbox": [
+      1302.12,
+      949.73,
+      1314.44,
+      978.0
+     ],
+     "icon_strokes_bbox": [
+      1303.68,
+      964.44,
+      1312.68,
+      978.0
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_afci_half_hot_duplex.png": {
+     "label": "DUPLEX OUTLET AFCI-HALF HOT",
+     "label_hits": 1,
+     "label_bbox": [
+      1326.35,
+      1003.2,
+      1404.68,
+      1023.09
+     ],
+     "search_window": [
+      1292.35,
+      995.2,
+      1324.85,
+      1025.09
+     ],
+     "icon_bbox": [
+      1303.8,
+      1001.52,
+      1312.92,
+      1015.08
+     ],
+     "icon_strokes_bbox": [
+      1303.8,
+      1001.52,
+      1312.92,
+      1015.08
+     ],
+     "icon_px": [
+      57,
+      39
+     ]
+    },
+    "receptacle_gfi_microwave_duplex.png": {
+     "label": "DUPLEX OUTLET MICROWAVE GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1326.36,
+      1036.32,
+      1404.68,
+      1077.93
+     ],
+     "search_window": [
+      1292.36,
+      1028.32,
+      1324.86,
+      1079.93
+     ],
+     "icon_bbox": [
+      1301.52,
+      1038.17,
+      1314.38,
+      1066.44
+     ],
+     "icon_strokes_bbox": [
+      1303.68,
+      1052.88,
+      1312.68,
+      1066.44
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_gfi_dishwasher_duplex.png": {
+     "label": "DUPLEX OUTLET DISH WASHER GROUND FAULT INTERRUPTER",
+     "label_hits": 1,
+     "label_bbox": [
+      1326.36,
+      1086.6,
+      1404.68,
+      1128.21
+     ],
+     "search_window": [
+      1292.36,
+      1078.6,
+      1324.86,
+      1130.21
+     ],
+     "icon_bbox": [
+      1302.0,
+      1091.45,
+      1314.38,
+      1119.72
+     ],
+     "icon_strokes_bbox": [
+      1303.68,
+      1106.16,
+      1312.68,
+      1119.72
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "receptacle_range_hood_duplex.png": {
+     "label": "DUPLEX OUTLET RANGE HOOD",
+     "label_hits": 1,
+     "label_bbox": [
+      1326.36,
+      1142.4,
+      1404.68,
+      1162.29
+     ],
+     "search_window": [
+      1292.36,
+      1134.4,
+      1324.86,
+      1164.29
+     ],
+     "icon_bbox": [
+      1303.68,
+      1142.45,
+      1312.68,
+      1163.52
+     ],
+     "icon_strokes_bbox": [
+      1303.68,
+      1149.96,
+      1312.68,
+      1163.52
+     ],
+     "icon_px": [
+      57,
+      38
+     ]
+    },
+    "fan_exhaust.png": {
+     "label": "EXHAUST FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1053.84,
+      1071.68,
+      1120.5,
+      1080.7
+     ],
+     "search_window": [
+      1019.84,
+      1063.68,
+      1052.34,
+      1082.7
+     ],
+     "icon_bbox": [
+      1023.12,
+      1067.4,
+      1033.32,
+      1077.48
+     ],
+     "icon_strokes_bbox": [
+      1023.12,
+      1067.4,
+      1033.32,
+      1077.48
+     ],
+     "icon_px": [
+      43,
+      43
+     ]
+    },
+    "fan_indoor_air_quality_iaq.png": {
+     "label": "INDOOR AIR QUALITY FAN",
+     "label_hits": 1,
+     "label_bbox": [
+      1053.84,
+      1089.72,
+      1115.94,
+      1109.61
+     ],
+     "search_window": [
+      1019.84,
+      1081.72,
+      1052.34,
+      1111.61
+     ],
+     "icon_bbox": [
+      1023.12,
+      1088.04,
+      1043.13,
+      1102.97
+     ],
+     "icon_strokes_bbox": [
+      1023.12,
+      1088.04,
+      1033.32,
+      1098.12
+     ],
+     "icon_px": [
+      43,
+      43
+     ]
+    },
+    "detector_smoke.png": {
+     "label": "SMOKE DETECTOR/ALARM",
+     "label_hits": 1,
+     "label_bbox": [
+      1189.92,
+      908.88,
+      1278.04,
+      928.77
+     ],
+     "search_window": [
+      1155.92,
+      900.88,
+      1188.42,
+      930.77
+     ],
+     "icon_bbox": [
+      1164.72,
+      907.68,
+      1179.24,
+      929.45
+     ],
+     "icon_strokes_bbox": [
+      1164.72,
+      907.68,
+      1179.24,
+      922.32
+     ],
+     "icon_px": [
+      61,
+      61
+     ]
+    },
+    "detector_combined_smoke_carbon_monoxide.png": {
+     "label": "COMBINATION SMOKE/CARBON MONOXIDE",
+     "label_hits": 1,
+     "label_bbox": [
+      1189.92,
+      943.8,
+      1270.82,
+      974.49
+     ],
+     "search_window": [
+      1155.92,
+      935.8,
+      1188.42,
+      976.49
+     ],
+     "icon_bbox": [
+      1160.88,
+      941.76,
+      1182.77,
+      963.53
+     ],
+     "icon_strokes_bbox": [
+      1164.72,
+      941.76,
+      1179.24,
+      956.4
+     ],
+     "icon_px": [
+      61,
+      61
+     ]
+    },
+    "junction_box_electrical.png": {
+     "label": "ELECTRICAL JUNCTION BOX",
+     "label_hits": 1,
+     "label_bbox": [
+      1189.92,
+      989.04,
+      1261.1,
+      1008.93
+     ],
+     "search_window": [
+      1155.92,
+      981.04,
+      1188.42,
+      1010.93
+     ],
+     "icon_bbox": [
+      1167.24,
+      987.0,
+      1176.24,
+      996.0
+     ],
+     "icon_strokes_bbox": [
+      1167.24,
+      987.0,
+      1176.24,
+      996.0
+     ],
+     "icon_px": [
+      38,
+      38
+     ]
+    },
+    "wiring_run_electrical_REFERENCE_BOM.png": {
+     "label": "ELECTRICAL WIRING",
+     "label_hits": 1,
+     "label_bbox": [
+      1160.76,
+      1243.68,
+      1222.1,
+      1263.57
+     ],
+     "search_window": [
+      1150.76,
+      1193.68,
+      1232.1,
+      1242.68
+     ],
+     "icon_bbox": [
+      1169.64,
+      1204.8,
+      1204.2,
+      1239.48
+     ],
+     "icon_strokes_bbox": [
+      1169.64,
+      1204.8,
+      1204.2,
+      1239.48
+     ],
+     "icon_px": [
+      145,
+      145
+     ]
+    },
+    "fan_coil_unit_dedicated_outlet_REFERENCE.png": {
+     "label": "FAN COIL UNIT +80\" TO BOTTOM OF UNIT PROVIDE DEDICATED OUTLET",
+     "label_hits": 1,
+     "label_bbox": [
+      1319.28,
+      1284.48,
+      1422.62,
+      1326.09
+     ],
+     "search_window": [
+      1279.28,
+      1276.48,
+      1317.78,
+      1328.09
+     ],
+     "icon_bbox": [
+      1278.96,
+      1284.84,
+      1305.6,
+      1303.68
+     ],
+     "icon_strokes_bbox": [
+      1278.96,
+      1284.84,
+      1305.6,
+      1303.68
+     ],
+     "icon_px": [
+      79,
+      111
+     ]
+    }
+   },
+   "raster": {
+    "switch_standard.png": {
+     "template_px": [
+      63,
+      28
+     ],
+     "candidates_by_threshold": {
+      "0.5": 420,
+      "0.6": 17,
+      "0.7": 7,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 432,
+      "0.6": 17,
+      "0.7": 7,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 50,
+      "0.6": 28,
+      "0.7": 18,
+      "0.8": 12,
+      "0.9": 0
+     },
+     "seconds": 1.43,
+     "top_scores": [
+      0.815,
+      0.787,
+      0.761,
+      0.755,
+      0.726
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1681.44,
+       "cy_pt": 368.16,
+       "score": 0.815,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1659.96,
+       "cy_pt": 334.2,
+       "score": 0.787,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1585.44,
+       "cy_pt": 329.76,
+       "score": 0.761,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1488.12,
+       "cy_pt": 519.0,
+       "score": 0.755,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1494.36,
+       "cy_pt": 151.08,
+       "score": 0.726,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1479.36,
+       "cy_pt": 299.04,
+       "score": 0.719,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1672.08,
+       "cy_pt": 276.72,
+       "score": 0.705,
+       "rot": 0
+      }
+     ]
+    },
+    "receptacle_gfi_duplex.png": {
+     "template_px": [
+      57,
+      38
+     ],
+     "candidates_by_threshold": {
+      "0.5": 38,
+      "0.6": 26,
+      "0.7": 20,
+      "0.8": 11,
+      "0.9": 5
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 38,
+      "0.6": 26,
+      "0.7": 20,
+      "0.8": 11,
+      "0.9": 5
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 96,
+      "0.6": 48,
+      "0.7": 28,
+      "0.8": 17,
+      "0.9": 6
+     },
+     "seconds": 1.05,
+     "top_scores": [
+      0.984,
+      0.967,
+      0.941,
+      0.93,
+      0.903
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1613.64,
+       "cy_pt": 217.56,
+       "score": 0.984,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1795.08,
+       "cy_pt": 291.72,
+       "score": 0.967,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1345.92,
+       "cy_pt": 567.36,
+       "score": 0.941,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1247.28,
+       "cy_pt": 361.68,
+       "score": 0.93,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1163.88,
+       "cy_pt": 533.64,
+       "score": 0.903,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1795.08,
+       "cy_pt": 147.72,
+       "score": 0.894,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1355.04,
+       "cy_pt": 283.44,
+       "score": 0.889,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1295.52,
+       "cy_pt": 541.68,
+       "score": 0.888,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1516.2,
+       "cy_pt": 231.0,
+       "score": 0.834,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1796.16,
+       "cy_pt": 100.8,
+       "score": 0.828,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1163.64,
+       "cy_pt": 394.44,
+       "score": 0.804,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1660.2,
+       "cy_pt": 314.28,
+       "score": 0.792,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1494.6,
+       "cy_pt": 260.28,
+       "score": 0.781,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1795.32,
+       "cy_pt": 386.04,
+       "score": 0.776,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1494.6,
+       "cy_pt": 138.36,
+       "score": 0.763,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1339.92,
+       "cy_pt": 283.44,
+       "score": 0.755,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1074.12,
+       "cy_pt": 147.48,
+       "score": 0.729,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1138.44,
+       "cy_pt": 394.44,
+       "score": 0.727,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1494.6,
+       "cy_pt": 211.8,
+       "score": 0.724,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1370.76,
+       "cy_pt": 441.96,
+       "score": 0.708,
+       "rot": 270
+      }
+     ]
+    },
+    "light_recessed_downlight.png": {
+     "template_px": [
+      53,
+      53
+     ],
+     "candidates_by_threshold": {
+      "0.5": 26,
+      "0.6": 19,
+      "0.7": 19,
+      "0.8": 16,
+      "0.9": 7
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 26,
+      "0.6": 19,
+      "0.7": 19,
+      "0.8": 16,
+      "0.9": 7
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 26,
+      "0.6": 22,
+      "0.7": 18,
+      "0.8": 17,
+      "0.9": 1
+     },
+     "seconds": 1.04,
+     "top_scores": [
+      0.966,
+      0.918,
+      0.917,
+      0.915,
+      0.908
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1450.2,
+       "cy_pt": 468.48,
+       "score": 0.966,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1339.8,
+       "cy_pt": 322.32,
+       "score": 0.918,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1339.8,
+       "cy_pt": 254.16,
+       "score": 0.917,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1242.84,
+       "cy_pt": 322.32,
+       "score": 0.915,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1242.84,
+       "cy_pt": 250.32,
+       "score": 0.908,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1533.72,
+       "cy_pt": 322.32,
+       "score": 0.906,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1242.84,
+       "cy_pt": 179.04,
+       "score": 0.902,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1125.96,
+       "cy_pt": 322.32,
+       "score": 0.896,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1630.68,
+       "cy_pt": 325.2,
+       "score": 0.896,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1125.96,
+       "cy_pt": 250.32,
+       "score": 0.889,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1339.8,
+       "cy_pt": 179.04,
+       "score": 0.883,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1565.64,
+       "cy_pt": 190.8,
+       "score": 0.878,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1125.96,
+       "cy_pt": 179.04,
+       "score": 0.868,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1423.32,
+       "cy_pt": 322.32,
+       "score": 0.868,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1547.88,
+       "cy_pt": 486.24,
+       "score": 0.866,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1423.32,
+       "cy_pt": 216.72,
+       "score": 0.825,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1412.04,
+       "cy_pt": 156.72,
+       "score": 0.781,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1563.72,
+       "cy_pt": 320.64,
+       "score": 0.778,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1462.2,
+       "cy_pt": 190.8,
+       "score": 0.755,
+       "rot": 0
+      }
+     ]
+    },
+    "light_pendant_high_efficacy.png": {
+     "template_px": [
+      52,
+      53
+     ],
+     "candidates_by_threshold": {
+      "0.5": 26,
+      "0.6": 23,
+      "0.7": 17,
+      "0.8": 1,
+      "0.9": 1
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 26,
+      "0.6": 23,
+      "0.7": 17,
+      "0.8": 1,
+      "0.9": 1
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 30,
+      "0.6": 23,
+      "0.7": 15,
+      "0.8": 1,
+      "0.9": 1
+     },
+     "seconds": 1.04,
+     "top_scores": [
+      0.962,
+      0.764,
+      0.745,
+      0.745,
+      0.728
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1563.6,
+       "cy_pt": 320.64,
+       "score": 0.962,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1450.2,
+       "cy_pt": 468.36,
+       "score": 0.764,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1547.76,
+       "cy_pt": 486.24,
+       "score": 0.745,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1242.84,
+       "cy_pt": 179.16,
+       "score": 0.745,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1339.8,
+       "cy_pt": 254.04,
+       "score": 0.728,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1565.64,
+       "cy_pt": 190.68,
+       "score": 0.725,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1065.24,
+       "cy_pt": 388.44,
+       "score": 0.724,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1339.8,
+       "cy_pt": 179.16,
+       "score": 0.722,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1339.8,
+       "cy_pt": 322.44,
+       "score": 0.72,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1125.96,
+       "cy_pt": 179.16,
+       "score": 0.718,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1242.84,
+       "cy_pt": 322.44,
+       "score": 0.718,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1242.84,
+       "cy_pt": 250.44,
+       "score": 0.712,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1533.72,
+       "cy_pt": 322.44,
+       "score": 0.708,
+       "rot": 180
+      },
+      {
+       "cx_pt": 1231.2,
+       "cy_pt": 459.6,
+       "score": 0.704,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1423.2,
+       "cy_pt": 322.32,
+       "score": 0.704,
+       "rot": 90
+      },
+      {
+       "cx_pt": 1630.8,
+       "cy_pt": 325.2,
+       "score": 0.703,
+       "rot": 270
+      },
+      {
+       "cx_pt": 1125.84,
+       "cy_pt": 322.32,
+       "score": 0.7,
+       "rot": 90
+      }
+     ]
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "template_px": [
+      60,
+      53
+     ],
+     "candidates_by_threshold": {
+      "0.5": 24,
+      "0.6": 21,
+      "0.7": 1,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 24,
+      "0.6": 21,
+      "0.7": 1,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 27,
+      "0.6": 23,
+      "0.7": 8,
+      "0.8": 1,
+      "0.9": 1
+     },
+     "seconds": 1.06,
+     "top_scores": [
+      0.86,
+      0.686,
+      0.672,
+      0.661,
+      0.658
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1562.64,
+       "cy_pt": 320.64,
+       "score": 0.86,
+       "rot": 270
+      }
+     ]
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "template_px": [
+      484,
+      484
+     ],
+     "candidates_by_threshold": {
+      "0.5": 3,
+      "0.6": 3,
+      "0.7": 3,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 3,
+      "0.6": 3,
+      "0.7": 3,
+      "0.8": 1,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 3,
+      "0.6": 3,
+      "0.7": 3,
+      "0.8": 3,
+      "0.9": 0
+     },
+     "seconds": 1.46,
+     "top_scores": [
+      0.795,
+      0.793,
+      0.793
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1710.48,
+       "cy_pt": 459.48,
+       "score": 0.795,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1710.48,
+       "cy_pt": 208.2,
+       "score": 0.793,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1231.2,
+       "cy_pt": 459.72,
+       "score": 0.793,
+       "rot": 180
+      }
+     ]
+    },
+    "fan_exhaust.png": {
+     "template_px": [
+      43,
+      43
+     ],
+     "candidates_by_threshold": {
+      "0.5": 62,
+      "0.6": 6,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 20,
+      "0.6": 6,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 21,
+      "0.6": 6,
+      "0.7": 4,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "seconds": 1.04,
+     "top_scores": [
+      0.66,
+      0.657,
+      0.646,
+      0.642,
+      0.64
+     ],
+     "candidates_at_display_threshold": []
+    },
+    "detector_smoke.png": {
+     "template_px": [
+      61,
+      61
+     ],
+     "candidates_by_threshold": {
+      "0.5": 5,
+      "0.6": 5,
+      "0.7": 5,
+      "0.8": 4,
+      "0.9": 2
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 5,
+      "0.6": 5,
+      "0.7": 5,
+      "0.8": 4,
+      "0.9": 2
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 18,
+      "0.6": 5,
+      "0.7": 5,
+      "0.8": 5,
+      "0.9": 4
+     },
+     "seconds": 1.1,
+     "top_scores": [
+      0.945,
+      0.911,
+      0.853,
+      0.839,
+      0.796
+     ],
+     "candidates_at_display_threshold": [
+      {
+       "cx_pt": 1635.24,
+       "cy_pt": 264.96,
+       "score": 0.945,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1636.68,
+       "cy_pt": 383.04,
+       "score": 0.911,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1607.4,
+       "cy_pt": 318.0,
+       "score": 0.853,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1289.64,
+       "cy_pt": 306.72,
+       "score": 0.839,
+       "rot": 0
+      },
+      {
+       "cx_pt": 1318.68,
+       "cy_pt": 393.6,
+       "score": 0.796,
+       "rot": 90
+      }
+     ]
+    },
+    "junction_box_electrical.png": {
+     "template_px": [
+      38,
+      38
+     ],
+     "candidates_by_threshold": {
+      "0.5": 17,
+      "0.6": 0,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_watermark_blanked": {
+      "0.5": 17,
+      "0.6": 0,
+      "0.7": 0,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "candidates_by_threshold_strokes_thickened_5px": {
+      "0.5": 54,
+      "0.6": 31,
+      "0.7": 17,
+      "0.8": 0,
+      "0.9": 0
+     },
+     "seconds": 1.03,
+     "top_scores": [
+      0.583,
+      0.573,
+      0.569,
+      0.564,
+      0.563
+     ],
+     "candidates_at_display_threshold": []
+    }
+   },
+   "vector": {
+    "region_segments_raw": 9797,
+    "region_segments_after_dedupe": 6104,
+    "region_components": 830,
+    "region_component_size_hist": {
+     ">100": 8,
+     "21-100": 20,
+     "2-5": 196,
+     "6-20": 144,
+     "1": 462
+    },
+    "switch_standard.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 15,
+      "dims_pt": [
+       5.28,
+       10.08
+      ],
+      "length_pt": 21.08
+     },
+     "matching_components_in_region": 22
+    },
+    "receptacle_gfi_duplex.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       7.8,
+       12.36
+      ],
+      "length_pt": 36.75
+     },
+     "matching_components_in_region": 40
+    },
+    "light_recessed_downlight.png": {
+     "icon_components": 6,
+     "key_component": {
+      "n_segments": 4,
+      "dims_pt": [
+       9.0,
+       9.0
+      ],
+      "length_pt": 36.0
+     },
+     "matching_components_in_region": 18
+    },
+    "light_pendant_high_efficacy.png": {
+     "icon_components": 5,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       8.76,
+       9.0
+      ],
+      "length_pt": 28.06
+     },
+     "matching_components_in_region": 24
+    },
+    "light_wall_mounted_high_efficacy.png": {
+     "icon_components": 6,
+     "key_component": {
+      "n_segments": 14,
+      "dims_pt": [
+       8.88,
+       9.0
+      ],
+      "length_pt": 28.04
+     },
+     "matching_components_in_region": 24
+    },
+    "ceiling_fan_optional_pre_wire.png": {
+     "icon_components": 7,
+     "key_component": {
+      "n_segments": 50,
+      "dims_pt": [
+       14.04,
+       114.84
+      ],
+      "length_pt": 257.78
+     },
+     "matching_components_in_region": 3
+    },
+    "fan_exhaust.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 266,
+      "dims_pt": [
+       8.88,
+       9.0
+      ],
+      "length_pt": 59.33
+     },
+     "matching_components_in_region": 0
+    },
+    "detector_smoke.png": {
+     "icon_components": 2,
+     "key_component": {
+      "n_segments": 17,
+      "dims_pt": [
+       13.32,
+       13.44
+      ],
+      "length_pt": 42.13
+     },
+     "matching_components_in_region": 5
+    },
+    "junction_box_electrical.png": {
+     "icon_components": 1,
+     "key_component": {
+      "n_segments": 13,
+      "dims_pt": [
+       7.8,
+       7.8
+      ],
+      "length_pt": 24.57
+     },
+     "matching_components_in_region": 0
+    }
+   },
+   "watermark_effect": {
+    "pixels_changed_fraction": 0.0327,
+    "max_abs_gray_diff": 25
+   }
+  }
+ },
+ "reference_px_per_pt_median": 1.48,
+ "input_sha256_before": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
+ "input_sha256_after": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
+ "input_unchanged": true
+}

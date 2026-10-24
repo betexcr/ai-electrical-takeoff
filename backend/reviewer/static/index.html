@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ground-truth reviewer</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header id="topbar">
+    <strong>Ground-truth reviewer</strong>
+    <label>Sheet <select id="sheet"></select></label>
+    <span id="phase" class="phase" data-testid="phase"></span>
+    <span id="phase-actions"></span>
+    <span class="spacer"></span>
+    <span id="layers">
+      <label data-layer="candidates"><input type="checkbox" id="show-candidates" checked> candidates</label>
+      <label data-layer="annotations"><input type="checkbox" id="show-annotations" checked> annotations</label>
+      <label><input type="checkbox" id="show-tokens"> text tokens</label>
+      <label><input type="checkbox" id="show-rooms" checked> room labels</label>
+      <label><input type="checkbox" id="show-grid" checked> grid</label>
+    </span>
+    <label>Reviewer <input id="reviewer" size="10" placeholder="name"></label>
+  </header>
+  <main>
+    <section id="viewport" tabindex="0" aria-label="plan viewer">
+      <img id="plan" alt="electrical plan region" draggable="false">
+      <svg id="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="mode-banner"></div>
+    </section>
+    <aside id="panel">
+      <section>
+        <h3>Progress <span id="cell-nav"></span></h3>
+        <div id="progress" data-testid="progress"></div>
+      </section>
+      <section>
+        <h3>Selected</h3>
+        <div id="details">Nothing selected.</div>
+      </section>
+      <section id="lists"></section>
+      <section>
+        <h3>Keys</h3>
+        <div id="help" class="help"></div>
+      </section>
+    </aside>
+  </main>
+  <div id="toast" role="status"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

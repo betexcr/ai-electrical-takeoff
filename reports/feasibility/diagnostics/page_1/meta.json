@@ -1,0 +1,1050 @@
+{
+ "page_number": 1,
+ "geometry": {
+  "page_rect_displayed": [
+   0.0,
+   0.0,
+   2592.0,
+   1728.0
+  ],
+  "cropbox_native": [
+   0.0,
+   0.0,
+   2592.0,
+   1728.0
+  ],
+  "rotation": 0,
+  "displayed_size_pt": [
+   2592.0,
+   1728.0
+  ],
+  "size_in": [
+   36.0,
+   24.0
+  ],
+  "pymupdf_transformation_matrix": [
+   1.0,
+   0.0,
+   0.0,
+   -1.0,
+   0.0,
+   1728.0
+  ],
+  "pymupdf_rotation_matrix": [
+   1.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   0.0
+  ],
+  "render_px_at_150dpi": [
+   5400,
+   3600
+  ],
+  "nominal_px_at_150dpi": [
+   5400,
+   3600
+  ]
+ },
+ "sheet_id_candidates": [
+  "A1-111"
+ ],
+ "counts": {
+  "text_lines": 537,
+  "words": 2192,
+  "drawings": 12474,
+  "frame_segments": 21,
+  "images": 2
+ },
+ "xobjects": [
+  [
+   32,
+   "BBA",
+   0,
+   [
+    0.0,
+    0.0,
+    2149.77,
+    1659.75
+   ]
+  ],
+  [
+   34,
+   "Fm0",
+   32,
+   [
+    0.0,
+    0.0,
+    1152.0,
+    1492.11
+   ]
+  ],
+  [
+   35,
+   "Fm0",
+   34,
+   [
+    -0.0,
+    0.0,
+    939.95,
+    1530.05
+   ]
+  ]
+ ],
+ "images": [
+  {
+   "xref": 41,
+   "width": 313,
+   "height": 301,
+   "bbox": [
+    2313.1,
+    44.6,
+    2568.7,
+    290.4
+   ],
+   "bbox_normalized": [
+    0.8924,
+    0.0258,
+    0.991,
+    0.1681
+   ]
+  },
+  {
+   "xref": 42,
+   "width": 531,
+   "height": 264,
+   "bbox": [
+    2314.3,
+    308.3,
+    2568.5,
+    435.0
+   ],
+   "bbox_normalized": [
+    0.8929,
+    0.1784,
+    0.9909,
+    0.2517
+   ]
+  }
+ ],
+ "watermarks": [
+  {
+   "text": "FOR USE IN THE CITY OF ESCONDIDO",
+   "size": 129.67,
+   "dir": [
+    0.866,
+    -0.5
+   ],
+   "bbox": [
+    140.9,
+    155.9,
+    2315.0,
+    1518.3
+   ]
+  }
+ ],
+ "titles": [
+  {
+   "kind": "floor_finish_legend",
+   "text": "FLOOR FINISH LEGEND",
+   "bbox": [
+    1026.4,
+    1448.4,
+    1312.7,
+    1471.8
+   ],
+   "size": 24.93
+  },
+  {
+   "kind": "ventilation_summaries",
+   "text": "VENTILATION SUMMARIES",
+   "bbox": [
+    1458.1,
+    932.5,
+    1782.1,
+    955.9
+   ],
+   "size": 24.93
+  },
+  {
+   "kind": "electrical_plan",
+   "text": "A1-111 ELECTRICAL PLAN - PLAN 1",
+   "bbox": [
+    909.4,
+    845.7,
+    1285.0,
+    884.7
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "mechanical_plan",
+   "text": "A1-111 MECHANICAL PLAN - PLAN 1",
+   "bbox": [
+    197.2,
+    845.7,
+    581.7,
+    884.7
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "finish_plan",
+   "text": "A1-111 FINISH PLAN - PLAN 1",
+   "bbox": [
+    197.2,
+    1634.7,
+    497.5,
+    1673.8
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "general_mep_notes",
+   "text": "GENERAL MEP NOTES",
+   "bbox": [
+    1889.8,
+    932.5,
+    2164.6,
+    955.9
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "legend",
+   "text": "LEGEND",
+   "bbox": [
+    1458.1,
+    68.3,
+    1562.1,
+    91.6
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "keynotes",
+   "text": "KEYNOTES",
+   "bbox": [
+    1026.4,
+    932.5,
+    1163.5,
+    955.9
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "electrical_notes",
+   "text": "ELECTRICAL NOTES",
+   "bbox": [
+    1889.8,
+    68.3,
+    2139.6,
+    91.6
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "plumbing_notes",
+   "text": "PLUMBING NOTES",
+   "bbox": [
+    1889.8,
+    1337.3,
+    2115.3,
+    1360.6
+   ],
+   "size": 24.94
+  }
+ ],
+ "regions": [
+  {
+   "kind": "floor_finish_legend",
+   "title_text": "FLOOR FINISH LEGEND",
+   "title_bbox": [
+    1026.36,
+    1448.37,
+    1312.68,
+    1471.76
+   ],
+   "bbox": [
+    1007.28,
+    901.32,
+    1439.04,
+    1692.0
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1007.2799682617188,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 901.3200073242188,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1692.0,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [
+    "cell shared with keynotes (no frame line between them)"
+   ],
+   "bbox_normalized": [
+    0.38861,
+    0.5216,
+    0.55519,
+    0.97917
+   ]
+  },
+  {
+   "kind": "ventilation_summaries",
+   "title_text": "VENTILATION SUMMARIES",
+   "title_bbox": [
+    1458.11,
+    932.49,
+    1782.07,
+    955.88
+   ],
+   "bbox": [
+    1439.04,
+    901.32,
+    1870.68,
+    1692.0
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 901.3200073242188,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1692.0,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.55519,
+    0.5216,
+    0.72171,
+    0.97917
+   ]
+  },
+  {
+   "kind": "electrical_plan",
+   "title_text": "A1-111 ELECTRICAL PLAN - PLAN 1",
+   "title_bbox": [
+    909.36,
+    845.73,
+    1285.03,
+    884.72
+   ],
+   "bbox": [
+    854.4,
+    37.08,
+    1439.04,
+    870.12
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 854.3999633789062,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 37.080078125,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 870.1199951171875,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.32963,
+    0.02146,
+    0.55519,
+    0.50354
+   ],
+   "room_label_candidates": [
+    {
+     "text": "BEDROOM / STUDIO",
+     "bbox": [
+      1228.92,
+      528.22,
+      1323.12,
+      537.21
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "LIVING",
+     "bbox": [
+      1094.76,
+      472.18,
+      1126.2,
+      481.17
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "KITCHEN / DINING",
+     "bbox": [
+      1046.64,
+      351.94,
+      1130.16,
+      360.93
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "BATH",
+     "bbox": [
+      1253.88,
+      320.74,
+      1280.35,
+      329.73
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      987.6,
+      576.58,
+      1000.41,
+      585.57
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      1260.72,
+      400.42,
+      1273.53,
+      409.41
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "LNDRY",
+     "bbox": [
+      1101.36,
+      254.86,
+      1134.38,
+      263.85
+     ],
+     "size": 9.58
+    }
+   ],
+   "short_token_counts": {
+    "GFI": 14,
+    "AFI": 9,
+    "3D": 4,
+    "WP": 3,
+    "F": 3,
+    "D": 2,
+    "FC": 2,
+    "CL": 2,
+    "1": 2,
+    "MW": 1,
+    "A": 1,
+    "VS": 1,
+    "DW": 1,
+    "EXT": 1,
+    "J": 1,
+    "SD": 1,
+    "IAQ": 1,
+    "IN": 1,
+    "B38": 1,
+    "F03": 1,
+    "B14": 1,
+    "B32": 1,
+    "54": 1,
+    "SEE": 1
+   },
+   "vector_stats": {
+    "paths": 4464,
+    "path_types": {
+     "f": 65,
+     "s": 4395,
+     "fs": 4
+    },
+    "item_kinds": {
+     "re": 65,
+     "l": 4407
+    },
+    "items_per_path_capped_10": {
+     "1": 4460,
+     "3": 4
+    },
+    "line_length_pt_buckets": {
+     "3-10": 805,
+     ">=50": 130,
+     "10-50": 351,
+     "1-3": 1672,
+     "<1": 1449
+    },
+    "stroke_widths": {
+     "0.24": 3935,
+     "0.72": 257,
+     "0.48": 205,
+     "0": 65,
+     "0.84": 2
+    },
+    "stroke_colours": {
+     "(0.0, 0.0, 0.0)": 3252,
+     "(0.666, 0.666, 0.666)": 1147,
+     "None": 65
+    },
+    "fill_colours": {
+     "None": 4395,
+     "(0.754, 0.754, 0.754)": 50,
+     "(0.0, 0.0, 0.0)": 10,
+     "(1.0, 1.0, 1.0)": 9
+    },
+    "dash_attribute_values": {
+     "[] 0": 4399,
+     "None": 65
+    },
+    "degenerate_rect_paths": 2624
+   }
+  },
+  {
+   "kind": "mechanical_plan",
+   "title_text": "A1-111 MECHANICAL PLAN - PLAN 1",
+   "title_bbox": [
+    197.16,
+    845.73,
+    581.71,
+    884.72
+   ],
+   "bbox": [
+    143.88,
+    37.08,
+    854.4,
+    870.12
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 143.87998962402344,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 854.3999633789062,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 37.080078125,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 870.1199951171875,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.05551,
+    0.02146,
+    0.32963,
+    0.50354
+   ],
+   "room_label_candidates": [
+    {
+     "text": "BATH",
+     "bbox": [
+      681.12,
+      296.98,
+      707.59,
+      305.97
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "KITCHEN / DINING",
+     "bbox": [
+      468.24,
+      326.5,
+      551.76,
+      335.49
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "LIVING",
+     "bbox": [
+      504.0,
+      486.34,
+      535.44,
+      495.33
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      412.68,
+      553.3,
+      425.48,
+      562.29
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      694.8,
+      384.46,
+      707.6,
+      393.45
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "LNDRY",
+     "bbox": [
+      537.12,
+      248.26,
+      570.14,
+      257.25
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "BEDROOM / STUDIO",
+     "bbox": [
+      654.12,
+      497.5,
+      748.32,
+      506.49
+     ],
+     "size": 9.58
+    }
+   ]
+  },
+  {
+   "kind": "finish_plan",
+   "title_text": "A1-111 FINISH PLAN - PLAN 1",
+   "title_bbox": [
+    197.16,
+    1634.73,
+    497.47,
+    1673.84
+   ],
+   "bbox": [
+    143.88,
+    901.32,
+    1007.28,
+    1659.24
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 143.87998962402344,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1007.2799682617188,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 901.3200073242188,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1659.239990234375,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.05551,
+    0.5216,
+    0.38861,
+    0.96021
+   ],
+   "room_label_candidates": [
+    {
+     "text": "LIVING",
+     "bbox": [
+      509.88,
+      1302.7,
+      541.32,
+      1311.69
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      697.68,
+      1206.7,
+      710.48,
+      1215.69
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "KITCHEN / DINING",
+     "bbox": [
+      474.12,
+      1156.78,
+      557.64,
+      1165.77
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "BEDROOM / STUDIO",
+     "bbox": [
+      656.88,
+      1313.98,
+      751.08,
+      1322.97
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      400.32,
+      1383.34,
+      413.13,
+      1392.33
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "LNDRY",
+     "bbox": [
+      562.44,
+      1071.58,
+      595.46,
+      1080.57
+     ],
+     "size": 9.58
+    },
+    {
+     "text": "BATH",
+     "bbox": [
+      684.0,
+      1132.54,
+      710.47,
+      1141.53
+     ],
+     "size": 9.58
+    }
+   ]
+  },
+  {
+   "kind": "general_mep_notes",
+   "title_text": "GENERAL MEP NOTES",
+   "title_bbox": [
+    1889.76,
+    932.49,
+    2164.64,
+    955.88
+   ],
+   "bbox": [
+    1870.68,
+    901.32,
+    2302.44,
+    1315.08
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 2302.43994140625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 901.3200073242188,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1315.080078125,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.72171,
+    0.5216,
+    0.88829,
+    0.76104
+   ]
+  },
+  {
+   "kind": "legend",
+   "title_text": "LEGEND",
+   "title_bbox": [
+    1458.12,
+    68.25,
+    1562.06,
+    91.64
+   ],
+   "bbox": [
+    1439.04,
+    37.08,
+    1870.68,
+    901.32
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 37.080078125,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 901.3200073242188,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.55519,
+    0.02146,
+    0.72171,
+    0.5216
+   ]
+  },
+  {
+   "kind": "keynotes",
+   "title_text": "KEYNOTES",
+   "title_bbox": [
+    1026.36,
+    932.49,
+    1163.49,
+    955.88
+   ],
+   "bbox": [
+    1007.28,
+    901.32,
+    1439.04,
+    1692.0
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1007.2799682617188,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 901.3200073242188,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1692.0,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [
+    "cell shared with floor_finish_legend (no frame line between them)"
+   ],
+   "bbox_normalized": [
+    0.38861,
+    0.5216,
+    0.55519,
+    0.97917
+   ]
+  },
+  {
+   "kind": "electrical_notes",
+   "title_text": "ELECTRICAL NOTES",
+   "title_bbox": [
+    1889.76,
+    68.25,
+    2139.56,
+    91.64
+   ],
+   "bbox": [
+    1870.68,
+    37.08,
+    2302.44,
+    901.32
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 2302.43994140625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 37.080078125,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 901.3200073242188,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.72171,
+    0.02146,
+    0.88829,
+    0.5216
+   ]
+  },
+  {
+   "kind": "plumbing_notes",
+   "title_text": "PLUMBING NOTES",
+   "title_bbox": [
+    1889.76,
+    1337.25,
+    2115.32,
+    1360.64
+   ],
+   "bbox": [
+    1870.68,
+    1315.08,
+    2302.44,
+    1692.0
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 2302.43994140625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 1315.080078125,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1692.0,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.72171,
+    0.76104,
+    0.88829,
+    0.97917
+   ]
+  }
+ ],
+ "page_vector_stats": {
+  "paths": 12474,
+  "path_types": {
+   "f": 582,
+   "s": 11880,
+   "fs": 12
+  },
+  "item_kinds": {
+   "re": 581,
+   "l": 11922
+  },
+  "items_per_path_capped_10": {
+   "1": 12461,
+   "3": 12,
+   "6": 1
+  },
+  "line_length_pt_buckets": {
+   "3-10": 2486,
+   ">=50": 584,
+   "10-50": 1020,
+   "1-3": 2794,
+   "<1": 5038
+  },
+  "stroke_widths": {
+   "0.24": 10349,
+   "0.48": 781,
+   "0.72": 702,
+   "0": 582,
+   "0.84": 26,
+   "1.56": 25,
+   "2.4": 7,
+   "0.36": 2
+  },
+  "stroke_colours": {
+   "(0.0, 0.0, 0.0)": 8487,
+   "(0.666, 0.666, 0.666)": 2089,
+   "(0.498, 0.498, 0.498)": 1107,
+   "None": 582,
+   "(0.396, 0.396, 0.396)": 122,
+   "(0.697, 0.697, 0.697)": 49,
+   "(0.098, 0.098, 0.098)": 25,
+   "(0.816, 0.816, 0.816)": 11
+  },
+  "fill_colours": {
+   "None": 11880,
+   "(1.0, 1.0, 1.0)": 406,
+   "(0.754, 0.754, 0.754)": 145,
+   "(0.0, 0.0, 0.0)": 39,
+   "(0.918, 0.918, 0.918)": 4
+  },
+  "dash_attribute_values": {
+   "[] 0": 11892,
+   "None": 582
+  },
+  "degenerate_rect_paths": 8199
+ },
+ "timings_s": {
+  "extract_text_and_drawings": 0.14,
+  "render_150dpi": 0.301
+ },
+ "frame_assumptions": {
+  "stroke_widths": [
+   0.84,
+   1.56
+  ],
+  "min_length_pt": 300.0
+ }
+}

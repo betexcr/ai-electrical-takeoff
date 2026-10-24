@@ -1,0 +1,1151 @@
+{
+ "page_number": 2,
+ "geometry": {
+  "page_rect_displayed": [
+   0.0,
+   0.0,
+   2592.0,
+   1728.0
+  ],
+  "cropbox_native": [
+   0.0,
+   0.0,
+   2592.0,
+   1728.0
+  ],
+  "rotation": 0,
+  "displayed_size_pt": [
+   2592.0,
+   1728.0
+  ],
+  "size_in": [
+   36.0,
+   24.0
+  ],
+  "pymupdf_transformation_matrix": [
+   1.0,
+   0.0,
+   0.0,
+   -1.0,
+   0.0,
+   1728.0
+  ],
+  "pymupdf_rotation_matrix": [
+   1.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   0.0
+  ],
+  "render_px_at_150dpi": [
+   5400,
+   3600
+  ],
+  "nominal_px_at_150dpi": [
+   5400,
+   3600
+  ]
+ },
+ "sheet_id_candidates": [
+  "A2-111"
+ ],
+ "counts": {
+  "text_lines": 557,
+  "words": 2203,
+  "drawings": 12802,
+  "frame_segments": 18,
+  "images": 2
+ },
+ "xobjects": [
+  [
+   64,
+   "BBA",
+   0,
+   [
+    0.0,
+    0.0,
+    2129.44,
+    1644.05
+   ]
+  ],
+  [
+   65,
+   "MWFOForm",
+   64,
+   [
+    0.0,
+    0.0,
+    1152.0,
+    1492.11
+   ]
+  ],
+  [
+   66,
+   "BBA",
+   65,
+   [
+    -0.0,
+    0.0,
+    939.95,
+    1530.05
+   ]
+  ]
+ ],
+ "images": [
+  {
+   "xref": 41,
+   "width": 313,
+   "height": 301,
+   "bbox": [
+    2313.1,
+    44.6,
+    2568.7,
+    290.4
+   ],
+   "bbox_normalized": [
+    0.8924,
+    0.0258,
+    0.991,
+    0.1681
+   ]
+  },
+  {
+   "xref": 42,
+   "width": 531,
+   "height": 264,
+   "bbox": [
+    2314.3,
+    308.3,
+    2568.5,
+    435.0
+   ],
+   "bbox_normalized": [
+    0.8929,
+    0.1784,
+    0.9909,
+    0.2517
+   ]
+  }
+ ],
+ "watermarks": [
+  {
+   "text": "FOR USE IN THE CITY OF ESCONDIDO",
+   "size": 128.44,
+   "dir": [
+    0.866,
+    -0.5
+   ],
+   "bbox": [
+    165.1,
+    168.3,
+    2318.7,
+    1517.8
+   ]
+  }
+ ],
+ "titles": [
+  {
+   "kind": "floor_finish_legend",
+   "text": "FLOOR FINISH LEGEND",
+   "bbox": [
+    1026.4,
+    1171.5,
+    1312.7,
+    1194.9
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "general_mep_notes",
+   "text": "GENERAL MEP NOTES",
+   "bbox": [
+    1889.8,
+    906.9,
+    2164.6,
+    930.3
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "legend",
+   "text": "LEGEND",
+   "bbox": [
+    1458.1,
+    1069.3,
+    1562.1,
+    1092.7
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "keynotes",
+   "text": "KEYNOTES",
+   "bbox": [
+    1458.1,
+    648.8,
+    1595.2,
+    672.2
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "electrical_notes",
+   "text": "ELECTRICAL NOTES",
+   "bbox": [
+    1889.8,
+    68.3,
+    2139.6,
+    91.6
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "electrical_plan",
+   "text": "A2-111 ELECTRICAL PLAN - PLAN 2",
+   "bbox": [
+    195.7,
+    532.3,
+    571.4,
+    571.3
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "mechanical_plan",
+   "text": "A2-111 MECHANICAL PLAN - PLAN 2",
+   "bbox": [
+    195.7,
+    1084.8,
+    580.4,
+    1123.8
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "finish_plan",
+   "text": "A2-111 FINISH PLAN - PLAN 2",
+   "bbox": [
+    195.7,
+    1635.5,
+    496.2,
+    1674.4
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "plumbing_notes",
+   "text": "PLUMBING NOTES",
+   "bbox": [
+    1889.8,
+    1312.7,
+    2115.3,
+    1336.0
+   ],
+   "size": 24.94
+  },
+  {
+   "kind": "ventilation_summaries",
+   "text": "VENTILATION SUMMARIES",
+   "bbox": [
+    1455.8,
+    65.0,
+    1779.8,
+    88.4
+   ],
+   "size": 24.94
+  }
+ ],
+ "regions": [
+  {
+   "kind": "floor_finish_legend",
+   "title_text": "FLOOR FINISH LEGEND",
+   "title_bbox": [
+    1026.36,
+    1171.53,
+    1312.7,
+    1194.92
+   ],
+   "bbox": [
+    143.88,
+    1140.36,
+    1439.04,
+    1659.84
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 143.87998962402344,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 1140.3599853515625,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1659.8399658203125,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [
+    "cell shared with finish_plan (no frame line between them)"
+   ],
+   "bbox_normalized": [
+    0.05551,
+    0.65993,
+    0.55519,
+    0.96056
+   ]
+  },
+  {
+   "kind": "general_mep_notes",
+   "title_text": "GENERAL MEP NOTES",
+   "title_bbox": [
+    1889.76,
+    906.93,
+    2164.64,
+    930.32
+   ],
+   "bbox": [
+    1870.68,
+    887.4,
+    2302.44,
+    1247.16
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 2302.43994140625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 887.4000244140625,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1247.1600341796875,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.72171,
+    0.51354,
+    0.88829,
+    0.72174
+   ]
+  },
+  {
+   "kind": "legend",
+   "title_text": "LEGEND",
+   "title_bbox": [
+    1458.12,
+    1069.29,
+    1562.06,
+    1092.68
+   ],
+   "bbox": [
+    1439.04,
+    629.64,
+    1870.68,
+    1692.0
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 629.6400146484375,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1692.0,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [
+    "cell shared with keynotes (no frame line between them)"
+   ],
+   "bbox_normalized": [
+    0.55519,
+    0.36438,
+    0.72171,
+    0.97917
+   ]
+  },
+  {
+   "kind": "keynotes",
+   "title_text": "KEYNOTES",
+   "title_bbox": [
+    1458.12,
+    648.81,
+    1595.25,
+    672.2
+   ],
+   "bbox": [
+    1439.04,
+    629.64,
+    1870.68,
+    1692.0
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 629.6400146484375,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1692.0,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [
+    "cell shared with legend (no frame line between them)"
+   ],
+   "bbox_normalized": [
+    0.55519,
+    0.36438,
+    0.72171,
+    0.97917
+   ]
+  },
+  {
+   "kind": "electrical_notes",
+   "title_text": "ELECTRICAL NOTES",
+   "title_bbox": [
+    1889.76,
+    68.25,
+    2139.56,
+    91.64
+   ],
+   "bbox": [
+    1870.68,
+    37.08,
+    2302.44,
+    887.4
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 2302.43994140625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 37.080078125,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 887.4000244140625,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.72171,
+    0.02146,
+    0.88829,
+    0.51354
+   ]
+  },
+  {
+   "kind": "electrical_plan",
+   "title_text": "A2-111 ELECTRICAL PLAN - PLAN 2",
+   "title_bbox": [
+    195.72,
+    532.29,
+    571.39,
+    571.28
+   ],
+   "bbox": [
+    143.88,
+    37.08,
+    1439.04,
+    556.68
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 143.87998962402344,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 37.080078125,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 556.6800537109375,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.05551,
+    0.02146,
+    0.55519,
+    0.32215
+   ],
+   "room_label_candidates": [
+    {
+     "text": "LIVING",
+     "bbox": [
+      644.64,
+      374.52,
+      676.08,
+      383.49
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "BED 1",
+     "bbox": [
+      480.72,
+      356.52,
+      508.96,
+      365.49
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      496.08,
+      198.0,
+      508.89,
+      206.97
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      1154.04,
+      197.52,
+      1166.85,
+      206.49
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "LNDRY",
+     "bbox": [
+      931.44,
+      224.4,
+      964.46,
+      233.37
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "BED 2",
+     "bbox": [
+      1138.68,
+      374.52,
+      1166.92,
+      383.49
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "BATH",
+     "bbox": [
+      922.08,
+      374.52,
+      948.55,
+      383.49
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "DINING",
+     "bbox": [
+      817.8,
+      241.56,
+      850.92,
+      250.53
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "HALLWAY",
+     "bbox": [
+      953.76,
+      301.92,
+      1000.58,
+      310.89
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "KITCHEN",
+     "bbox": [
+      667.68,
+      252.84,
+      710.23,
+      261.81
+     ],
+     "size": 9.56
+    }
+   ],
+   "short_token_counts": {
+    "AFI": 15,
+    "GFI": 14,
+    "F": 4,
+    "D": 3,
+    "FC": 3,
+    "3D": 2,
+    "WP": 2,
+    "J": 2,
+    "SD": 2,
+    "BED": 2,
+    "1": 2,
+    "CL": 2,
+    "2": 2,
+    "MW": 1,
+    "A": 1,
+    "VS": 1,
+    "EXT": 1,
+    "IAQ": 1,
+    "DW": 1,
+    "IN": 1,
+    "F03": 1,
+    "A01": 1,
+    "A05": 1,
+    "A04": 1,
+    "B38": 1,
+    "B32": 1,
+    "A08": 1,
+    "A07": 1,
+    "54": 1,
+    "SEE": 1
+   },
+   "vector_stats": {
+    "paths": 5129,
+    "path_types": {
+     "f": 178,
+     "s": 4942,
+     "fs": 9
+    },
+    "item_kinds": {
+     "re": 178,
+     "l": 4969
+    },
+    "items_per_path_capped_10": {
+     "1": 5120,
+     "3": 9
+    },
+    "line_length_pt_buckets": {
+     "10-50": 407,
+     "1-3": 2119,
+     "<1": 1318,
+     "3-10": 962,
+     ">=50": 163
+    },
+    "stroke_widths": {
+     "0.24": 4364,
+     "0.72": 361,
+     "0.48": 217,
+     "0": 178,
+     "1.08": 8,
+     "0.84": 1
+    },
+    "stroke_colours": {
+     "(0.0, 0.0, 0.0)": 3699,
+     "(0.666, 0.666, 0.666)": 1222,
+     "None": 178,
+     "(0.153, 0.153, 0.078)": 30
+    },
+    "fill_colours": {
+     "None": 4942,
+     "(1.0, 1.0, 1.0)": 123,
+     "(0.754, 0.754, 0.754)": 49,
+     "(0.0, 0.0, 0.0)": 15
+    },
+    "dash_attribute_values": {
+     "[] 0": 4951,
+     "None": 178
+    },
+    "degenerate_rect_paths": 2819
+   }
+  },
+  {
+   "kind": "mechanical_plan",
+   "title_text": "A2-111 MECHANICAL PLAN - PLAN 2",
+   "title_bbox": [
+    195.72,
+    1084.77,
+    580.39,
+    1123.76
+   ],
+   "bbox": [
+    143.88,
+    588.72,
+    1439.04,
+    1109.16
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 143.87998962402344,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 588.719970703125,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1109.1600341796875,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.05551,
+    0.34069,
+    0.55519,
+    0.64188
+   ],
+   "room_label_candidates": [
+    {
+     "text": "BED 1",
+     "bbox": [
+      463.8,
+      864.84,
+      492.04,
+      873.81
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      463.8,
+      756.6,
+      476.61,
+      765.57
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "LIVING",
+     "bbox": [
+      640.44,
+      876.12,
+      671.88,
+      885.09
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "BATH",
+     "bbox": [
+      901.68,
+      925.44,
+      928.15,
+      934.41
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "BED 2",
+     "bbox": [
+      1107.72,
+      864.84,
+      1135.96,
+      873.81
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      1150.08,
+      756.6,
+      1162.89,
+      765.57
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "LNDRY",
+     "bbox": [
+      928.32,
+      767.88,
+      961.34,
+      776.85
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "KITCHEN",
+     "bbox": [
+      672.12,
+      804.0,
+      714.67,
+      812.97
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "DINING",
+     "bbox": [
+      843.24,
+      792.72,
+      876.36,
+      801.69
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "HALLWAY",
+     "bbox": [
+      849.6,
+      840.24,
+      896.42,
+      849.21
+     ],
+     "size": 9.56
+    }
+   ]
+  },
+  {
+   "kind": "finish_plan",
+   "title_text": "A2-111 FINISH PLAN - PLAN 2",
+   "title_bbox": [
+    195.72,
+    1635.45,
+    496.15,
+    1674.44
+   ],
+   "bbox": [
+    143.88,
+    1140.36,
+    1439.04,
+    1659.84
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 143.87998962402344,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 1140.3599853515625,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1659.8399658203125,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [
+    "cell shared with floor_finish_legend (no frame line between them)"
+   ],
+   "bbox_normalized": [
+    0.05551,
+    0.65993,
+    0.55519,
+    0.96056
+   ],
+   "room_label_candidates": [
+    {
+     "text": "LIVING",
+     "bbox": [
+      449.52,
+      1491.12,
+      480.96,
+      1500.09
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "BED 1",
+     "bbox": [
+      303.24,
+      1466.88,
+      331.48,
+      1475.85
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      303.24,
+      1314.72,
+      316.05,
+      1323.69
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "CL",
+     "bbox": [
+      964.44,
+      1314.72,
+      977.25,
+      1323.69
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "BED 2",
+     "bbox": [
+      964.44,
+      1455.72,
+      992.68,
+      1464.69
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "LNDRY",
+     "bbox": [
+      740.76,
+      1340.16,
+      773.78,
+      1349.13
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "BATH",
+     "bbox": [
+      697.2,
+      1491.12,
+      723.67,
+      1500.09
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "KITCHEN",
+     "bbox": [
+      468.72,
+      1383.24,
+      511.27,
+      1392.21
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "HALLWAY",
+     "bbox": [
+      723.84,
+      1414.56,
+      770.66,
+      1423.53
+     ],
+     "size": 9.56
+    },
+    {
+     "text": "DINING",
+     "bbox": [
+      651.6,
+      1356.96,
+      684.72,
+      1365.93
+     ],
+     "size": 9.56
+    }
+   ]
+  },
+  {
+   "kind": "plumbing_notes",
+   "title_text": "PLUMBING NOTES",
+   "title_bbox": [
+    1889.76,
+    1312.65,
+    2115.32,
+    1336.04
+   ],
+   "bbox": [
+    1870.68,
+    1247.16,
+    2302.44,
+    1692.0
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 2302.43994140625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 1247.1600341796875,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 1692.0,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.72171,
+    0.72174,
+    0.88829,
+    0.97917
+   ]
+  },
+  {
+   "kind": "ventilation_summaries",
+   "title_text": "VENTILATION SUMMARIES",
+   "title_bbox": [
+    1455.83,
+    65.01,
+    1779.8,
+    88.4
+   ],
+   "bbox": [
+    1439.04,
+    37.08,
+    1870.68,
+    629.64
+   ],
+   "method": "ray_cast_from_title_centre_to_frame_lines",
+   "status": "hypothesis",
+   "sides": {
+    "left": {
+     "value": 1439.0399169921875,
+     "source": "frame_line"
+    },
+    "right": {
+     "value": 1870.679931640625,
+     "source": "frame_line"
+    },
+    "top": {
+     "value": 37.080078125,
+     "source": "frame_line"
+    },
+    "bottom": {
+     "value": 629.6400146484375,
+     "source": "frame_line"
+    }
+   },
+   "warnings": [],
+   "bbox_normalized": [
+    0.55519,
+    0.02146,
+    0.72171,
+    0.36438
+   ]
+  }
+ ],
+ "page_vector_stats": {
+  "paths": 12802,
+  "path_types": {
+   "f": 844,
+   "s": 11940,
+   "fs": 18
+  },
+  "item_kinds": {
+   "re": 843,
+   "l": 12000
+  },
+  "items_per_path_capped_10": {
+   "1": 12783,
+   "3": 18,
+   "6": 1
+  },
+  "line_length_pt_buckets": {
+   "10-50": 1086,
+   "<1": 3855,
+   "1-3": 3443,
+   "3-10": 2913,
+   ">=50": 703
+  },
+  "stroke_widths": {
+   "0.24": 10011,
+   "0.72": 1006,
+   "0": 844,
+   "0.48": 832,
+   "1.56": 53,
+   "1.08": 24,
+   "0.84": 23,
+   "2.4": 7,
+   "0.36": 2
+  },
+  "stroke_colours": {
+   "(0.0, 0.0, 0.0)": 8641,
+   "(0.666, 0.666, 0.666)": 2282,
+   "(0.498, 0.498, 0.498)": 945,
+   "None": 844,
+   "(0.153, 0.153, 0.078)": 60,
+   "(0.717, 0.717, 0.689)": 30
+  },
+  "fill_colours": {
+   "None": 11940,
+   "(1.0, 1.0, 1.0)": 672,
+   "(0.754, 0.754, 0.754)": 143,
+   "(0.0, 0.0, 0.0)": 45,
+   "(0.918, 0.918, 0.918)": 2
+  },
+  "dash_attribute_values": {
+   "[] 0": 11958,
+   "None": 844
+  },
+  "degenerate_rect_paths": 8110
+ },
+ "timings_s": {
+  "extract_text_and_drawings": 0.138,
+  "render_150dpi": 0.296
+ },
+ "frame_assumptions": {
+  "stroke_widths": [
+   0.84,
+   1.56
+  ],
+  "min_length_pt": 300.0
+ }
+}

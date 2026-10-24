@@ -1,0 +1,14 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Bulky rendered diagnostic outputs (regenerate with backend/tools/*.py).
+# Small JSON summaries and selected evidence images are kept.
+reports/feasibility/**/*_render_*.png
+reports/feasibility/**/*_nowm_*.png
+
+# Ground-truth working store and render cache (exports under data/ground_truth/exports are kept).
+data/ground_truth/working.sqlite*
+data/ground_truth/cache/

@@ -1,0 +1,291 @@
+{
+ "tool_version": "pdf_diagnostics/0.1.0",
+ "pymupdf_version": "2.0",
+ "mupdf_version": "1.28.5",
+ "input": "Escondido_Electrical_Plans_Ceiling_Fans.pdf",
+ "input_sha256_before": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
+ "input_sha256_after": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
+ "input_unchanged": true,
+ "page_count": 4,
+ "pages": [
+  {
+   "page": 1,
+   "size_pt": [
+    2592.0,
+    1728.0
+   ],
+   "rotation": 0,
+   "sheet_id_candidates": [
+    "A1-111"
+   ],
+   "titles": [
+    "FLOOR FINISH LEGEND",
+    "VENTILATION SUMMARIES",
+    "A1-111 ELECTRICAL PLAN - PLAN 1",
+    "A1-111 MECHANICAL PLAN - PLAN 1",
+    "A1-111 FINISH PLAN - PLAN 1",
+    "GENERAL MEP NOTES",
+    "LEGEND",
+    "KEYNOTES",
+    "ELECTRICAL NOTES",
+    "PLUMBING NOTES"
+   ],
+   "electrical_regions": [
+    {
+     "bbox": [
+      854.4,
+      37.08,
+      1439.04,
+      870.12
+     ],
+     "bbox_normalized": [
+      0.32963,
+      0.02146,
+      0.55519,
+      0.50354
+     ],
+     "warnings": [],
+     "room_labels": [
+      "BEDROOM / STUDIO",
+      "LIVING",
+      "KITCHEN / DINING",
+      "BATH",
+      "CL",
+      "CL",
+      "LNDRY"
+     ]
+    }
+   ],
+   "regions_with_warnings": [
+    {
+     "kind": "floor_finish_legend",
+     "warnings": [
+      "cell shared with keynotes (no frame line between them)"
+     ]
+    },
+    {
+     "kind": "keynotes",
+     "warnings": [
+      "cell shared with floor_finish_legend (no frame line between them)"
+     ]
+    }
+   ],
+   "counts": {
+    "text_lines": 537,
+    "words": 2192,
+    "drawings": 12474,
+    "frame_segments": 21,
+    "images": 2
+   }
+  },
+  {
+   "page": 2,
+   "size_pt": [
+    2592.0,
+    1728.0
+   ],
+   "rotation": 0,
+   "sheet_id_candidates": [
+    "A2-111"
+   ],
+   "titles": [
+    "FLOOR FINISH LEGEND",
+    "GENERAL MEP NOTES",
+    "LEGEND",
+    "KEYNOTES",
+    "ELECTRICAL NOTES",
+    "A2-111 ELECTRICAL PLAN - PLAN 2",
+    "A2-111 MECHANICAL PLAN - PLAN 2",
+    "A2-111 FINISH PLAN - PLAN 2",
+    "PLUMBING NOTES",
+    "VENTILATION SUMMARIES"
+   ],
+   "electrical_regions": [
+    {
+     "bbox": [
+      143.88,
+      37.08,
+      1439.04,
+      556.68
+     ],
+     "bbox_normalized": [
+      0.05551,
+      0.02146,
+      0.55519,
+      0.32215
+     ],
+     "warnings": [],
+     "room_labels": [
+      "LIVING",
+      "BED 1",
+      "CL",
+      "CL",
+      "LNDRY",
+      "BED 2",
+      "BATH",
+      "DINING",
+      "HALLWAY",
+      "KITCHEN"
+     ]
+    }
+   ],
+   "regions_with_warnings": [
+    {
+     "kind": "floor_finish_legend",
+     "warnings": [
+      "cell shared with finish_plan (no frame line between them)"
+     ]
+    },
+    {
+     "kind": "legend",
+     "warnings": [
+      "cell shared with keynotes (no frame line between them)"
+     ]
+    },
+    {
+     "kind": "keynotes",
+     "warnings": [
+      "cell shared with legend (no frame line between them)"
+     ]
+    },
+    {
+     "kind": "finish_plan",
+     "warnings": [
+      "cell shared with floor_finish_legend (no frame line between them)"
+     ]
+    }
+   ],
+   "counts": {
+    "text_lines": 557,
+    "words": 2203,
+    "drawings": 12802,
+    "frame_segments": 18,
+    "images": 2
+   }
+  },
+  {
+   "page": 3,
+   "size_pt": [
+    2592.0,
+    1728.0
+   ],
+   "rotation": 0,
+   "sheet_id_candidates": [
+    "A3-111"
+   ],
+   "titles": [
+    "FLOOR FINISH LEGEND",
+    "A3-111 FINISH PLAN - PLAN 3",
+    "A3-111 ELECTRICAL PLAN - PLAN 3",
+    "A3-111 MECHANICAL PLAN - PLAN 3",
+    "GENERAL MEP NOTES",
+    "LEGEND",
+    "KEYNOTES",
+    "ELECTRICAL NOTES",
+    "PLUMBING NOTES",
+    "VENTILATION SUMMARIES"
+   ],
+   "electrical_regions": [
+    {
+     "bbox": [
+      818.4,
+      37.08,
+      1439.04,
+      870.0
+     ],
+     "bbox_normalized": [
+      0.31574,
+      0.02146,
+      0.55519,
+      0.50347
+     ],
+     "warnings": [],
+     "room_labels": [
+      "CL",
+      "CL",
+      "BED 2",
+      "BED 1",
+      "BATH 1",
+      "BATH 2",
+      "HALL",
+      "LNDRY",
+      "CL",
+      "CL",
+      "KITCHEN / DINING",
+      "LIVING"
+     ]
+    }
+   ],
+   "regions_with_warnings": [],
+   "counts": {
+    "text_lines": 593,
+    "words": 2253,
+    "drawings": 17815,
+    "frame_segments": 22,
+    "images": 2
+   }
+  },
+  {
+   "page": 4,
+   "size_pt": [
+    2592.0,
+    1728.0
+   ],
+   "rotation": 0,
+   "sheet_id_candidates": [
+    "A4-111"
+   ],
+   "titles": [
+    "FLOOR FINISH LEGEND",
+    "GENERAL MEP NOTES",
+    "KEYNOTES",
+    "ELECTRICAL NOTES",
+    "PLUMBING NOTES",
+    "LEGEND",
+    "A4-111 ELECTRICAL PLAN - PLAN 4",
+    "A4-111 MECHNICAL PLAN - PLAN 4",
+    "A4-111 FINISH PLAN - PLAN 4",
+    "VENTILATION SUMMARIES"
+   ],
+   "electrical_regions": [
+    {
+     "bbox": [
+      1007.28,
+      37.08,
+      1870.68,
+      711.84
+     ],
+     "bbox_normalized": [
+      0.38861,
+      0.02146,
+      0.72171,
+      0.41194
+     ],
+     "warnings": [],
+     "room_labels": [
+      "OPTIONAL BED 3",
+      "CL",
+      "BATH 1",
+      "WALK-IN CLOSET",
+      "LNDRY",
+      "BED 1",
+      "BED 2",
+      "CL",
+      "BATH 2",
+      "KITCHEN",
+      "LIVING",
+      "HALLWAY"
+     ]
+    }
+   ],
+   "regions_with_warnings": [],
+   "counts": {
+    "text_lines": 603,
+    "words": 2266,
+    "drawings": 21416,
+    "frame_segments": 20,
+    "images": 2
+   }
+  }
+ ]
+}

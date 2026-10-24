@@ -1,0 +1,28 @@
+filename,category,subtype,handling_notes
+switch_standard.png,switch,standard,Count as a switch.
+switch_three_way_dimmer.png,switch,three_way_dimmer,Count as a switch; follow the plan legend.
+switch_vacancy_sensor.png,switch,vacancy_sensor,Count as a switch.
+switch_dimmer.png,switch,dimmer,Count as a switch.
+switch_fan.png,switch,fan_switch,Count as a switch.
+switch_astronomical_time_or_motion_sensor.png,switch,astronomical_time_or_motion_sensor,Count as a switch.
+light_pendant_high_efficacy.png,light,pendant,Count as a light.
+light_wall_mounted_high_efficacy.png,light,wall_mounted,Count as a light.
+light_exterior_wall_photosensor.png,light,exterior_wall_photosensor,Count as an exterior light.
+light_recessed_downlight.png,light,recessed_downlight,Count as a light.
+light_recessed_vapor_proof_downlight.png,light,recessed_vapor_proof_downlight,Count as a light.
+ceiling_fan_optional_pre_wire.png,ceiling_fan,optional_pre_wire,Required detection class. Count as a ceiling-fan/pre-wire symbol location; preserve optional_pre_wire status. Do not claim a physical fan is installed from this symbol alone.
+receptacle_afi_duplex_arc_fault.png,receptacle,afi_duplex,Count as a receptacle.
+receptacle_gfi_240v_duplex.png,receptacle,gfi_240v,Count as a receptacle.
+receptacle_gfi_duplex.png,receptacle,gfi,Count as a receptacle.
+receptacle_gfi_weatherproof_duplex.png,receptacle,gfi_weatherproof,Count as a receptacle; exterior assignment may apply.
+receptacle_afci_half_hot_duplex.png,receptacle,afci_half_hot,Count as a receptacle.
+receptacle_gfi_microwave_duplex.png,receptacle,gfi_microwave,Count as a receptacle.
+receptacle_gfi_dishwasher_duplex.png,receptacle,gfi_dishwasher,Count as a receptacle.
+receptacle_range_hood_duplex.png,receptacle,range_hood,Count as a receptacle.
+fan_exhaust.png,fan,exhaust_fan,Count as an exhaust fan.
+fan_indoor_air_quality_iaq.png,fan,iaq_fan,Count as an IAQ fan.
+detector_smoke.png,detector,smoke_detector,Count as a smoke detector/alarm.
+detector_combined_smoke_carbon_monoxide.png,detector,combined_smoke_co,Count once as the combined type.
+junction_box_electrical.png,junction_box,electrical_junction_box,Count as a junction box if the scope includes junction boxes.
+wiring_run_electrical_REFERENCE_BOM.png,reference_only,electrical_wiring_run,Not an individual component; retain for visualizing/measuring runs for the optional bill of materials.
+fan_coil_unit_dedicated_outlet_REFERENCE.png,reference_only,fan_coil_dedicated_outlet,Do not count the fan-coil HVAC unit as an electrical component; count the dedicated outlet where shown.
