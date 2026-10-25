@@ -118,19 +118,46 @@ def test_review_identities_hold_for_random_states():
         assert s["total"] == sum(n for subs in s["by_category"].values() for n in subs.values())
         assert s["total"] == sum(n for cats in s["by_room"].values() for subs in cats.values() for n in subs.values())
 
+    # K and W_unflagged recomputed here from the spec's words, not with the production helpers:
+    # "flagged" = an open flag of severity review, or an open ai_only_candidate / model_disagrees (never bulk).
+    def flagged(device_id):
+        return any(f.open and f.device_id == device_id
+                   and (f.severity == "review" or f.type in ("ai_only_candidate", "model_disagrees")) for f in flags)
+
     live = [d for d in devices if not d.deleted]
-    open_by = {}
-    for f in flags:
-        if f.open:
-            open_by.setdefault(f.device_id, []).append(f)
-    awaiting = [d for d in live if d.origin != "manual" and d.review_state == "proposed"]
-    # the bulk button's N is W_unflagged
-    assert r["awaiting_unflagged"] == sum(F.bulk_eligible(d, open_by.get(d.id, [])) for d in awaiting)
+    awaiting = [d for d in live if d.origin in ("detector", "ai") and d.review_state == "proposed"]
+    unflagged = [d for d in awaiting if not flagged(d.id)]
+    assert r["awaiting_unflagged"] == len(unflagged)  # the bulk button's N is W_unflagged
+    assert 0 < len(unflagged) < len(awaiting)
+    assert r["awaiting_unflagged"] == sum(F.bulk_eligible(d, flags) for d in awaiting)  # and the gate agrees
     accepted = [d for d in live if d.review_state == "accepted"]
-    k = sum(1 for d in accepted if any(f.severity == "review" or f.type in F.BULK_NEVER_TYPES
-                                       for f in open_by.get(d.id, [])))
-    assert r["accepted_with_open_flags"] == k
-    assert 0 < k <= len(accepted)
+    k = [d for d in accepted if flagged(d.id)]
+    assert r["accepted_with_open_flags"] == len(k)
+    assert 0 < len(k) < len(accepted)
     # proposed and rejected devices with open review flags exist, and never reach K
-    assert any(open_by.get(d.id) and d.review_state != "accepted" for d in live)
+    assert any(flagged(d.id) and d.review_state != "accepted" for d in live)
     assert r["official_total"] == len(accepted)  # every accepted, non-deleted device, whatever its origin
+
+
+def test_k_and_unflagged_hand_built():
+    devices = [dev("acc-review"), dev("acc-info"), dev("acc-md-info"), dev("acc-closed"),
+               dev("p-review", state="proposed"), dev("p-info", state="proposed"),
+               dev("p-ai-info", state="proposed", origin="ai"), dev("p-clean", state="proposed"),
+               dev("r-review", state="rejected")]
+    flags = [flag("acc-review", "not_redetected"), flag("acc-info", "not_redetected", severity="info"),
+             flag("acc-md-info", "model_disagrees", severity="info"), flag("acc-closed", "no_room", open=False),
+             flag("p-review", "ambiguous_match"), flag("p-info", "not_redetected", severity="info"),
+             flag("p-ai-info", "ai_only_candidate", severity="info"), flag("r-review", "classification_conflict")]
+    review = C.derive(devices, flags)["review"]
+    assert review["accepted_with_open_flags"] == 2  # acc-review, acc-md-info
+    assert (review["awaiting_unflagged"], review["awaiting_flagged"]) == (2, 2)  # p-info, p-clean | p-review, p-ai-info
+
+
+def test_room_rows_disambiguate_over_sheet_rooms():
+    cl_west = {"kind": "labeled", "name": "CL", "label_bbox_pt": [200.0, 300.0, 215.0, 309.0]}
+    cl_east = {"kind": "labeled", "name": "CL", "label_bbox_pt": [700.0, 300.0, 715.0, 309.0]}
+    rooms = {SHEET: [{**KITCHEN, "bbox": None}, {**cl_west, "bbox": None}, {**cl_east, "bbox": None}]}
+    # only the west CL has a counted device; the sheet still has two CL labels, so the row name is stable
+    devices = [dev("w1", room=cl_west), dev("e1", room=cl_east, state="proposed")]
+    assert set(C.derive(devices, [], rooms)["official"][SHEET]["by_room"]) == {"CL @(200,300)"}
+    assert set(C.derive(devices, [])["official"][SHEET]["by_room"]) == {"CL"}  # fallback: counted devices only

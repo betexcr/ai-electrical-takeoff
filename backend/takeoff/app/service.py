@@ -57,9 +57,13 @@ DEVICE_DELETED = "device deleted: {}"
 KEPT_EXISTING = "kept_existing"
 SEPARATE_DEVICE = "separate_device: {}"
 
-# Decision flags an accepted correction closes (classification_conflict closes only when the
-# classification changes; model_disagrees follows its own lifecycle).
-CLOSED_ON_CORRECTED_ACCEPT = ("ai_only_candidate", "ambiguous_match", "not_redetected")
+ACCEPTED_ON_CORRECTION = "accepted by reviewer (saved correction)"
+
+# Decision flags a saved correction closes when it accepts the device, as accept() does (ruling R12);
+# model_disagrees follows its own reason rule.
+CLOSED_ON_CORRECTED_ACCEPT = tuple(t for t in F.DECISION_TYPES if t != "model_disagrees")
+# Closed only by accept, a saved correction or reject (spec §5.9.2(4), ruling R11); never acknowledged.
+NOT_ACKNOWLEDGEABLE = F.VALIDATION_TYPES + ("ai_only_candidate",)
 
 AI_ONLY_TEXT = "AI-proposed location: check position before accepting"
 FAKE_SUFFIX = " · test double, not a model"
@@ -114,7 +118,13 @@ class TakeoffService:
     def counts(self, document_id: str) -> dict:
         devices = self.devices(document_id, include_deleted=True)
         flags = [f for f in self.store.list("flags") if f.document_id == document_id and f.open]
-        return COUNTS.derive(devices, flags)
+        rooms = {}
+        for sheet_id in sorted({d.sheet_id for d in devices if not d.deleted and d.review_state == "accepted"}):
+            try:
+                rooms[sheet_id] = self.views(document_id, sheet_id)["rooms"]
+            except LookupError:  # no view for the sheet: rows fall back to the counted devices' rooms
+                pass
+        return COUNTS.derive(devices, flags, rooms)
 
     def device_detail(self, device_id: str) -> dict:
         device = self._get_device(device_id)
@@ -246,6 +256,8 @@ class TakeoffService:
             if flag.type in F.VALIDATION_TYPES:
                 # It would re-open at the next recompute while its condition holds: fix the condition instead.
                 raise TakeoffError("invalid", f"a {flag.type} flag clears when its condition is fixed")
+            if flag.type in NOT_ACKNOWLEDGEABLE:
+                raise TakeoffError("invalid", "an AI-only candidate is decided by accept, a saved correction or reject")
             return self._close(conn, flag, actor, ACKNOWLEDGED.format(reason.strip()), utcnow())
 
     def resolve_conflict(self, flag_id: str, actor: str,
@@ -312,21 +324,35 @@ class TakeoffService:
         elif "point" in changes and before.room_source != "reviewer":
             room, source = self._propose(sheet, upd["point_pt"])  # a proposal follows the moved device
             upd.update(room=room, room_source=source)
-        upd["human_set"] = _human(before.human_set, *({"category", "subtype", "room", "point"} & changes.keys()))
         new = before.model_copy(update=upd)
+        # Only an actual change to the classification, room or position is a correction (ruling R13).
+        # Confirming a proposed room as the reviewer's choice changes ``room_source``, so it counts.
+        class_changed = (new.category, new.subtype) != (before.category, before.subtype)
+        changed = {f for f, on in (("category", new.category != before.category),
+                                   ("subtype", new.subtype != before.subtype),
+                                   ("room", "room" in changes and (new.room != before.room
+                                                                  or before.room_source != "reviewer")),
+                                   ("point", new.point_pt != before.point_pt or new.point != before.point)) if on}
+        if "point" not in changed and "room" not in changes:
+            new = new.model_copy(update={"room": before.room, "room_source": before.room_source})
+        # 2. human_set records the fields this save actually changed
+        new = new.model_copy(update={"human_set": _human(before.human_set, *changed)})
 
         # 3. the validation flags
         open_flags = self._sync(conn, sheet, actor, now, pending=[new])
+        if not changed:  # a notes-only or no-op save: no decision is taken, the review state never changes
+            device = self._write(conn, before, new, actor, "update", now)
+            return {"device": device, "blocking_flags": []}
         closed: set[str] = set()
         # 4. classification_conflict, when the classification changed
-        if (category, subtype) != (before.category, before.subtype):
+        if class_changed:
             for f in self._mine(open_flags, device_id, ("classification_conflict",)):
                 self._close(conn, f, actor, RESOLVED_BY_CORRECTION, now)
                 closed.add(f.id)
-        # 5. model_disagrees
+        # 5. model_disagrees: resolved only by a classification change that lands on the AI's answer
         for f in self._mine(open_flags, device_id, ("model_disagrees",)):
             ai_category, ai_subtype = f.details.get("ai_category"), f.details.get("ai_subtype")
-            if category == ai_category and (ai_subtype is None or subtype == ai_subtype):
+            if class_changed and category == ai_category and (ai_subtype is None or subtype == ai_subtype):
                 self._close(conn, f, actor, RESOLVED_BY_CORRECTION, now)
                 closed.add(f.id)
             elif _has_text(reason):
@@ -343,7 +369,7 @@ class TakeoffService:
                 new = new.model_copy(update={"review_state": "accepted", "accept_kind": "corrected_and_accepted",
                                              "human_set": _human(new.human_set, "review_state")})
                 for f in self._mine(remaining, device_id, CLOSED_ON_CORRECTED_ACCEPT):
-                    self._close(conn, f, actor, ACCEPTED_BY_REVIEWER, now)
+                    self._close(conn, f, actor, ACCEPTED_ON_CORRECTION, now)
                 action = "correct_and_accept"
         device = self._write(conn, before, new, actor, action, now)
         return {"device": device, "blocking_flags": blockers}
@@ -406,7 +432,10 @@ class TakeoffService:
 
     def _sheet(self, document_id: str, sheet_id: str) -> _Sheet:
         """The sheet's rooms, geometry and region, fetched before a transaction starts."""
-        v = self.views(document_id, sheet_id)
+        try:
+            v = self.views(document_id, sheet_id)
+        except LookupError as e:  # KeyError / IndexError from the sheet lookup
+            raise TakeoffError("not_found", f"sheet {sheet_id!r} of document {document_id[:12]} not found") from e
         g = v["geometry"]
         return _Sheet(document_id=document_id, sheet_id=sheet_id, rooms=v["rooms"],
                       geometry=C.PageGeometry(*g["crop_native"], rotation=g["rotation"]),
@@ -493,6 +522,8 @@ class TakeoffService:
     @staticmethod
     def _describe_ai(category, subtype) -> str:
         if category is None:
+            return "missing verdict row"  # the flag or verdict carries no row for this item
+        if category == "not_a_device":  # the verify schema's answer for "this is not a device"
             return "not a device"
         return f"{category} / {subtype}" if subtype else category
 
@@ -507,9 +538,13 @@ class TakeoffService:
                     "implementation": impl, "verdict_id": verdict.id if verdict is not None else None, **extra}
 
         def disagrees(f: Flag) -> dict:
+            verdict = by_id.get(f.details.get("verdict_id"))
+            extra = dict(flag_id=f.id, open=f.open, resolution=f.resolution)
+            if not f.open and f.resolution == RESOLVED_BY_CORRECTION:
+                # the reviewer corrected the device to the AI's answer: they agree now
+                return out("agrees", "AI second opinion: agrees (resolved by correction)", verdict, **extra)
             what = self._describe_ai(f.details.get("ai_category"), f.details.get("ai_subtype"))
-            return out("disagrees", f"AI second opinion: disagrees ({what})", by_id.get(f.details.get("verdict_id")),
-                       what=what, flag_id=f.id, open=f.open, resolution=f.resolution)
+            return out("disagrees", f"AI second opinion: disagrees ({what})", verdict, what=what, **extra)
 
         disagreements = [f for f in flags if f.type == "model_disagrees"]
         open_md = [f for f in disagreements if f.open]

@@ -15,7 +15,7 @@ Pure module: no store, no I/O.
 from __future__ import annotations
 
 from collections import Counter, defaultdict
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 
 from takeoff.app.flags import BULK_NEVER_TYPES, bulk_eligible
 from takeoff.app.models import Device, Flag
@@ -34,15 +34,41 @@ def _sorted_subtypes(c: Counter) -> dict:
     return dict(sorted(c.items(), key=lambda kv: (kv[0] is None, kv[0] or "")))
 
 
-def _official(accepted: list[Device]) -> dict:
+def sheet_room_key(device: Device, sheet_rooms: list[dict]) -> str:
+    """``groundtruth.export.room_key``'s row name, disambiguated over the sheet's own room labels.
+
+    Two labels with the same text on a sheet (the two "CL" on A1) are separate rows, keyed by label position,
+    whether or not both have counted devices, so a row's name does not change as devices are accepted.
+    """
+    room = device.room
+    if room is None:
+        return "UNASSIGNED"
+    if room.kind != "labeled":
+        return room.name
+    same = {tuple(float(x) for x in r["label_bbox_pt"]) for r in sheet_rooms
+            if r.get("kind") == "labeled" and r.get("name") == room.name and r.get("label_bbox_pt")}
+    same.add(tuple(float(x) for x in room.label_bbox_pt))
+    if len(same) <= 1:
+        return room.name
+    x0, y0 = room.label_bbox_pt[:2]
+    return f"{room.name} @({x0:.0f},{y0:.0f})"
+
+
+def _official(accepted: list[Device], rooms: Mapping[str, list[dict]] | None) -> dict:
     out: dict = {}
     for sheet in sorted({d.sheet_id for d in accepted}):
         here = [d for d in accepted if d.sheet_id == sheet]
+        sheet_rooms = (rooms or {}).get(sheet)
+
+        def key(d: Device) -> str:
+            # without the sheet's rooms, fall back to disambiguating over the counted devices
+            return room_key(d, here) if sheet_rooms is None else sheet_room_key(d, sheet_rooms)
+
         by_room: dict = defaultdict(lambda: defaultdict(Counter))
         by_cat: dict = defaultdict(Counter)
         by_origin = {v: 0 for v in REPORTED_ORIGIN.values()}
         for d in here:
-            by_room[room_key(d, here)][d.category][d.subtype] += 1  # two same-named labels are two rows
+            by_room[key(d)][d.category][d.subtype] += 1  # two same-named labels are two rows
             by_cat[d.category][d.subtype] += 1
             by_origin[REPORTED_ORIGIN[d.origin]] += 1
         out[sheet] = {
@@ -55,10 +81,12 @@ def _official(accepted: list[Device]) -> dict:
     return out
 
 
-def derive(devices: Iterable[Device], open_flags: Iterable[Flag]) -> dict:
+def derive(devices: Iterable[Device], open_flags: Iterable[Flag],
+           rooms: Mapping[str, list[dict]] | None = None) -> dict:
     """``{"review": {...}, "official": {sheet_id: {...}}}`` for one document's devices and flags.
 
-    ``open_flags`` may contain closed flags; they are ignored.
+    ``open_flags`` may contain closed flags; they are ignored. ``rooms`` maps a sheet id to that sheet's rooms
+    (``sheet_view(...)["rooms"]``); room rows are disambiguated over them when given.
     """
     live = [d for d in devices if not d.deleted]
     flags_by_device: dict[str, list[Flag]] = defaultdict(list)
@@ -87,4 +115,4 @@ def derive(devices: Iterable[Device], open_flags: Iterable[Flag]) -> dict:
         "accepted_with_open_flags": sum(1 for d in accepted
                                         if any(needs_review(f) for f in flags_by_device.get(d.id, ()))),
     }
-    return {"review": review, "official": _official(accepted)}
+    return {"review": review, "official": _official(accepted, rooms)}

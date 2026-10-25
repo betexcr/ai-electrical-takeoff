@@ -7,7 +7,7 @@ import pytest
 
 from takeoff.app import flags as F
 from takeoff.app.service import TakeoffError
-from tk_helpers import ACTOR, DOC, flags_of, make, seed_device, seed_flag
+from tk_helpers import ACTOR, DOC, HALL, flags_of, make, seed_device, seed_flag
 
 AI = {"verdict_id": "v-1", "ai_category": "receptacle", "ai_subtype": "gfi", "rationale": "GFI tag next to it",
       "source": "verify"}
@@ -149,3 +149,35 @@ def test_open_flag_keeps_device_out_of_bulk(env):
     assert F.bulk_eligible(store.get("devices", "d1"), flags_of(store, "d1")) is True
     review = svc.counts(DOC)["review"]
     assert (review["awaiting_flagged"], review["awaiting_unflagged"]) == (0, 1)
+
+
+def test_notes_only_save_keeps_uncertain_disagreement_open(tmp_path):
+    store, svc = make(tmp_path)
+    dev = seed_device(store, "d1")  # switch / standard
+    # an "uncertain" verify answer whose class equals the device's own
+    fl = seed_flag(store, dev, "model_disagrees", **{**AI, "ai_category": "switch", "ai_subtype": "standard"})
+    for save in ({"notes": "looked at it"}, {"category": "switch", "subtype": "standard"}):
+        out = svc.update_device("d1", ACTOR, save)
+        assert out["device"].review_state == "proposed"
+        assert store.get("flags", fl.id).open  # only a classification change can resolve it by correction
+    # a real correction that leaves the classification alone still needs a reason
+    out = svc.update_device("d1", ACTOR, {"room": HALL})
+    assert [f.id for f in out["blocking_flags"]] == [fl.id]
+    assert out["device"].review_state == "proposed" and store.get("flags", fl.id).open
+    store.close()
+
+
+def test_room_only_save_without_reason_names_flag(env):
+    store, svc, fl = env
+    out = svc.update_device("d1", ACTOR, {"room": HALL})
+    assert [f.id for f in out["blocking_flags"]] == [fl.id]
+    assert out["device"].review_state == "proposed" and out["device"].room.name == "Hall"
+    assert store.get("flags", fl.id).open
+
+
+def test_room_only_save_with_reason_closes_kept_over_ai(env):
+    store, svc, fl = env
+    out = svc.update_device("d1", ACTOR, {"room": HALL}, reason="legend symbol is a switch")
+    assert out["blocking_flags"] == []
+    assert state(store) == ("accepted", "corrected_and_accepted")
+    assert store.get("flags", fl.id).resolution == "kept_over_ai: legend symbol is a switch"

@@ -19,7 +19,10 @@ PAGE_PT = 1200.0
 REGION_PT = [0.0, 0.0, 1000.0, 1000.0]
 KITCHEN = {"kind": "labeled", "name": "Kitchen", "label_bbox_pt": [100.0, 100.0, 160.0, 112.0], "bbox": None}
 HALL = {"kind": "labeled", "name": "Hall", "label_bbox_pt": [600.0, 100.0, 640.0, 112.0], "bbox": None}
-ROOMS = [KITCHEN, HALL, S.ROOM_EXTERIOR, S.ROOM_UNLABELED]
+# Two labels with the same text, far from everything else (like the two "CL" on A1).
+CL_WEST = {"kind": "labeled", "name": "CL", "label_bbox_pt": [300.0, 900.0, 315.0, 909.0], "bbox": None}
+CL_EAST = {"kind": "labeled", "name": "CL", "label_bbox_pt": [700.0, 900.0, 715.0, 909.0], "bbox": None}
+ROOMS = [KITCHEN, HALL, CL_WEST, CL_EAST, S.ROOM_EXTERIOR, S.ROOM_UNLABELED]
 NEAR_KITCHEN = (130.0, 150.0)  # 38 pt below the Kitchen label, far from Hall: a clear proposal
 NEAR_HALL = (580.0, 150.0)  # 43 pt from the Hall label, far from Kitchen
 FAR_FROM_LABELS = (380.0, 600.0)  # > 100 pt from every label: proposed Unlabeled, room_ambiguous

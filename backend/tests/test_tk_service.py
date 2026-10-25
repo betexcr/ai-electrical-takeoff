@@ -204,7 +204,8 @@ def test_resolve_conflict_three_choices(env):
 
     kept = svc.resolve_conflict(flags["keep"].id, ACTOR, "keep")
     assert (kept.category, kept.review_state) == ("switch", "proposed")
-    assert store.get("flags", flags["keep"].id).open is False
+    kept_flag = store.get("flags", flags["keep"].id)
+    assert (kept_flag.open, kept_flag.resolution, kept_flag.resolved_by) == (False, "kept_existing", ACTOR)
 
     changed = svc.resolve_conflict(flags["change_category"].id, ACTOR, "change_category")
     assert (changed.category, changed.subtype) == ("receptacle", "gfi")
@@ -270,7 +271,7 @@ def test_ai_only_candidate_individual_accept_and_correction_close_flag(env):
 
     corrected = svc.update_device("ai-b", ACTOR, {"subtype": "dimmer"})["device"]
     assert (corrected.review_state, corrected.accept_kind) == ("accepted", "corrected_and_accepted")
-    assert store.get("flags", fb.id).resolution == "accepted by reviewer"
+    assert store.get("flags", fb.id).resolution == "accepted by reviewer (saved correction)"
 
     official = svc.counts(DOC)["official"][SHEET]
     assert official["by_origin"] == {"detector_accepted": 0, "ai_accepted": 2, "manual": 0}
@@ -329,3 +330,94 @@ def test_device_detail_ai_summary_variants(env):
     assert svc.device_detail("ai")["ai_summary"]["text"] == "AI-proposed location: check position before accepting"
     assert svc.device_detail(manual.id)["ai_summary"]["text"] == "AI second opinion: not verified (added manually)"
     raises("not_found", svc.device_detail, "nope")
+
+
+def test_ai_only_candidate_cannot_be_acknowledged(env):
+    store, svc = env
+    d = seed_device(store, "ai-a", origin="ai")
+    fl = seed_flag(store, d, "ai_only_candidate", verdict_id="v-a", tile_id="t1", rationale="looks like a switch")
+    err = raises("invalid", svc.acknowledge_flag, fl.id, ACTOR, "looks fine")
+    assert err.status == 400
+    assert store.get("flags", fl.id).open
+    assert F.bulk_eligible(store.get("devices", "ai-a"), flags_of(store, "ai-a")) is False
+    assert svc.counts(DOC)["review"]["awaiting_flagged"] == 1
+
+
+def test_condition_flags_cannot_be_acknowledged(env):
+    store, svc = env
+    d = seed_device(store, "d1")
+    for type_ in F.VALIDATION_TYPES:
+        fl = seed_flag(store, d, type_, id=f"cond:d1:{type_}")
+        raises("invalid", svc.acknowledge_flag, fl.id, ACTOR, "it is fine")
+        assert store.get("flags", fl.id).open
+
+
+def test_room_only_correction_closes_decision_flags_on_accept(env):
+    store, svc = env
+    d = seed_device(store, "d1")
+    opened = [seed_flag(store, d, "classification_conflict", run_category="receptacle", run_subtype="gfi",
+                        detection_id="x", kind="category"),
+              seed_flag(store, d, "ambiguous_match", possible_device_ids=["other"]),
+              seed_flag(store, d, "not_redetected")]
+    out = svc.update_device("d1", ACTOR, {"room": HALL})
+    assert out["blocking_flags"] == []
+    assert (out["device"].review_state, out["device"].accept_kind) == ("accepted", "corrected_and_accepted")
+    for fl in opened:
+        closed = store.get("flags", fl.id)
+        assert (closed.open, closed.resolution, closed.resolved_by) == (
+            False, "accepted by reviewer (saved correction)", ACTOR)
+
+
+def test_notes_only_or_no_op_save_is_not_a_correction(env):
+    store, svc = env
+    seed_device(store, "d1")
+    out = svc.update_device("d1", ACTOR, {"notes": "check the elevation"})
+    dev = out["device"]
+    assert (dev.review_state, dev.accept_kind, dev.notes) == ("proposed", None, "check the elevation")
+    assert dev.human_set == [] and out["blocking_flags"] == []
+    for no_op in ({"category": "switch", "subtype": "standard"}, {"point": norm(NEAR_KITCHEN)}):
+        dev = svc.update_device("d1", ACTOR, no_op)["device"]
+        assert (dev.review_state, dev.accept_kind, dev.human_set) == ("proposed", None, [])
+        assert dev.point_pt == NEAR_KITCHEN and dev.room_source == "proposed_nearest_label"
+    assert [e.action for e in store.events("device", "d1")] == ["create", "update", "update", "update"]
+    assert official_total(svc) == 0
+    # confirming the proposed room as the reviewer's choice changes room_source: that is a correction
+    dev = svc.update_device("d1", ACTOR, {"room": KITCHEN})["device"]
+    assert (dev.review_state, dev.room_source, dev.human_set) == ("accepted", "reviewer", ["room", "review_state"])
+
+
+def test_counts_room_rows_use_sheet_rooms(env):
+    store, svc = env
+    # the sheet has two "CL" labels; only the west one gets a counted device
+    dev = svc.create_device(DOC, SHEET, ACTOR, "switch", "standard", norm((305.0, 870.0)))
+    assert dev.room.name == "CL" and dev.room.label_bbox_pt == (300.0, 900.0, 315.0, 909.0)
+    assert svc.counts(DOC)["official"][SHEET]["by_room"] == {"CL @(300,900)": {"switch": {"standard": 1}}}
+
+
+def test_unknown_sheet_view_is_not_found(env):
+    store, svc = env
+    store.insert("sheets", TM.SheetInfo(id=f"{DOC}:2", document_id=DOC, page_number=2, sheet_id="A2-111"), "system")
+    err = raises("not_found", svc.create_device, DOC, "A2-111", ACTOR, "switch", "standard", norm(NEAR_KITCHEN))
+    assert err.status == 404
+    seed_device(store, "d2", sheet_id="A2-111")
+    raises("not_found", svc.update_device, "d2", ACTOR, {"subtype": "dimmer"})
+    raises("not_found", svc.accept, "d2", ACTOR)
+    assert store.get("devices", "d2").review_state == "proposed"
+
+
+def test_ai_summary_reflects_resolution_and_missing_rows(env):
+    store, svc = env
+    det = seed_detection(store, "det-1")
+    d = seed_device(store, "d1", detection=det)
+    seed_flag(store, d, "model_disagrees", verdict_id="v-1", ai_category="receptacle", ai_subtype="gfi",
+              rationale="GFI tag", source="verify")
+    svc.update_device("d1", ACTOR, {"category": "receptacle", "subtype": "gfi"})
+    summary = svc.device_detail("d1")["ai_summary"]
+    assert summary["status"] == "agrees" and summary["resolution"] == "resolved_by_correction"
+    assert summary["text"] == "AI second opinion: agrees (resolved by correction)"
+
+    for i, (ai_category, what) in enumerate(((None, "missing verdict row"), ("not_a_device", "not a device"))):
+        dev = seed_device(store, f"x{i}", pt=(580.0 + 20 * i, 150.0), room=HALL)
+        seed_flag(store, dev, "model_disagrees", verdict_id="v-x", ai_category=ai_category, ai_subtype=None,
+                  rationale=None, source="verify")
+        assert svc.device_detail(dev.id)["ai_summary"]["text"] == f"AI second opinion: disagrees ({what})"
