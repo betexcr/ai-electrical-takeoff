@@ -1,0 +1,341 @@
+{
+  "test": "backend/tests/test_tk_e2e.py::test_demo_path_end_to_end",
+  "pdf_sha256": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
+  "ai_implementation": "fake",
+  "ai_choice": "ai_preflight.json did not pass every check: credential_source: fail (no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)); model_available: not_run (not run: credential_source failed); vision_request: not_run (not run: credential_source failed); stages_on_sheet: not_run (not run: credential_source failed). The AI stages ran with FakeVerifier (agrees with det/0) and FakeDiscoverer (no points): test doubles, not a model; nothing here is evidence of model performance.",
+  "ai_preflight": {
+    "path": "reports/takeoff/ai_preflight.json",
+    "present": true,
+    "created_at": "2026-10-25T16:08:33.565+00:00",
+    "model": "claude-opus-5-5",
+    "sheet_run": false,
+    "ok": false,
+    "all_passed": false,
+    "checks": [
+      {
+        "name": "credential_source",
+        "status": "fail",
+        "reason": "no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)"
+      },
+      {
+        "name": "model_available",
+        "status": "not_run",
+        "reason": "not run: credential_source failed"
+      },
+      {
+        "name": "vision_request",
+        "status": "not_run",
+        "reason": "not run: credential_source failed"
+      },
+      {
+        "name": "stages_on_sheet",
+        "status": "not_run",
+        "reason": "not run: credential_source failed"
+      }
+    ]
+  },
+  "result": "passed: every step's assertions held",
+  "screenshots": [
+    {
+      "file": "01_analyzed.png",
+      "shows": "all 4 sheets analyzed by det/0 in one background run; per-sheet progress, run summary and the AI stage lines (test double) in the status bar; A1 proposals on the plan"
+    },
+    {
+      "file": "02_inspect_switch.png",
+      "shows": "A1 switch selected: category, legend subtype, room and source, review state, origin, 'match score (not a probability)', run and versions, AI line, evidence, history"
+    },
+    {
+      "file": "03_inspect_receptacle.png",
+      "shows": "A1 receptacle selected: category, legend subtype, room and source, review state, origin, 'match score (not a probability)', run and versions, AI line, evidence, history"
+    },
+    {
+      "file": "04_fan_detected.png",
+      "shows": "the A1 bedroom ceiling fan, detected by det/0 0.395 pt from the J hub, selected and inspected"
+    },
+    {
+      "file": "05_corrected.png",
+      "shows": "one proposal's category corrected (light -> fan) and saved: accepted as corrected_and_accepted; the official totals updated without a reload"
+    },
+    {
+      "file": "06_reloaded.png",
+      "shows": "after a page reload: the corrected device is still accepted (corrected_and_accepted), with its history; the totals and review figures equal GET /counts"
+    },
+    {
+      "file": "07_zoomed.png",
+      "shows": "zoomed in (4x fit) on the bedroom fan hub: markers sit on their symbols"
+    },
+    {
+      "file": "08_panned.png",
+      "shows": "the same view panned; every probed marker stayed within 1.5 px (worst 0.000 px)"
+    },
+    {
+      "file": "09_bulk_accepted.png",
+      "shows": "after confirming 'Accept 218 unflagged proposals?': flagged proposals stay awaiting review; official totals 219"
+    },
+    {
+      "file": "10_exported.png",
+      "shows": "Export: the status bar states 'Export incomplete' with the reasons (flagged proposals still awaiting review on every sheet), as manifest.json does"
+    }
+  ],
+  "analysis_seconds": 116.8,
+  "run_id": "run-001",
+  "detector": "det0",
+  "detector_version": "det/0",
+  "merge_version": "takeoff-merge/1",
+  "sheets": {
+    "A1-111": {
+      "status": "done",
+      "n_detections": 55,
+      "ai_verify": "done",
+      "ai_discover": "done"
+    },
+    "A2-111": {
+      "status": "done",
+      "n_detections": 67,
+      "ai_verify": "done",
+      "ai_discover": "done"
+    },
+    "A3-111": {
+      "status": "done",
+      "n_detections": 82,
+      "ai_verify": "done",
+      "ai_discover": "done"
+    },
+    "A4-111": {
+      "status": "done",
+      "n_detections": 109,
+      "ai_verify": "done",
+      "ai_discover": "done"
+    }
+  },
+  "ai_usage_run": {
+    "verify": {
+      "implementation": "fake",
+      "requests": 41,
+      "errors_by_code": {},
+      "tokens": {
+        "input": 0,
+        "output": 0,
+        "cache_creation": 0,
+        "cache_read": 0
+      },
+      "latency_ms": {
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "n_items": 313
+    },
+    "discover": {
+      "implementation": "fake",
+      "requests": 84,
+      "errors_by_code": {},
+      "tokens": {
+        "input": 0,
+        "output": 0,
+        "cache_creation": 0,
+        "cache_read": 0
+      },
+      "latency_ms": {
+        "p50": 0.0,
+        "p95": 0.0
+      },
+      "n_items": 0
+    }
+  },
+  "review_after_analysis": {
+    "detected": 313,
+    "detected_ai_only": 0,
+    "accepted_detected": 0,
+    "rejected": 0,
+    "awaiting": 313,
+    "awaiting_unflagged": 219,
+    "awaiting_flagged": 94,
+    "manual": 0,
+    "official_total": 0,
+    "accepted_with_open_flags": 0
+  },
+  "inspected": {
+    "switch": {
+      "device_id": "run-001:run-001:A1-111:det0-0006",
+      "subtype": "three_way_dimmer",
+      "room": "LNDRY",
+      "point_pt": [
+        1081.92,
+        252.48
+      ],
+      "ai_line": "AI second opinion: agrees \u00b7 test double, not a model",
+      "open_flags": []
+    },
+    "receptacle": {
+      "device_id": "run-001:run-001:A1-111:det0-0000",
+      "subtype": "gfi_240v",
+      "room": "LNDRY",
+      "point_pt": [
+        1151.94,
+        197.46
+      ],
+      "ai_line": "AI second opinion: agrees \u00b7 test double, not a model",
+      "open_flags": []
+    }
+  },
+  "fan_hub": {
+    "token_id": "t0059",
+    "text": "J",
+    "bbox_pt": [
+      1274.52,
+      503.333,
+      1277.842,
+      509.448
+    ],
+    "centre_pt": [
+      1276.181,
+      506.3905
+    ],
+    "tolerance_pt": 6.0
+  },
+  "fan_branch": "detected",
+  "fan": {
+    "device_id": "run-001:run-001:A1-111:det0-0041",
+    "subtype": "optional_pre_wire",
+    "point_pt": [
+      1276.56,
+      506.28
+    ],
+    "distance_to_hub_pt": 0.395,
+    "review_state": "proposed",
+    "room": "BEDROOM / STUDIO",
+    "ai_line": "AI second opinion: agrees \u00b7 test double, not a model"
+  },
+  "ai_flags_demo": "none produced",
+  "correction": {
+    "device_id": "run-001:run-001:A1-111:det0-0015",
+    "from": [
+      "light",
+      "pendant"
+    ],
+    "to": [
+      "fan",
+      "exhaust_fan"
+    ],
+    "accept_kind": "corrected_and_accepted",
+    "official_total_before": 0,
+    "official_total_after": 1,
+    "note": "a demonstration of the correction flow on an unflagged proposal; it is not a claim that det/0 classified this device wrongly"
+  },
+  "alignment": {
+    "devices": [
+      "run-001:run-001:A1-111:det0-0006",
+      "run-001:run-001:A1-111:det0-0000",
+      "run-001:run-001:A1-111:det0-0041",
+      "run-001:run-001:A1-111:det0-0015"
+    ],
+    "zoom_factors_of_fit": [
+      1.0,
+      3.0
+    ],
+    "pans_px": [
+      [
+        0,
+        0
+      ],
+      [
+        137.5,
+        -61.25
+      ]
+    ],
+    "max_error_px": 0.0,
+    "tolerance_px": 1.5
+  },
+  "bulk_accept": {
+    "confirmation": "Accept 218 unflagged proposals? Official totals will update.",
+    "accepted": 218,
+    "of_which_on_A1": 42,
+    "scope": "every sheet of the document (the page's button); flagged proposals excluded",
+    "official_total_after": 219,
+    "review_after": {
+      "detected": 313,
+      "detected_ai_only": 0,
+      "accepted_detected": 219,
+      "rejected": 0,
+      "awaiting": 94,
+      "awaiting_unflagged": 0,
+      "awaiting_flagged": 94,
+      "manual": 0,
+      "official_total": 219,
+      "accepted_with_open_flags": 0
+    }
+  },
+  "r1_03_counted_have_markers": {
+    "A1-111": {
+      "official": 43,
+      "counted_markers": 43
+    },
+    "A2-111": {
+      "official": 56,
+      "counted_markers": 56
+    },
+    "A3-111": {
+      "official": 49,
+      "counted_markers": 49
+    },
+    "A4-111": {
+      "official": 71,
+      "counted_markers": 71
+    }
+  },
+  "export": {
+    "source_dir_name": "tk_001_20261025T162800Z",
+    "copied_to": "reports/takeoff/demo/export/",
+    "complete": false,
+    "incomplete_reasons": [
+      "94 detected devices awaiting review",
+      "94 open room_ambiguous flags"
+    ],
+    "sheets_still_awaiting_review_other_than_A1": [
+      "A2-111",
+      "A3-111",
+      "A4-111"
+    ],
+    "totals_json_equals_api_counts": true,
+    "totals_json_equals_csv_recomputation": true,
+    "manifest_ai_usage_equals_verdict_sums": true,
+    "ai_usage_summed": {
+      "verify": {
+        "requests": 41,
+        "errors_by_code": {},
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "cache_creation": 0,
+          "cache_read": 0
+        },
+        "n_items": 313,
+        "implementations": [
+          "fake"
+        ]
+      },
+      "discover": {
+        "requests": 84,
+        "errors_by_code": {},
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "cache_creation": 0,
+          "cache_read": 0
+        },
+        "n_items": 0,
+        "implementations": [
+          "fake"
+        ]
+      }
+    },
+    "official_records": 219,
+    "review_records": 94,
+    "official_total": 219,
+    "fan_row": {
+      "origin_reported": "detector_accepted",
+      "room_key": "BEDROOM / STUDIO"
+    }
+  },
+  "finished_at": "2026-10-25T16:28:01Z"
+}

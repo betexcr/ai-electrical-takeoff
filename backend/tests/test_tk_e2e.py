@@ -4,6 +4,11 @@ Playwright + Chromium against a live uvicorn server on a temporary data director
 ``background=False`` (a run finishes inside its request), a scripted fake detector (no candidate generation) and the
 AI test doubles (``FakeVerifier`` / ``FakeDiscoverer``); only A1 is analyzed. No test makes a network request.
 
+The demo path (AC-T13, §4.14, §4.16) is the exception to the scripted detector: it runs the real det/0 on all 4
+sheets in the background, as the page does, and writes its screenshots, ``run.json`` and a copy of the export to
+``reports/takeoff/demo/``. It uses Claude only when ``reports/takeoff/ai_preflight.json`` shows every check passed
+*and* ``TAKEOFF_LIVE_AI=1``; otherwise it uses the test doubles, labelled "test double, not a model".
+
 Expected screen positions are recomputed here in Python from the served image mapping and the page's view transform
 (the same independent re-implementation as ``test_gt_e2e.py``), never taken from the page's own helpers. The figures
 the page shows are compared with ``GET /counts`` and the saved device records, never with numbers the page computed.
@@ -11,12 +16,17 @@ the page shows are compared with ``GET /counts`` and the saved device records, n
 
 from __future__ import annotations
 
+import csv
 import hashlib
+import json
 import math
+import os
 import re
+import shutil
 import socket
 import threading
 import time
+from collections import Counter
 from pathlib import Path
 
 import httpx
@@ -25,9 +35,11 @@ import uvicorn
 
 from takeoff.ai import discover as AD
 from takeoff.ai import verifier as AV
+from takeoff.app import analyze as AN
 from takeoff.app import models as TM
 from takeoff.app.api import create_app
 from takeoff.app.rooms import propose_room
+from takeoff.detection import det0
 
 ROOT = Path(__file__).resolve().parents[2]
 PDF = ROOT / "plans" / "Escondido_Electrical_Plans_Ceiling_Fans.pdf"
@@ -74,12 +86,17 @@ class FakeDetector:
 
 
 class Server:
-    def __init__(self, tmp_path: Path, cache: Path, verifier=None, discoverer=None):
-        self.detector = FakeDetector()
+    """``detector="fake"`` (default) scripts det0-shaped points; ``None`` is the real det/0; any other object is used
+    as the detector. ``ai`` overrides the (verifier, discoverer) test doubles (``"claude"`` for a live demo)."""
+
+    def __init__(self, tmp_path: Path, cache: Path, verifier=None, discoverer=None, *, detector="fake",
+                 background: bool = False, ai=None):
+        self.detector = FakeDetector() if detector == "fake" else detector
         self.verifier = verifier if verifier is not None else AV.FakeVerifier()
         self.discoverer = discoverer if discoverer is not None else AD.FakeDiscoverer()
-        self.app = create_app(tmp_path / "data", PDF, default_reviewer="e2e", background=False,
-                              ai=(self.verifier, self.discoverer), detector=self.detector, cache_dir=cache)
+        self.app = create_app(tmp_path / "data", PDF, default_reviewer="e2e", background=background,
+                              ai=ai if ai is not None else (self.verifier, self.discoverer), detector=self.detector,
+                              cache_dir=cache)
         self.port = _free_port()
         self.url = f"http://127.0.0.1:{self.port}"
         self.srv = uvicorn.Server(uvicorn.Config(self.app, host="127.0.0.1", port=self.port, log_level="warning"))
@@ -444,6 +461,15 @@ def test_move_create_reject_delete_from_the_plan(page, server):
     gone = server.call("GET", f"/api/devices/{manual['id']}")["device"]
     assert gone["deleted"] is True and gone["delete_reason"] == "e2e: placed by mistake"
     assert any("reason" in msg.lower() for msg in dialogs.messages)
+
+    # after a reload: the move stays accepted, the reject stays rejected, the deleted device stays gone
+    page.reload()
+    page.wait_for_selector("body[data-ready='1']")
+    page.wait_for_function("!tk.state.loading")
+    assert official_total(page) == 1 == server.counts()["review"]["official_total"]
+    assert page.locator(f"{marker(d0['id'])}.counted").count() == 1
+    assert page.locator(f"{marker(d1['id'])}.state-rejected").count() == 1
+    assert page.locator(marker(manual["id"])).count() == 0
 
 
 # --- AC-T6: bulk accept with confirmation, and undo --------------------------------------------------------------------
@@ -884,6 +910,539 @@ def test_refresh_never_applies_a_stale_detail_over_a_newer_selection(page, serve
     }""", [a["id"], b["id"]])
     assert got == [b["id"], b["id"]]
     assert page.locator(f"#ed-form[data-id='{b['id']}']").count() == 1
+
+
+# --- AC-T13 / §4.14 / §4.16: the demo path, end to end on the real PDF ----------------------------------------------------
+
+DEMO_DIR = ROOT / "reports" / "takeoff" / "demo"
+PREFLIGHT = ROOT / "reports" / "takeoff" / "ai_preflight.json"
+HUB_TOL_PT = 6.0  # the protocol's match tolerance
+ALIGN_PX = 1.5
+FAN = ("ceiling_fan", "optional_pre_wire")
+AI_FLAG_TYPES = ("model_disagrees", "ai_only_candidate")
+
+
+class Evidence:
+    """Screenshots and ``run.json`` for one demo test, in a directory cleared of its previous outputs first (the
+    hand-written ``README.md`` is kept)."""
+
+    def __init__(self, page, out: Path, record: dict):
+        self.page, self.out, self.record = page, out, record
+        out.mkdir(parents=True, exist_ok=True)
+        for p in out.iterdir():
+            if p.is_file() and (p.suffix == ".png" or p.name == "run.json"):
+                p.unlink()
+            elif p.is_dir() and p.name == "export":
+                shutil.rmtree(p)
+        self.record.setdefault("screenshots", [])
+
+    def shot(self, name: str, what: str, panel: str = "#device") -> None:
+        """A viewport screenshot, with the right panel scrolled to ``panel`` (``#device`` or ``#totals-heading``)."""
+        n = len(self.record["screenshots"]) + 1
+        file = f"{n:02d}_{name}.png"
+        self.page.evaluate("(sel) => { const p = document.getElementById('panel'), el = document.querySelector(sel); "
+                           "p.scrollTop = el ? el.getBoundingClientRect().top - p.getBoundingClientRect().top "
+                           "+ p.scrollTop - 8 : 0; }", panel)
+        self.page.mouse.move(1, 1)  # no hover highlight left over from the last click
+        self.page.screenshot(path=str(self.out / file))
+        self.record["screenshots"].append({"file": file, "shows": what})
+
+    def write(self) -> None:
+        (self.out / "run.json").write_text(json.dumps(self.record, indent=2) + "\n", encoding="utf-8", newline="\n")
+
+
+def preflight_summary() -> dict:
+    if not PREFLIGHT.exists():
+        return {"path": "reports/takeoff/ai_preflight.json", "present": False}
+    pre = json.loads(PREFLIGHT.read_text(encoding="utf-8"))
+    return {"path": "reports/takeoff/ai_preflight.json", "present": True, "created_at": pre.get("created_at"),
+            "model": pre.get("model"), "sheet_run": pre.get("sheet_run"), "ok": pre.get("ok"),
+            "all_passed": pre.get("all_passed"),
+            "checks": [{"name": c["name"], "status": c["status"], "reason": c["reason"]} for c in pre["checks"]]}
+
+
+def choose_ai(pre: dict) -> tuple[str, str]:
+    """Claude only with a fully passed live preflight *and* the explicit live opt-in; else the test doubles."""
+    if pre.get("all_passed") and os.environ.get("TAKEOFF_LIVE_AI") == "1":
+        return "claude", "ai_preflight.json: every check passed, and TAKEOFF_LIVE_AI=1"
+    if not pre.get("present"):
+        why = "no reports/takeoff/ai_preflight.json"
+    elif not pre.get("all_passed"):
+        failed = [f"{c['name']}: {c['status']} ({c['reason']})" for c in pre["checks"] if c["status"] != "pass"]
+        why = "ai_preflight.json did not pass every check: " + "; ".join(failed)
+    else:
+        why = "TAKEOFF_LIVE_AI is not 1 (live, billed requests are opt-in)"
+    return "fake", why + ". The AI stages ran with FakeVerifier (agrees with det/0) and FakeDiscoverer (no points): " \
+                         "test doubles, not a model; nothing here is evidence of model performance."
+
+
+def hub_token(meta: dict) -> dict:
+    """A1's single ``J`` token (the bedroom ceiling-fan hub), with its centre in points and normalized."""
+    hubs = [t for t in meta["tokens"] if t["text"] == "J"]
+    assert len(hubs) == 1, [t["bbox_pt"] for t in hubs]
+    (t,) = hubs
+    b = t["bbox_pt"]
+    return {"id": t["id"], "bbox_pt": b, "pt": ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2), "norm": t["center"]}
+
+
+def ceiling_fans_near(devices, pt, tol=HUB_TOL_PT) -> list[dict]:
+    return sorted((d for d in devices if d["category"] == "ceiling_fan" and not d["deleted"]
+                   and math.dist(d["point_pt"], pt) <= tol), key=lambda d: math.dist(d["point_pt"], pt))
+
+
+def show_device(page, m, d, factor=3.0):
+    set_view_centered(page, m, d["point"]["u"], d["point"]["v"], fit_scale(page, m) * factor)
+    select_device(page, d["id"])
+
+
+def room_ceiling_fans(counts: dict, sheet: str, room: str) -> int:
+    return sum(counts["official"].get(sheet, {}).get("by_room", {}).get(room, {}).get("ceiling_fan", {}).values())
+
+
+def row_room_of(page, did) -> str:
+    """The official totals row (room key) that names this device among its markers."""
+    for row in page.locator("#totals tr.total-row").all():
+        if did in (row.get_attribute("data-ids") or "").split(","):
+            return row.get_attribute("data-room")
+    raise AssertionError(f"no totals row lists {did}")
+
+
+def add_fan_at_hub(page, server, m, hub, ev: Evidence | None = None) -> dict:
+    """The §4.16 fallback: press C, click the J hub, save as ceiling_fan / optional_pre_wire; then reload. Returns
+    the manual device, the room row it is counted in, and that row's ceiling-fan totals before and after."""
+    before = server.counts()
+    total0 = before["review"]["official_total"]
+    set_view_centered(page, m, hub["norm"]["u"], hub["norm"]["v"], fit_scale(page, m) * 3)
+    page.locator("#viewport").focus()
+    page.keyboard.press("c")
+    page.wait_for_function("tk.state.placing === true")
+    click_plan(page, m, hub["norm"]["u"], hub["norm"]["v"], s=fit_scale(page, m) * 3)
+    page.wait_for_selector("#new-form")
+    page.select_option("#new-category", FAN[0])
+    page.select_option("#new-subtype", FAN[1])
+    if ev:
+        ev.shot("fan_manual_form", "fan fallback: C pressed, the J hub clicked, the new-device form set to "
+                                   "ceiling_fan / optional pre-wire before Save")
+    page.click("#new-save")
+    wait_total(page, total0 + 1)
+    (dev,) = [d for d in server.devices(A1) if d["origin"] == "manual" and d["category"] == FAN[0]]
+    assert (dev["subtype"], dev["review_state"]) == (FAN[1], "accepted")
+    assert math.dist(dev["point_pt"], hub["pt"]) <= 0.5, (dev["point_pt"], hub["pt"])
+    room = row_room_of(page, dev["id"])
+    if ev:
+        ev.shot("fan_manual_saved", "fan fallback: the manual ceiling fan saved (manual, accepted, counted); "
+                                    "the official totals now include it", panel="#totals-heading")
+    page.reload()
+    page.wait_for_selector("body[data-ready='1']")
+    page.wait_for_function("!tk.state.loading")
+    assert official_total(page) == total0 + 1 == server.counts()["review"]["official_total"]
+    assert page.locator(f"{marker(dev['id'])}.counted").count() == 1
+    show_device(page, m, dev)
+    text = page.inner_text("#device")
+    assert "ceiling_fan" in text and "manual" in text and "accepted" in text
+    after = server.counts()
+    assert row_room_of(page, dev["id"]) == room
+    fan_before, fan_after = room_ceiling_fans(before, A1, room), room_ceiling_fans(after, A1, room)
+    assert fan_after == fan_before + 1, (room, fan_before, fan_after)
+    if ev:
+        ev.shot("fan_manual_reloaded", f"fan fallback after reload: the manual fan persists and room {room}'s "
+                                       f"official ceiling_fan total is {fan_after} (was {fan_before})",
+                panel="#totals-heading")
+    return {"device_id": dev["id"], "point_pt": dev["point_pt"], "room_row": room,
+            "room_ceiling_fan_before": fan_before, "room_ceiling_fan_after": fan_after,
+            "official_total_before": total0, "official_total_after": total0 + 1}
+
+
+def csv_rows(path: Path) -> list[dict]:
+    with open(path, newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def totals_from_csv(path: Path) -> dict:
+    """The official totals recomputed from ``devices_official.csv`` alone (room by its ``room_key`` column; an
+    empty subtype is JSON's ``null`` key, as in ``totals.json``)."""
+    out: dict = {}
+    for r in csv_rows(path):
+        s = out.setdefault(r["sheet_id"], {"by_room": {}, "by_category": {}, "total": 0,
+                                           "by_origin": {"detector_accepted": 0, "ai_accepted": 0, "manual": 0}})
+        sub = r["subtype"] or "null"
+        s["by_room"].setdefault(r["room_key"], {}).setdefault(r["category"], Counter())[sub] += 1
+        s["by_category"].setdefault(r["category"], Counter())[sub] += 1
+        s["total"] += 1
+        s["by_origin"][r["origin_reported"]] += 1
+    return json.loads(json.dumps(out, sort_keys=True))
+
+
+def usage_from_verdicts(store, run_id: str) -> dict:
+    """Each stage's requests, failures, tokens and items, summed here from the saved verdicts."""
+    out = {}
+    for kind in ("verify", "discover"):
+        mine = [v for v in store.list("verdicts") if v.run_id == run_id and v.kind == kind]
+        codes = Counter((v.error or {}).get("code") for v in mine if v.error)
+        sent = [v for v in mine if not str((v.error or {}).get("code") or "").startswith("skipped_")]
+        out[kind] = {"requests": len(sent), "errors_by_code": dict(sorted(codes.items())),
+                     "tokens": {"input": sum(v.input_tokens or 0 for v in mine),
+                                "output": sum(v.output_tokens or 0 for v in mine),
+                                "cache_creation": sum(v.cache_creation_input_tokens or 0 for v in mine),
+                                "cache_read": sum(v.cache_read_input_tokens or 0 for v in mine)},
+                     "n_items": sum(len(v.detection_ids) for v in mine),
+                     "implementations": sorted({v.implementation for v in mine})}
+    return out
+
+
+def assert_aligned(page, m, devices, factors=(1.0, 3.0), pans=((0, 0), (137.5, -61.25))) -> float:
+    worst = 0.0
+    fit = fit_scale(page, m)
+    for d in devices:
+        u, v = d["point"]["u"], d["point"]["v"]
+        for factor in factors:
+            for pan in pans:
+                set_view_centered(page, m, u, v, fit * factor)
+                view = page.evaluate("([dx, dy]) => { const v = tk.view; tk.setView(v.s, v.tx + dx, v.ty + dy); "
+                                     "return tk.view; }", list(pan))
+                got = center_of(page, f'{marker(d["id"])} circle.core')
+                want = expected_screen(m, view, u, v)
+                assert got is not None, d["id"]
+                err = max(abs(got[0] - want[0]), abs(got[1] - want[1]))
+                assert err <= ALIGN_PX, (d["id"], factor, pan, got, want)
+                worst = max(worst, err)
+    return worst
+
+
+def test_demo_path_end_to_end(page, tmp_path, cache_dir):
+    pre = preflight_summary()
+    impl, why = choose_ai(pre)
+    record = {"test": "backend/tests/test_tk_e2e.py::test_demo_path_end_to_end", "pdf_sha256": None,
+              "ai_implementation": impl, "ai_choice": why, "ai_preflight": pre,
+              "result": "did not finish: an assertion or error stopped the test (see the pytest output)"}
+    ev = Evidence(page, DEMO_DIR, record)
+    srv = Server(tmp_path, cache_dir, detector=None, background=True, ai="claude" if impl == "claude" else None)
+    try:
+        record["pdf_sha256"] = srv.doc
+        open_page(page, srv)
+        dialogs = Dialogs(page)
+        m = srv.meta(A1)
+
+        # 1. Analyze all 4 sheets from the page (background run, the page polls) and wait for every sheet
+        assert not page.is_checked("#analyze-sheet-only")
+        t0 = time.time()
+        page.click("#analyze")
+        page.wait_for_function("document.getElementById('run-summary').textContent.includes('run-001')")
+        page.wait_for_function("!tk.state.polling", timeout=900_000)
+        record["analysis_seconds"] = round(time.time() - t0, 1)
+        (run,) = srv.call("GET", f"/api/documents/{srv.doc}/runs")
+        assert list(run["sheets"]) == SHEETS and all(s["status"] == "done" for s in run["sheets"].values()), run
+        progress = page.inner_text("#analyze-progress")
+        assert all(f"{sid}: done" in progress for sid in SHEETS), progress
+        summary = page.inner_text("#run-summary")
+        assert "run-001" in summary and "4 sheets done" in summary and det0.DETECTOR_VERSION in summary
+        fake = FAKE if impl == "fake" else ""
+        if impl == "fake":
+            assert "AI: test double, not a model" in summary
+        s1 = run["sheets"][A1]
+        for kind, el, name in (("verify", "#stage-verify", "AI verification"),
+                               ("discover", "#stage-discover", "AI discovery")):
+            st = s1[f"ai_{kind}"]
+            if st["status"] == "done":
+                want = f"{name}: done ({st['n_items']})"
+            elif st["status"] == "partial":
+                want = f"{name}: partial ({sum(st['errors_by_code'].values())} errors)"
+            else:
+                want = f"{name}: {st['status']}: {st['reason']}"
+            assert page.inner_text(el).strip() == want + fake, (kind, st)
+        record.update(run_id=run["id"], detector=run["detector"], detector_version=run["detector_version"],
+                      merge_version=run["merge_version"],
+                      sheets={sid: {"status": s["status"], "n_detections": s["n_detections"],
+                                    "ai_verify": s["ai_verify"]["status"], "ai_discover": s["ai_discover"]["status"]}
+                              for sid, s in run["sheets"].items()},
+                      ai_usage_run=run["ai_usage"], review_after_analysis=srv.counts()["review"])
+        ev.shot("analyzed", "all 4 sheets analyzed by det/0 in one background run; per-sheet progress, run summary "
+                            "and the AI stage lines (test double) in the status bar; A1 proposals on the plan")
+
+        # 2. inspect a switch and a receptacle on A1
+        devs = srv.devices(A1)
+        open_by_device: dict[str, list[str]] = {}
+        for f in srv.call("GET", f"/api/documents/{srv.doc}/devices?sheet_id={A1}")["open_flags"]:
+            open_by_device.setdefault(f["device_id"], []).append(f["type"])
+        labels = {(c, s["name"]): s["label"] for c, subs in srv.call("GET", "/api/config")["taxonomy"][
+            "categories"].items() for s in subs}
+        inspected = {}
+        for cat in ("switch", "receptacle"):
+            d = next(x for x in devs if x["category"] == cat and x["origin"] == "detector")
+            show_device(page, m, d)
+            text = page.inner_text("#device")
+            for want in (cat, labels[(cat, d["subtype"])], d["review_state"], "detector", SCORE_LABEL, run["id"],
+                         run["detector_version"], "takeoff-merge/1", "Subtype source", "History"):
+                assert want in text, (cat, want, text)
+            if d["room"]:
+                assert d["room"]["name"] in text
+            ai_line = page.inner_text("#ai-line").strip()
+            if impl == "fake":
+                assert ai_line == "AI second opinion: agrees" + FAKE
+            inspected[cat] = {"device_id": d["id"], "subtype": d["subtype"], "room": (d["room"] or {}).get("name"),
+                              "point_pt": d["point_pt"], "ai_line": ai_line,
+                              "open_flags": open_by_device.get(d["id"], [])}
+            ev.shot(f"inspect_{cat}", f"A1 {cat} selected: category, legend subtype, room and source, review "
+                                      f"state, origin, '{SCORE_LABEL}', run and versions, AI line, evidence, history")
+        record["inspected"] = inspected
+
+        # 3. the ceiling fan: inspected if det/0 found it at the J hub, otherwise added manually (§4.16)
+        hub = hub_token(m)
+        near = ceiling_fans_near(devs, hub["pt"])
+        record["fan_hub"] = {"token_id": hub["id"], "text": "J", "bbox_pt": hub["bbox_pt"], "centre_pt": hub["pt"],
+                             "tolerance_pt": HUB_TOL_PT}
+        if near:
+            fan = near[0]
+            record["fan_branch"] = "detected"
+            show_device(page, m, fan)
+            text = page.inner_text("#device")
+            for want in ("ceiling_fan", labels[(fan["category"], fan["subtype"])], "detector", SCORE_LABEL):
+                assert want in text, (want, text)
+            record["fan"] = {"device_id": fan["id"], "subtype": fan["subtype"], "point_pt": fan["point_pt"],
+                             "distance_to_hub_pt": round(math.dist(fan["point_pt"], hub["pt"]), 3),
+                             "review_state": fan["review_state"], "room": (fan["room"] or {}).get("name"),
+                             "ai_line": page.inner_text("#ai-line").strip()}
+            ev.shot("fan_detected", f"the A1 bedroom ceiling fan, detected by det/0 "
+                                    f"{record['fan']['distance_to_hub_pt']} pt from the J hub, selected and inspected")
+        else:
+            record["fan_branch"] = "manual"
+            record["fan"] = add_fan_at_hub(page, srv, m, hub, ev)
+        ev.write()
+
+        # 4. AI flags: resolve one through the UI if the run produced any (live AI only)
+        flags = srv.call("GET", f"/api/documents/{srv.doc}/devices")["open_flags"]
+        ai_flags = [f for f in flags if f["type"] in AI_FLAG_TYPES]
+        if not ai_flags:  # always so with the test doubles: they agree with det/0 and discover nothing
+            record["ai_flags_demo"] = "none produced"
+        else:
+            f = ai_flags[0]
+            d = srv.device(f["device_id"])["device"]
+            if d["sheet_id"] != A1:
+                choose_sheet(page, d["sheet_id"])
+            sm = page.evaluate("tk.state.meta")
+            show_device(page, sm, d)
+            if f["type"] == "model_disagrees":
+                dialogs.answers.append("demo: reviewed on the plan, keeping det/0's classification")
+                page.click("#accept-selected")
+            else:
+                page.click("#reject-selected")
+            page.wait_for_function("tk.state.detail && tk.state.detail.flags.every(x => x.id !== %r || !x.open)"
+                                   % f["id"])
+            closed = next(x for x in srv.device(d["id"])["flags"] if x["id"] == f["id"])
+            assert not closed["open"]
+            record["ai_flags_demo"] = {"flag": f["type"], "device_id": d["id"], "resolution": closed["resolution"]}
+            ev.shot("ai_flag_resolved", f"an AI {f['type']} flag resolved through the panel: {closed['resolution']}")
+            if d["sheet_id"] != A1:
+                choose_sheet(page, A1)
+
+        # 5. correct one proposal's category: a saved correction accepts it; the totals change at once
+        devs = srv.devices(A1)
+        target = next(d for d in devs if d["category"] == "light" and d["review_state"] == "proposed"
+                      and not open_by_device.get(d["id"]))
+        k0 = srv.counts()
+        show_device(page, m, target)
+        page.select_option("#ed-category", "fan")
+        new_sub = page.input_value("#ed-subtype")
+        page.click("#save")
+        wait_total(page, k0["review"]["official_total"] + 1)
+        dev = srv.device(target["id"])["device"]
+        assert (dev["category"], dev["review_state"], dev["accept_kind"]) == ("fan", "accepted",
+                                                                              "corrected_and_accepted")
+        k1 = srv.counts()
+        assert sum(k1["official"][A1]["by_category"]["fan"].values()) == \
+            sum(k0["official"].get(A1, {}).get("by_category", {}).get("fan", {}).values()) + 1
+        assert page.locator(f"{marker(target['id'])}.counted").count() == 1
+        record["correction"] = {"device_id": target["id"], "from": [target["category"], target["subtype"]],
+                                "to": [dev["category"], dev["subtype"]], "accept_kind": dev["accept_kind"],
+                                "official_total_before": k0["review"]["official_total"],
+                                "official_total_after": k1["review"]["official_total"],
+                                "note": "a demonstration of the correction flow on an unflagged proposal; it is not "
+                                        "a claim that det/0 classified this device wrongly"}
+        assert new_sub == dev["subtype"]
+        ev.shot("corrected", "one proposal's category corrected (light -> fan) and saved: accepted as "
+                             "corrected_and_accepted; the official totals updated without a reload",
+                panel="#totals-heading")
+
+        # 6. reload: the correction persists
+        page.reload()
+        page.wait_for_selector("body[data-ready='1']")
+        page.wait_for_function("!tk.state.loading")
+        assert official_total(page) == k1["review"]["official_total"]
+        show_device(page, m, dev)
+        assert "corrected_and_accepted" in page.inner_text("#device")
+        assert "correct_and_accept" in page.inner_text("#history")
+        assert_review_lines(page, srv)
+        ev.shot("reloaded", "after a page reload: the corrected device is still accepted (corrected_and_accepted), "
+                            "with its history; the totals and review figures equal GET /counts")
+
+        # 7. zoom and pan: the markers stay aligned
+        probes = [srv.device(inspected["switch"]["device_id"])["device"],
+                  srv.device(inspected["receptacle"]["device_id"])["device"],
+                  srv.device(record["fan"]["device_id"])["device"], srv.device(target["id"])["device"]]
+        worst = assert_aligned(page, m, probes)
+        record["alignment"] = {"devices": [d["id"] for d in probes], "zoom_factors_of_fit": [1.0, 3.0],
+                               "pans_px": [[0, 0], [137.5, -61.25]], "max_error_px": round(worst, 3),
+                               "tolerance_px": ALIGN_PX}
+        set_view_centered(page, m, hub["norm"]["u"], hub["norm"]["v"], fit_scale(page, m) * 4)
+        ev.shot("zoomed", "zoomed in (4x fit) on the bedroom fan hub: markers sit on their symbols")
+        page.evaluate("(() => { const v = tk.view; tk.setView(v.s, v.tx + 137.5, v.ty - 61.25); })()")
+        ev.shot("panned", f"the same view panned; every probed marker stayed within {ALIGN_PX} px "
+                          f"(worst {worst:.3f} px)")
+        page.locator("#viewport").focus()
+        page.keyboard.press("f")  # back to the fitted view
+
+        # 8. bulk accept, after the confirmation (the button covers every sheet's unflagged proposals)
+        eligible = srv.call("GET", f"/api/documents/{srv.doc}/bulk-eligible")
+        eligible_a1 = srv.call("GET", f"/api/documents/{srv.doc}/bulk-eligible?sheet_id={A1}")
+        k2 = srv.counts()
+        n = eligible["count"]
+        assert n == k2["review"]["awaiting_unflagged"] > 0
+        dialogs.answers.append(True)
+        page.click("#bulk-accept")
+        wait_total(page, k2["review"]["official_total"] + n, timeout=30_000)
+        assert dialogs.messages[-1] == f"Accept {n} unflagged proposals? Official totals will update."
+        k3 = srv.counts()
+        assert k3["review"]["official_total"] == k2["review"]["official_total"] + n
+        assert srv.call("GET", f"/api/documents/{srv.doc}/bulk-eligible?sheet_id={A1}")["count"] == 0
+        assert_review_lines(page, srv)
+        record["bulk_accept"] = {"confirmation": dialogs.messages[-1], "accepted": n,
+                                 "of_which_on_A1": eligible_a1["count"], "scope": "every sheet of the document "
+                                 "(the page's button); flagged proposals excluded",
+                                 "official_total_after": k3["review"]["official_total"],
+                                 "review_after": k3["review"]}
+        ev.shot("bulk_accepted", f"after confirming 'Accept {n} unflagged proposals?': flagged proposals stay "
+                                 f"awaiting review; official totals {k3['review']['official_total']}",
+                panel="#review-lines")
+        # R1-03 on the real takeoff: every officially counted device has its counted marker on its sheet
+        invariant = {}
+        for sid in SHEETS:
+            choose_sheet(page, sid)
+            official = sorted(d["id"] for d in srv.devices(sid) if d["review_state"] == "accepted")
+            drawn = sorted(page.eval_on_selector_all(".device.counted", "els => els.map(e => e.dataset.id)"))
+            assert drawn == official and len(official) == k3["official"].get(sid, {}).get("total", 0), sid
+            assert int(page.get_attribute("#sheet-total", "data-total")) == len(official)
+            invariant[sid] = {"official": len(official), "counted_markers": len(drawn)}
+        choose_sheet(page, A1)
+        record["r1_03_counted_have_markers"] = invariant
+
+        # 9. export: totals.json = GET /counts = recomputed from the CSV; incomplete with reasons; AI usage summed
+        page.click("#export")
+        page.wait_for_function("document.getElementById('export-status').textContent.includes('Export')")
+        res = page.evaluate("tk.state.exportResult")
+        out = Path(res["path"])
+        manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+        assert manifest == res["manifest"]
+        totals = json.loads((out / "totals.json").read_text(encoding="utf-8"))
+        api_counts = srv.counts()
+        assert totals == api_counts["official"]
+        assert totals_from_csv(out / "devices_official.csv") == json.loads(json.dumps(totals, sort_keys=True))
+        assert manifest["review"] == api_counts["review"]
+        awaiting_elsewhere = sorted({d["sheet_id"] for d in srv.devices() if d["review_state"] == "proposed"
+                                     and d["sheet_id"] != A1})
+        assert awaiting_elsewhere, "other sheets should still await review"
+        assert manifest["complete"] is False and manifest["incomplete_reasons"]
+        awaiting = api_counts["review"]["awaiting"]
+        assert f"{awaiting} detected device{'s' if awaiting != 1 else ''} awaiting review" in \
+            manifest["incomplete_reasons"]
+        assert "Export incomplete" in page.inner_text("#export-status")
+        (mrun,) = manifest["runs"]
+        summed = usage_from_verdicts(srv.app.state.store, run["id"])
+        for kind in ("verify", "discover"):
+            got = mrun["ai"][kind]
+            for key in ("requests", "errors_by_code", "tokens", "n_items"):
+                assert got[key] == summed[kind][key], (kind, key, got[key], summed[kind][key])
+            assert got["implementation"] == impl and summed[kind]["implementations"] == [impl]
+        assert manifest["ai_test_double"] is (impl == "fake")
+        if impl == "fake":
+            assert manifest["ai_note"].endswith("(test double, not a model)")
+        fan_row = next((r for r in csv_rows(out / "devices_official.csv") if r["id"] == record["fan"]["device_id"]),
+                       None)
+        shutil.copytree(out, DEMO_DIR / "export")
+        record["export"] = {"source_dir_name": out.name, "copied_to": "reports/takeoff/demo/export/",
+                            "complete": manifest["complete"], "incomplete_reasons": manifest["incomplete_reasons"],
+                            "sheets_still_awaiting_review_other_than_A1": awaiting_elsewhere,
+                            "totals_json_equals_api_counts": True, "totals_json_equals_csv_recomputation": True,
+                            "manifest_ai_usage_equals_verdict_sums": True, "ai_usage_summed": summed,
+                            "official_records": manifest["counts"]["official_records"],
+                            "review_records": manifest["counts"]["review_records"],
+                            "official_total": api_counts["review"]["official_total"],
+                            "fan_row": ({"origin_reported": fan_row["origin_reported"],
+                                         "room_key": fan_row["room_key"]} if fan_row else
+                                        "not in the official records (the detected fan is still awaiting review)")}
+        ev.shot("exported", "Export: the status bar states 'Export incomplete' with the reasons (flagged proposals "
+                            "still awaiting review on every sheet), as manifest.json does")
+        record["finished_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        record["result"] = "passed: every step's assertions held"
+    finally:
+        ev.write()
+        srv.stop()
+
+
+class Det0WithoutA1CeilingFans:
+    """The real det/0 with A1's ceiling-fan detections removed: forces the demo's "fan missed" branch (§4.16)."""
+
+    name = "det0-test-stub"
+    version = f"{det0.DETECTOR_VERSION}+stub-drops-A1-ceiling-fans"
+
+    def __init__(self):
+        self.inner = AN.Det0Detector()
+        self.params = {"det0": det0.PARAMS, "test_stub": "drops ceiling_fan detections on A1-111"}
+        self.dropped: list[dict] = []
+
+    def __call__(self, pdf_path, sheet):
+        out = self.inner(pdf_path, sheet)
+        if sheet.sheet_id == A1:
+            self.dropped += [d for d in out["detections"] if d["category"] == "ceiling_fan"]
+            out = {**out, "detections": [d for d in out["detections"] if d["category"] != "ceiling_fan"]}
+        return out
+
+
+def test_missed_ceiling_fan_is_added_manually_and_counted(page, tmp_path, cache_dir):
+    stub = Det0WithoutA1CeilingFans()
+    srv = Server(tmp_path, cache_dir, detector=stub)  # FakeVerifier agrees, FakeDiscoverer finds nothing
+    record = {"test": "backend/tests/test_tk_e2e.py::test_missed_ceiling_fan_is_added_manually_and_counted",
+              "fan_branch": "manual (forced: the detector stub drops A1's ceiling-fan detections)",
+              "ai_implementation": "fake", "ai_choice": "deterministic test: FakeVerifier and an empty "
+                                                       "FakeDiscoverer (test doubles, not a model)",
+              "result": "did not finish: an assertion or error stopped the test (see the pytest output)"}
+    ev = Evidence(page, DEMO_DIR / "fan_missed", record)
+    try:
+        run = srv.call("POST", f"/api/documents/{srv.doc}/analyze", {"sheet_ids": [A1]})
+        assert run["sheets"][A1]["status"] == "done", run
+        assert len(stub.dropped) >= 1  # det/0 did find the fan; the stub removed it
+        record.update(run_id=run["id"], detector_version=run["detector_version"],
+                      dropped_detections=[{"category": d["category"], "subtype": d["subtype"],
+                                           "x_pt": d["x_pt"], "y_pt": d["y_pt"]} for d in stub.dropped])
+        assert not [d for d in srv.devices(A1) if d["category"] == "ceiling_fan"]
+        assert sum(srv.counts()["official"].get(A1, {}).get("by_category", {}).get("ceiling_fan", {}).values()) == 0
+        m = srv.meta(A1)
+        hub = hub_token(m)
+        record["fan_hub"] = {"token_id": hub["id"], "bbox_pt": hub["bbox_pt"], "centre_pt": hub["pt"]}
+        assert not ceiling_fans_near(srv.devices(A1), hub["pt"])
+        open_page(page, srv)
+        set_view_centered(page, m, hub["norm"]["u"], hub["norm"]["v"], fit_scale(page, m) * 3)
+        ev.shot("fan_missing", "after Analyze (det/0 stub): no ceiling-fan marker at the A1 bedroom J hub")
+
+        fan = add_fan_at_hub(page, srv, m, hub, ev)
+        record["fan"] = fan
+        k = srv.counts()
+        fans = sum(sum(s["by_category"].get("ceiling_fan", {}).values()) for s in k["official"].values())
+        assert fans == 1 == sum(k["official"][A1]["by_category"]["ceiling_fan"].values())
+        assert k["official"][A1]["by_category"]["ceiling_fan"] == {FAN[1]: 1}
+        assert k["review"]["manual"] == 1
+
+        res = srv.call("POST", f"/api/documents/{srv.doc}/export")
+        out = Path(res["path"])
+        (row,) = [r for r in csv_rows(out / "devices_official.csv") if r["id"] == fan["device_id"]]
+        assert (row["origin_reported"], row["category"], row["subtype"], row["review_state"]) == \
+            ("manual", *FAN, "accepted")
+        assert json.loads((out / "totals.json").read_text(encoding="utf-8")) == k["official"]
+        record["export"] = {"origin_reported": row["origin_reported"], "room_key": row["room_key"],
+                            "official_ceiling_fans": fans, "complete": res["manifest"]["complete"]}
+        record["result"] = "passed: every assertion held"
+    finally:
+        ev.write()
+        srv.stop()
 
 
 def test_originals_untouched_by_e2e_session():

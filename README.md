@@ -2,7 +2,7 @@
 
 Assessment project: read the supplied electrical plans, find every electrical component, count it per room and let a user correct the result on the plan. The working record of status, evidence and decisions is [PROJECT_TRACKING.md](PROJECT_TRACKING.md).
 
-> **Status (2026-10-25):** The four sheets have hand-verified ground truth (`gt_001`, 300 devices). The evaluator (`eval/1.1`) has scored the Milestone 1 candidate generators and a first rule-based detector, `det/0`, which reaches F1 0.95 on the held-out sheets A3/A4 ([report](reports/evaluation/gt_001_20261025T020009Z__eval1.1__det0/report.md)). Those numbers are biased upward: the ground truth was built from the same candidates, and all 4 sheets come from one plan set. **No detector is final, and the takeoff app workflow is not built yet.**
+> **Status (2026-10-25):** The four sheets have hand-verified ground truth (`gt_001`, 300 devices). The evaluator (`eval/1.1`) has scored the Milestone 1 candidate generators and a first rule-based detector, `det/0`, which reaches F1 0.95 on the held-out sheets A3/A4 ([report](reports/evaluation/gt_001_20261025T020009Z__eval1.1__det0/report.md)). Those numbers are biased upward: the ground truth was built from the same candidates, and all 4 sheets come from one plan set. **The takeoff app works end to end on the supplied PDF**: analyze, review on the plan, correct/add/delete, totals and export ([demo evidence](reports/takeoff/demo/README.md)). **The AI stages are implemented but not yet demonstrated with a live model.** No Anthropic API credentials were configured for the app, so the demo ran with test doubles, and no AI accuracy figures exist. No detector is final.
 
 ## Layout
 | Path | Contents |
@@ -12,11 +12,14 @@ Assessment project: read the supplied electrical plans, find every electrical co
 | `backend/takeoff/groundtruth/` | Ground-truth schema, store, review workflow, checks, export, API |
 | `backend/takeoff/evaluation/` | Matching and metrics against a verified export (`eval/1.1`) |
 | `backend/takeoff/detection/` | Detectors (`det0.py`: rule-based fusion of the candidate generators) |
-| `backend/reviewer/static/` | Reviewer page (vanilla JS) |
-| `backend/tools/` | `pdf_diagnostics.py`, `symbol_probe.py`, `gt_review.py`, `evaluate.py` |
+| `backend/takeoff/app/` | Takeoff app: store, sheet intake, rooms, merge, flags, service, counts, analyzer, export, API |
+| `backend/takeoff/ai/` | Non-authoritative AI stages: `ai-verify/1` (verifier), `ai-discover/1` (discovery), prompts, test doubles |
+| `backend/reviewer/static/`, `backend/app/static/`, `backend/shared/static/` | Ground-truth reviewer page, takeoff page, and shared plan-view code (vanilla JS) |
+| `backend/tools/` | `pdf_diagnostics.py`, `symbol_probe.py`, `gt_review.py`, `evaluate.py`, `takeoff_app.py`, `ai_preflight.py`, `eval_ai_verifier.py`, `eval_ai_discovery.py`, `eval_rooms.py` |
 | `docs/` | `pdf_feasibility_findings.md`, `ground_truth_protocol.md` |
 | `reports/` | Generated evidence (overlays, probe results, reviewer screenshots, `evaluation/` reports) |
 | `data/ground_truth/` | Working DB and cache (git-ignored); `exports/` holds immutable ground-truth exports |
+| `data/takeoff/` | Takeoff store, uploads, exports and render cache (git-ignored) |
 
 ## Setup
 Requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
@@ -32,6 +35,65 @@ cd backend
 uv run pytest -q
 ```
 Add `-m "not e2e"` to skip the browser end-to-end tests.
+- Tests marked `live` make real, billed Anthropic requests. They are skipped unless `TAKEOFF_LIVE_AI=1`.
+- The ground-truth tests read the verified export named by `TAKEOFF_GT_EXPORT` (default `data/ground_truth/exports/gt_001_20261025T020009Z`). It must pass `require_verified`.
+- The demo test (`test_demo_path_end_to_end`) rewrites the evidence in `reports/takeoff/demo/` on every run.
+
+## Takeoff app (R1-01, B-09, B-10)
+```bash
+cd backend
+uv run python tools/takeoff_app.py serve                          # http://127.0.0.1:8766, AI on (Claude)
+uv run python tools/takeoff_app.py serve --ai off                 # det/0 only; no Anthropic request is ever made
+uv run python tools/takeoff_app.py serve --ai-max-requests 150    # per-run AI request cap
+```
+- The supplied Escondido PDF is registered at startup and only ever read. Other PDFs can be uploaded from the page.
+- The store is `data/takeoff/takeoff.sqlite`. Each export goes to a new, immutable `data/takeoff/exports/tk_NNN_<UTC>/` directory.
+- `--ai on` (the default) runs two non-authoritative Claude vision stages after det/0 on every sheet:
+  - **verify** gives a second opinion on det/0's classifications. A disagreement opens a `model_disagrees` flag.
+  - **discover** proposes devices det/0 may have missed. Each becomes an AI-only candidate that needs an individual decision.
+
+  Neither stage changes a saved device or a total; totals come only from accepted and manual device records. If AI is unavailable, the run still completes, and the page and the export state `unavailable: <reason>`.
+- `--ai-max-requests` sets the per-run request cap (default `TAKEOFF_AI_MAX_REQUESTS`, else 200). A full 4-sheet analysis needs about 41 verify and 84 discover requests. Requests over the cap are recorded as `skipped_budget`.
+- `TAKEOFF_AI_MODEL` sets the model (default `claude-opus-5-5`).
+
+### Credentials for the AI stages
+- The app uses the official Anthropic SDK and resolves credentials the same way the SDK does: `ANTHROPIC_API_KEY` (or `ANTHROPIC_AUTH_TOKEN`), or an `ant auth login` profile. Credential values are never printed or stored.
+- **A Claude subscription (Pro/Max) does not include API access.** The requests are billed to the Anthropic API account behind the credential.
+- Run the live preflight before relying on AI in a demo. It makes real, billed requests, so it runs only by explicit command:
+  ```bash
+  uv run python tools/ai_preflight.py                                   # writes ../reports/takeoff/ai_preflight.json
+  uv run python tools/ai_preflight.py --no-sheet-run                    # checks 1-3 only
+  uv run python tools/ai_preflight.py --confirm-host api.example.com    # after confirming a non-default API host is yours
+  ```
+  - **What it checks:** the credential source and API host, the model, one real vision request, and both stages on one real sheet.
+  - **Non-default host:** if `ANTHROPIC_BASE_URL` (or a profile) points to a non-default host, the check fails and nothing is sent. Confirm the host with `--confirm-host` first, because another tool's session variables may be in your shell.
+  - **No credentials:** it stops at check 1 and sends nothing.
+- Model accuracy is measured separately, against the verified export. These also make real, billed requests:
+  ```bash
+  uv run python tools/eval_ai_verifier.py --export ../data/ground_truth/exports/gt_001_20261025T020009Z
+  uv run python tools/eval_ai_discovery.py --export ../data/ground_truth/exports/gt_001_20261025T020009Z
+  ```
+  Both refuse the test doubles. Without credentials they exit 3 and print the reason.
+
+### Demo path (AC-T13)
+1. **Analyze** all sheets and wait until every sheet is `done`. The status bar shows the run summary and each AI stage's status.
+2. Click a switch marker, then a receptacle marker, on A1. The panel shows:
+   - category, legend subtype, and room with its source;
+   - review state, origin, and "match score (not a probability)";
+   - run and versions, the AI second opinion, evidence and history.
+3. **The ceiling fan** (A1 bedroom, at the single `J` hub):
+   - **If det/0 detected it**, select it and inspect it. It did on 2026-10-25, 0.4 pt from the hub.
+   - **If it was missed**, press **C**, click the hub, choose `ceiling_fan` / *CEILING FAN OPTIONAL (PRE WIRE…)* and Save. The device is manual and counted at once. Reload the page: the fan persists, and that room's official ceiling-fan total has gone up by 1.
+4. With live AI, resolve one `model_disagrees` flag or AI-only candidate from the panel. Keeping a classification the model disputes requires a reason.
+5. Change one proposal's category and Save. A saved correction is an acceptance, and the totals change at once.
+6. Reload: the correction and its history persist.
+7. Zoom (wheel) and pan (drag): the markers stay on their symbols.
+8. Click **Accept all unflagged (N)**, then confirm. It covers every sheet, and flagged proposals are never included.
+9. **Export**. The status bar says whether the takeoff is complete, and gives the reasons if not. `totals.json` equals both the API's totals and the totals recomputed from `devices_official.csv`.
+
+The automated version is `tests/test_tk_e2e.py::test_demo_path_end_to_end`, with screenshots in [`reports/takeoff/demo/`](reports/takeoff/demo/README.md). `::test_missed_ceiling_fan_is_added_manually_and_counted` forces the "fan missed" branch.
+
+**"Test double"** means `FakeVerifier` and `FakeDiscoverer`. They are deterministic stand-ins used by the tests, and by the demo test when no live preflight has passed. The verifier agrees with det/0 and the discoverer proposes nothing. Everything they produce is labelled "test double, not a model" in the page, the run summary, the export manifest and the demo evidence. It is never evidence of model performance.
 
 ## Ground-truth review (B-03)
 Read [docs/ground_truth_protocol.md](docs/ground_truth_protocol.md) first.

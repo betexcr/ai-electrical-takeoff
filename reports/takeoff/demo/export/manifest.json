@@ -1,0 +1,279 @@
+{
+ "ai_note": "AI verdicts and AI-only candidates are suggestions; totals come from accepted and manual device records (test double, not a model)",
+ "ai_test_double": true,
+ "complete": false,
+ "counts": {
+  "official_records": 219,
+  "review_records": 94
+ },
+ "created_at": "2026-10-25T16:28:00.840+00:00",
+ "created_by": "e2e",
+ "document_name": "Escondido_Electrical_Plans_Ceiling_Fans.pdf",
+ "document_sha256": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
+ "export_format": "takeoff-export/1",
+ "files": {
+  "devices_official.csv": {
+   "bytes": 71817,
+   "sha256": "3886d298df9e216a84eedc3f2192a07ecdd5e07f6ae731873f1b4cc35453c029"
+  },
+  "devices_review.csv": {
+   "bytes": 31430,
+   "sha256": "0c32c9fb8d9d851164cdb4832b834de9a54b37736876161f5c9a874220e5a12b"
+  },
+  "totals.json": {
+   "bytes": 10344,
+   "sha256": "f4e966bcb7128592393ef434c07a82046991fe8c66cfa579e3c056b3154051d2"
+  }
+ },
+ "incomplete_reasons": [
+  "94 detected devices awaiting review",
+  "94 open room_ambiguous flags"
+ ],
+ "merge_version": "takeoff-merge/1",
+ "open_flags_by_type": {
+  "room_ambiguous": 94
+ },
+ "origin_vocabulary": {
+  "devices_official.csv": "origin_reported is the reported origin of an accepted device: detector_accepted | ai_accepted | manual",
+  "devices_review.csv": "origin_reported is the internal origin: detector | ai | manual; none of these rows is in any total"
+ },
+ "review": {
+  "accepted_detected": 219,
+  "accepted_with_open_flags": 0,
+  "awaiting": 94,
+  "awaiting_flagged": 94,
+  "awaiting_unflagged": 0,
+  "detected": 313,
+  "detected_ai_only": 0,
+  "manual": 0,
+  "official_total": 219,
+  "rejected": 0
+ },
+ "runs": [
+  {
+   "ai": {
+    "discover": {
+     "ai_version": "ai-discover/1",
+     "errors_by_code": {},
+     "implementation": "fake",
+     "latency_ms": {
+      "p50": 0.0,
+      "p95": 0.0
+     },
+     "model": "fake-discoverer",
+     "n_items": 0,
+     "prompt_version": "ai-discover-prompt/1",
+     "requests": 84,
+     "sheets": {
+      "A1-111": {
+       "errors_by_code": {},
+       "implementation": "fake",
+       "latency_ms": {
+        "p50": 0.0,
+        "p95": 0.0
+       },
+       "n_items": 0,
+       "reason": null,
+       "requests": 20,
+       "status": "done",
+       "tokens": {
+        "cache_creation": 0,
+        "cache_read": 0,
+        "input": 0,
+        "output": 0
+       }
+      },
+      "A2-111": {
+       "errors_by_code": {},
+       "implementation": "fake",
+       "latency_ms": {
+        "p50": 0.0,
+        "p95": 0.0
+       },
+       "n_items": 0,
+       "reason": null,
+       "requests": 24,
+       "status": "done",
+       "tokens": {
+        "cache_creation": 0,
+        "cache_read": 0,
+        "input": 0,
+        "output": 0
+       }
+      },
+      "A3-111": {
+       "errors_by_code": {},
+       "implementation": "fake",
+       "latency_ms": {
+        "p50": 0.0,
+        "p95": 0.0
+       },
+       "n_items": 0,
+       "reason": null,
+       "requests": 20,
+       "status": "done",
+       "tokens": {
+        "cache_creation": 0,
+        "cache_read": 0,
+        "input": 0,
+        "output": 0
+       }
+      },
+      "A4-111": {
+       "errors_by_code": {},
+       "implementation": "fake",
+       "latency_ms": {
+        "p50": 0.0,
+        "p95": 0.0
+       },
+       "n_items": 0,
+       "reason": null,
+       "requests": 20,
+       "status": "done",
+       "tokens": {
+        "cache_creation": 0,
+        "cache_read": 0,
+        "input": 0,
+        "output": 0
+       }
+      }
+     },
+     "status": "done",
+     "tokens": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "input": 0,
+      "output": 0
+     }
+    },
+    "model": "fake-verifier",
+    "verify": {
+     "ai_version": "ai-verify/1",
+     "errors_by_code": {},
+     "implementation": "fake",
+     "latency_ms": {
+      "p50": 0.0,
+      "p95": 0.0
+     },
+     "model": "fake-verifier",
+     "n_items": 313,
+     "prompt_version": "ai-verify-prompt/1",
+     "requests": 41,
+     "sheets": {
+      "A1-111": {
+       "errors_by_code": {},
+       "implementation": "fake",
+       "latency_ms": {
+        "p50": 0.0,
+        "p95": 0.0
+       },
+       "n_items": 55,
+       "reason": null,
+       "requests": 7,
+       "status": "done",
+       "tokens": {
+        "cache_creation": 0,
+        "cache_read": 0,
+        "input": 0,
+        "output": 0
+       }
+      },
+      "A2-111": {
+       "errors_by_code": {},
+       "implementation": "fake",
+       "latency_ms": {
+        "p50": 0.0,
+        "p95": 0.0
+       },
+       "n_items": 67,
+       "reason": null,
+       "requests": 9,
+       "status": "done",
+       "tokens": {
+        "cache_creation": 0,
+        "cache_read": 0,
+        "input": 0,
+        "output": 0
+       }
+      },
+      "A3-111": {
+       "errors_by_code": {},
+       "implementation": "fake",
+       "latency_ms": {
+        "p50": 0.0,
+        "p95": 0.0
+       },
+       "n_items": 82,
+       "reason": null,
+       "requests": 11,
+       "status": "done",
+       "tokens": {
+        "cache_creation": 0,
+        "cache_read": 0,
+        "input": 0,
+        "output": 0
+       }
+      },
+      "A4-111": {
+       "errors_by_code": {},
+       "implementation": "fake",
+       "latency_ms": {
+        "p50": 0.0,
+        "p95": 0.0
+       },
+       "n_items": 109,
+       "reason": null,
+       "requests": 14,
+       "status": "done",
+       "tokens": {
+        "cache_creation": 0,
+        "cache_read": 0,
+        "input": 0,
+        "output": 0
+       }
+      }
+     },
+     "status": "done",
+     "tokens": {
+      "cache_creation": 0,
+      "cache_read": 0,
+      "input": 0,
+      "output": 0
+     }
+    }
+   },
+   "created_at": "2026-10-25T16:25:59.732+00:00",
+   "created_by": "e2e",
+   "detector": "det0",
+   "detector_version": "det/0",
+   "finished_at": "2026-10-25T16:27:55.911+00:00",
+   "id": "run-001",
+   "merge_version": "takeoff-merge/1",
+   "sheets": {
+    "A1-111": {
+     "message": null,
+     "n_detections": 55,
+     "status": "done"
+    },
+    "A2-111": {
+     "message": null,
+     "n_detections": 67,
+     "status": "done"
+    },
+    "A3-111": {
+     "message": null,
+     "n_detections": 82,
+     "status": "done"
+    },
+    "A4-111": {
+     "message": null,
+     "n_detections": 109,
+     "status": "done"
+    }
+   }
+  }
+ ],
+ "schema_version": "takeoff-schema/1",
+ "store_version": "takeoff-store/1",
+ "taxonomy_version": "taxonomy/1"
+}

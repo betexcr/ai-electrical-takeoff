@@ -1,0 +1,66 @@
+{
+  "test": "backend/tests/test_tk_e2e.py::test_missed_ceiling_fan_is_added_manually_and_counted",
+  "fan_branch": "manual (forced: the detector stub drops A1's ceiling-fan detections)",
+  "ai_implementation": "fake",
+  "ai_choice": "deterministic test: FakeVerifier and an empty FakeDiscoverer (test doubles, not a model)",
+  "result": "passed: every assertion held",
+  "screenshots": [
+    {
+      "file": "01_fan_missing.png",
+      "shows": "after Analyze (det/0 stub): no ceiling-fan marker at the A1 bedroom J hub"
+    },
+    {
+      "file": "02_fan_manual_form.png",
+      "shows": "fan fallback: C pressed, the J hub clicked, the new-device form set to ceiling_fan / optional pre-wire before Save"
+    },
+    {
+      "file": "03_fan_manual_saved.png",
+      "shows": "fan fallback: the manual ceiling fan saved (manual, accepted, counted); the official totals now include it"
+    },
+    {
+      "file": "04_fan_manual_reloaded.png",
+      "shows": "fan fallback after reload: the manual fan persists and room BEDROOM / STUDIO's official ceiling_fan total is 1 (was 0)"
+    }
+  ],
+  "run_id": "run-001",
+  "detector_version": "det/0+stub-drops-A1-ceiling-fans",
+  "dropped_detections": [
+    {
+      "category": "ceiling_fan",
+      "subtype": "optional_pre_wire",
+      "x_pt": 1276.56,
+      "y_pt": 506.28
+    }
+  ],
+  "fan_hub": {
+    "token_id": "t0059",
+    "bbox_pt": [
+      1274.52,
+      503.333,
+      1277.842,
+      509.448
+    ],
+    "centre_pt": [
+      1276.181,
+      506.3905
+    ]
+  },
+  "fan": {
+    "device_id": "1333b83c23aa4eae82222d08a0889606",
+    "point_pt": [
+      1276.181,
+      506.07
+    ],
+    "room_row": "BEDROOM / STUDIO",
+    "room_ceiling_fan_before": 0,
+    "room_ceiling_fan_after": 1,
+    "official_total_before": 0,
+    "official_total_after": 1
+  },
+  "export": {
+    "origin_reported": "manual",
+    "room_key": "BEDROOM / STUDIO",
+    "official_ceiling_fans": 1,
+    "complete": false
+  }
+}
