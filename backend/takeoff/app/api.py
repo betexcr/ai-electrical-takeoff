@@ -17,6 +17,11 @@ analyzer, the export and the AI stages, plus the layout-A page.
   startup; availability is checked lazily (``GET /api/config``, or the first run) and a failure is reported, never
   raised. ``ai="off"`` runs det/0 only. Tests pass the test doubles as a ``(verifier, discoverer)`` tuple.
 * **Runs**: interrupted runs are failed once at startup (``Analyzer.recover_interrupted``), before any worker starts.
+* **Request guards** (final review I5), one middleware: every request's ``Host`` must be loopback (``127.0.0.1``,
+  ``localhost``, ``[::1]``, any port) or the explicit ``host`` the server was started with, else 403 (DNS
+  rebinding: a hostile page must not read the takeoff). Every ``/api`` write (not GET/HEAD/OPTIONS) must have no
+  ``Origin`` or the request's own ``scheme://host:port`` (403), and a JSON ``Content-Type`` (415); the upload
+  instead needs ``X-Takeoff-Client: 1``, which a cross-site form cannot send. So no cross-site request can write.
 """
 
 from __future__ import annotations
@@ -61,6 +66,10 @@ SHARED_DIR = BACKEND / "shared" / "static"
 SCORE_LABEL = "match score (not a probability)"
 MAX_UPLOAD_BYTES = 200 * 1024 * 1024
 _UI_PREFIXES = ("/static/", "/shared/")
+LOOPBACK_HOSTS = ("127.0.0.1", "localhost", "[::1]", "::1")
+SAFE_METHODS = ("GET", "HEAD", "OPTIONS")
+CLIENT_HEADER = "x-takeoff-client"  # the upload's guard: a custom header forces a CORS preflight
+UPLOAD_PATH = "/api/documents"
 
 log = logging.getLogger("takeoff.api")
 
@@ -115,6 +124,24 @@ def _dump(x: Any) -> Any:
 
 def _why(e: BaseException) -> str:
     return f"{type(e).__name__}: {e}"[:300]
+
+
+def host_name(host: str) -> str:
+    """The name part of a ``Host`` header or ``--host`` value, lower-cased: ``[::1]:8766`` -> ``[::1]``."""
+    h = (host or "").strip().lower()
+    if h.startswith("["):
+        return h[:h.find("]") + 1] if "]" in h else h
+    if h.count(":") > 1:  # a bare IPv6 address (a --host value, never a Host header)
+        return f"[{h}]"
+    return h.split(":", 1)[0]
+
+
+def is_loopback(host: str) -> bool:
+    return host_name(host) in LOOPBACK_HOSTS
+
+
+def _refuse(status: int, code: str, message: str) -> JSONResponse:
+    return JSONResponse({"code": code, "message": message}, status_code=status)
 
 
 # --- sheet views (memoized) ----------------------------------------------------------------------------------------
@@ -240,11 +267,13 @@ def _clean_name(name: str | None) -> str:
 
 def create_app(data_dir: Path | str, supplied_pdf: Path | str | None, default_reviewer: str = "reviewer",
                background: bool = True, ai: Literal["claude", "off"] | tuple = "claude", *,
-               max_requests: int | None = None, detector=None, cache_dir: Path | str | None = None) -> FastAPI:
+               max_requests: int | None = None, detector=None, cache_dir: Path | str | None = None,
+               host: str | None = None) -> FastAPI:
     """The takeoff app over ``data_dir`` (``takeoff.sqlite``, ``documents/``, ``exports/``, ``cache/``).
 
     ``detector`` (default det/0) and ``cache_dir`` (default ``<data>/cache``) exist for tests; ``max_requests`` is the
-    per-run AI request cap (default ``TAKEOFF_AI_MAX_REQUESTS`` or 200).
+    per-run AI request cap (default ``TAKEOFF_AI_MAX_REQUESTS`` or 200). ``host`` is the server's explicit ``--host``:
+    a non-loopback one is accepted as a ``Host`` besides the loopback names.
     """
     data_dir = Path(data_dir)
     documents_dir = data_dir / "documents"
@@ -367,6 +396,31 @@ def create_app(data_dir: Path | str, supplied_pdf: Path | str | None, default_re
     app.state.analyzer = analyzer
     app.state.views = views
 
+    allowed_hosts = set(LOOPBACK_HOSTS) | ({host_name(host)} if host else set())
+
+    @app.middleware("http")
+    async def _guard(request: Request, call_next):
+        # One guard for cross-site requests and DNS rebinding (see the module docstring).
+        host_header = request.headers.get("host", "")
+        if host_name(host_header) not in allowed_hosts:
+            return _refuse(403, "forbidden", f"host {host_header!r} is not allowed (this server answers on "
+                                             f"{', '.join(sorted(allowed_hosts))})")
+        path = request.url.path
+        if path.startswith("/api/") and request.method not in SAFE_METHODS:
+            origin = request.headers.get("origin")
+            if origin is not None and origin.rstrip("/").lower() != f"{request.url.scheme}://{host_header}".lower():
+                return _refuse(403, "forbidden", f"cross-site request from origin {origin!r} refused")
+            if request.method == "POST" and path == UPLOAD_PATH:
+                if request.headers.get(CLIENT_HEADER) != "1":
+                    return _refuse(403, "forbidden", "an upload must come from the takeoff page "
+                                                     "(header X-Takeoff-Client: 1)")
+            else:
+                media = request.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+                if media != "application/json":
+                    return _refuse(415, "unsupported_media_type",
+                                   f"this endpoint takes application/json, not {media or 'no content type'}")
+        return await call_next(request)
+
     @app.middleware("http")
     async def _no_stale_ui(request: Request, call_next):
         # The page and its scripts must never be served stale after an update.
@@ -461,6 +515,9 @@ def create_app(data_dir: Path | str, supplied_pdf: Path | str | None, default_re
     @app.post("/api/documents")
     async def upload_document(request: Request, file_name: str | None = None, x_reviewer: str | None = Header(None)):
         name = _clean_name(file_name)
+        declared = request.headers.get("content-length")
+        if declared is not None and declared.isdigit() and int(declared) > MAX_UPLOAD_BYTES:  # before reading it
+            raise TakeoffError("invalid_pdf", f"the upload is larger than {MAX_UPLOAD_BYTES // (1024 * 1024)} MB")
         data = await request.body()
         doc, created = await run_in_threadpool(register, data, name, "upload", actor(x_reviewer))
         return JSONResponse({"document": _dump(doc), "created": created}, status_code=201 if created else 200)

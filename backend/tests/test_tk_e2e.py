@@ -115,6 +115,8 @@ class Server:
         self._meta: dict[str, dict] = {}
 
     def call(self, method, path, json=None):
+        if json is None and method not in ("GET", "HEAD"):
+            json = {}  # every API write is JSON (the request guard, final review I5), as the page sends it
         r = self.http.request(method, path, json=json)
         assert r.status_code < 400, (path, r.status_code, r.text)
         return r.json()
@@ -658,6 +660,29 @@ def test_no_percentage_or_accuracy_text_on_page(page, server):
     page.click("#export")
     page.wait_for_function("document.getElementById('export-status').textContent.includes('Export')")
     check()
+
+
+def test_page_upload_and_body_less_writes_pass_the_request_guard(page, server, tmp_path):
+    """I5: the page's upload sends X-Takeoff-Client: 1 and its body-less writes send {} as JSON; a write without
+    them (a cross-site form, say) is refused."""
+    import pymupdf
+
+    doc = pymupdf.open()
+    doc.new_page(width=612, height=792).insert_text((72, 72), "uploaded through the page")
+    pdf = tmp_path / "page-upload.pdf"
+    doc.save(pdf)
+    doc.close()
+    open_page(page, server)
+    page.set_input_files("#upload", str(pdf))
+    page.wait_for_function("document.getElementById('document').options.length === 2")
+    sha = hashlib.sha256(pdf.read_bytes()).hexdigest()
+    assert page.input_value("#document") == sha
+    assert [d["id"] for d in server.call("GET", "/api/documents")][-1] == sha
+    r = server.http.post("/api/documents", params={"file_name": "x.pdf"}, content=pdf.read_bytes(),
+                         headers={"Content-Type": "application/pdf"})
+    assert r.status_code == 403 and r.json()["code"] == "forbidden"
+    r = server.http.post(f"/api/documents/{server.doc}/export", content=b"", headers={"Content-Type": "text/plain"})
+    assert r.status_code == 415
 
 
 # --- AC-T16: review figures ----------------------------------------------------------------------------------------------

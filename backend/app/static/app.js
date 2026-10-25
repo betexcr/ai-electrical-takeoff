@@ -58,10 +58,15 @@ function reviewer() {
   return ($("reviewer").value || "").trim() || st.config?.default_reviewer || "reviewer";
 }
 
+// The server's request guard (api.py): every write is JSON (a body-less one sends {}), and the upload carries
+// X-Takeoff-Client: 1. A cross-site page can send neither without a CORS preflight the server never grants.
 async function api(method, url, body, { quiet = false, raw = null, contentType = null } = {}) {
   const opts = { method, headers: { "X-Reviewer": reviewer() } };
-  if (raw !== null) { opts.headers["Content-Type"] = contentType; opts.body = raw; }
-  else if (body !== undefined) { opts.headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(body); }
+  const write = !["GET", "HEAD", "OPTIONS"].includes(method);
+  if (raw !== null) { opts.headers["Content-Type"] = contentType; opts.headers["X-Takeoff-Client"] = "1"; opts.body = raw; }
+  else if (body !== undefined || write) {
+    opts.headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(body === undefined ? {} : body);
+  }
   const r = await fetch(url, opts);
   const data = r.headers.get("content-type")?.includes("json") ? await r.json() : null;
   if (!r.ok) {

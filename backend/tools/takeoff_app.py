@@ -25,6 +25,17 @@ DEFAULTS = {
 }
 
 
+def host_warning(host: str) -> str | None:
+    """The warning ``serve`` prints for a non-loopback ``--host`` (None for a loopback one)."""
+    from takeoff.app.api import is_loopback
+
+    if is_loopback(host):
+        return None
+    return (f"WARNING: --host {host} is not loopback: anyone who can reach this machine can read and change the "
+            f"takeoff, and the API has no login. Requests must name Host {host} (or a loopback name); "
+            f"use --host 127.0.0.1 unless you need remote access.")
+
+
 def cmd_serve(args) -> int:
     import uvicorn
 
@@ -36,7 +47,10 @@ def cmd_serve(args) -> int:
         print(f"supplied PDF not found: {pdf}", file=sys.stderr)
         return 2
     app = create_app(Path(args.data or DEFAULTS["data"]), pdf, default_reviewer=args.reviewer, background=True,
-                     ai="claude" if args.ai == "on" else "off", max_requests=args.ai_max_requests)
+                     ai="claude" if args.ai == "on" else "off", max_requests=args.ai_max_requests, host=args.host)
+    warning = host_warning(args.host)
+    if warning:
+        print(warning, file=sys.stderr)
     uvicorn.run(app, host=args.host, port=args.port, log_level="info")
     return 0
 

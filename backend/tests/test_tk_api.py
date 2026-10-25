@@ -29,6 +29,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PDF = ROOT / "plans" / "Escondido_Electrical_Plans_Ceiling_Fans.pdf"
 A1 = "A1-111"
 SHEETS = ["A1-111", "A2-111", "A3-111", "A4-111"]
+LOCAL = "http://127.0.0.1:8766"  # the Host guard (final review I5) refuses TestClient's default "testserver"
 NO_LEGEND_MESSAGE = ("No recognizable symbol legend on this sheet; automated detection did not run. "
                      "Add devices manually.")
 
@@ -75,7 +76,7 @@ def make(tmp_path, cache):
         kw.setdefault("ai", "off")
         kw.setdefault("detector", FakeDetector())
         app = create_app(data or tmp_path / "data", PDF, background=False, cache_dir=cache, **kw)
-        c = TestClient(app)
+        c = TestClient(app, base_url=LOCAL)
         c.__enter__()
         clients.append(c)
         return c
@@ -97,7 +98,8 @@ def blank_pdf(text: str | None = None) -> bytes:
 
 def upload(client, data: bytes, name="upload.pdf", **kw):
     return client.post("/api/documents", params={"file_name": name}, content=data,
-                       headers={"Content-Type": "application/pdf", **kw.pop("headers", {})}, **kw)
+                       headers={"Content-Type": "application/pdf", "X-Takeoff-Client": "1", **kw.pop("headers", {})},
+                       **kw)
 
 
 def clear_points(meta: dict, n: int, sep: float = 40.0) -> list[tuple[float, float]]:
@@ -228,13 +230,13 @@ def test_moved_supplied_pdf_is_repointed_by_sha_and_the_takeoff_keeps_working(tm
     new.parent.mkdir()
     shutil.copy(PDF, old)
     data = tmp_path / "data"
-    with TestClient(create_app(data, old, ai="off", background=False, detector=FakeDetector())) as c:
+    with TestClient(create_app(data, old, ai="off", background=False, detector=FakeDetector()), base_url=LOCAL) as c:
         dev = _device_on_a1(c, sha)
         before = counts(c, sha)
         assert c.get("/api/documents").json()[0]["stored_path"] == str(old.resolve())
     shutil.move(str(old), str(new))
     shutil.rmtree(data / "cache", ignore_errors=True)
-    with TestClient(create_app(data, new, ai="off", background=False, detector=FakeDetector())) as c:
+    with TestClient(create_app(data, new, ai="off", background=False, detector=FakeDetector()), base_url=LOCAL) as c:
         r = c.get(f"/api/documents/{sha}/counts")
         assert r.status_code == 200, r.text
         assert r.json()["official"] == before["official"] and r.json()["review"] == before["review"]
@@ -260,12 +262,12 @@ def test_counts_degrade_when_the_pdf_is_missing_and_recover_when_it_is_back(tmp_
     where = tmp_path / "plans.pdf"
     shutil.copy(PDF, where)
     data = tmp_path / "data"
-    with TestClient(create_app(data, where, ai="off", background=False, detector=FakeDetector())) as c:
+    with TestClient(create_app(data, where, ai="off", background=False, detector=FakeDetector()), base_url=LOCAL) as c:
         dev = _device_on_a1(c, sha)
         before = counts(c, sha)
     hidden = tmp_path / "hidden.pdf"
     shutil.move(str(where), str(hidden))
-    with TestClient(create_app(data, None, ai="off", background=False, detector=FakeDetector())) as c:
+    with TestClient(create_app(data, None, ai="off", background=False, detector=FakeDetector()), base_url=LOCAL) as c:
         k = counts(c, sha)
         assert k["review"] == before["review"] and k["official"] == before["official"]
         assert set(k["rooms_unavailable"]) == {A1} and "FileNotFoundError" in k["rooms_unavailable"][A1]
@@ -281,11 +283,13 @@ def test_uploads_are_stored_relative_to_the_data_dir(tmp_path, cache):
     """I3b: an upload's stored path is relative to the data directory, so the directory can move."""
     data = blank_pdf("relative")
     up_sha = hashlib.sha256(data).hexdigest()
-    with TestClient(create_app(tmp_path / "data", None, ai="off", background=False, cache_dir=cache)) as c:
+    with TestClient(create_app(tmp_path / "data", None, ai="off", background=False, cache_dir=cache),
+                    base_url=LOCAL) as c:
         body = upload(c, data, "rel.pdf").json()
         assert body["document"]["stored_path"] == f"documents/{up_sha}.pdf"
     shutil.move(str(tmp_path / "data"), str(tmp_path / "moved-data"))
-    with TestClient(create_app(tmp_path / "moved-data", None, ai="off", background=False, cache_dir=cache)) as c:
+    with TestClient(create_app(tmp_path / "moved-data", None, ai="off", background=False, cache_dir=cache),
+                    base_url=LOCAL) as c:
         sheet = c.get(f"/api/documents/{up_sha}/sheets").json()[0]["sheet_id"]
         assert meta_of(c, up_sha, sheet)["view_error"] is None
 
@@ -314,7 +318,8 @@ def test_upload_non_pdf_is_400_and_writes_nothing(make, tmp_path):
         assert r.json()["code"] == "invalid_pdf" and r.json()["message"]
     assert len(store.events()) == events and files_under(docs_dir) == files
     assert len(c.get("/api/documents").json()) == 1
-    r = c.post("/api/documents", content=blank_pdf(), headers={"Content-Type": "application/pdf"})  # no file_name
+    r = c.post("/api/documents", content=blank_pdf(),
+               headers={"Content-Type": "application/pdf", "X-Takeoff-Client": "1"})  # no file_name
     assert r.status_code in (400, 422) and r.json()["code"] == "invalid"
     assert len(store.events()) == events and files_under(docs_dir) == files
 
@@ -427,7 +432,8 @@ def test_disagreement_reason_flow_over_http(make, sha, tmp_path):
     r = c.post(f"/api/devices/{dev['id']}/accept", json={})
     assert r.status_code == 409 and r.json()["code"] == "ai_disagreement_reason_required"
     assert [f["type"] for f in r.json()["blocking_flags"]] == ["model_disagrees"]
-    r = c.post(f"/api/devices/{dev['id']}/accept")  # no body at all: the same refusal
+    r = c.post(f"/api/devices/{dev['id']}/accept", content=b"",
+               headers={"Content-Type": "application/json"})  # an empty JSON body: the same refusal
     assert r.status_code == 409 and r.json()["code"] == "ai_disagreement_reason_required"
     assert counts(c, sha)["review"]["official_total"] == 0
 
@@ -458,7 +464,7 @@ def test_error_codes_and_statuses(make, sha, tmp_path):
     err(c.get("/api/devices/nope"), 404, "not_found")
     err(c.get("/api/runs/run-999"), 404, "not_found")
     err(c.post("/api/flags/nope/acknowledge", json={"reason": "x"}), 404, "not_found")
-    err(c.post("/api/bulk/nope/undo"), 404, "not_found")
+    err(c.post("/api/bulk/nope/undo", json={}), 404, "not_found")
     err(c.post(f"/api/documents/{sha}/analyze", json={"sheet_ids": ["Z9-999"]}), 404, "not_found")
     err(c.post(f"/api/documents/{sha}/devices", json={"sheet_id": A1, "category": "switch", "subtype": "standard",
                                                      "point": {"u": 0.01, "v": 0.99}}), 400, "outside_region")
@@ -488,11 +494,11 @@ def test_error_codes_and_statuses(make, sha, tmp_path):
     assert counts(c, sha)["review"]["official_total"] == 2
     last = c.get(f"/api/documents/{sha}/bulk-actions").json()
     assert last["last_undoable"]["id"] == bulk.json()["id"]
-    undo = c.post(f"/api/bulk/{bulk.json()['id']}/undo")
+    undo = c.post(f"/api/bulk/{bulk.json()['id']}/undo", json={})
     assert undo.status_code == 200 and undo.json()["kind"] == "undo"
     assert c.get(f"/api/documents/{sha}/bulk-actions").json()["last_undoable"] is None
     assert counts(c, sha)["review"]["official_total"] == 0
-    err(c.post(f"/api/bulk/{bulk.json()['id']}/undo"), 400, "invalid")
+    err(c.post(f"/api/bulk/{bulk.json()['id']}/undo", json={}), 400, "invalid")
     err(c.post(f"/api/documents/{sha}/bulk-accept", json={"expected_count": 2, "sheet_id": "Z9-999"}), 404,
         "not_found")
 
@@ -598,7 +604,7 @@ def test_analyze_with_ai_off(make, sha, tmp_path):
     assert (run["sheets"][A1]["ai_verify"]["status"], run["sheets"][A1]["ai_discover"]["status"]) == ("off", "off")
 
     # the export of an unfinished takeoff says so
-    r = c.post(f"/api/documents/{sha}/export")
+    r = c.post(f"/api/documents/{sha}/export", json={})
     assert r.status_code == 200, r.text
     out = Path(r.json()["path"])
     assert out.parent == tmp_path / "off" / "exports" and (out / "manifest.json").exists()
@@ -636,3 +642,92 @@ def test_counts_by_sheet_match_the_per_sheet_bulk_scope(make, sha, tmp_path):
     k2, n2 = state()
     assert k2["review_by_sheet"][A1]["awaiting_unflagged"] == 0 == n2[A1]
     assert k2["review_by_sheet"]["A2-111"] == per["A2-111"] and n2["A2-111"] == n["A2-111"]
+
+
+# --- request guards: cross-site requests and DNS rebinding (final review I5) ------------------------------------
+
+def _guard(r, status, code):
+    assert r.status_code == status, r.text
+    assert r.json()["code"] == code and r.json()["message"], r.json()
+
+
+def test_foreign_host_is_refused_for_reads_and_writes(make, sha):
+    c = make()
+    for host in ("evil.example", "evil.example:8766", "127.0.0.1.evil.example", "localhost.evil.example:80"):
+        _guard(c.get("/api/config", headers={"Host": host}), 403, "forbidden")
+        _guard(c.get(f"/api/documents/{sha}/counts", headers={"Host": host}), 403, "forbidden")
+        _guard(c.post(f"/api/documents/{sha}/export", json={}, headers={"Host": host}), 403, "forbidden")
+    for host in ("127.0.0.1", "127.0.0.1:8766", "localhost:9999", "LOCALHOST", "[::1]:8766", "[::1]"):
+        assert c.get("/api/config", headers={"Host": host}).status_code == 200, host
+
+
+def test_explicit_non_loopback_host_is_accepted_and_others_are_not(tmp_path, cache):
+    app = create_app(tmp_path / "data", PDF, ai="off", background=False, cache_dir=cache, host="192.168.1.20")
+    with TestClient(app, base_url="http://192.168.1.20:8766") as c:
+        assert c.get("/api/config").status_code == 200
+        assert c.get("/api/config", headers={"Host": "127.0.0.1:8766"}).status_code == 200
+        _guard(c.get("/api/config", headers={"Host": "evil.example"}), 403, "forbidden")
+
+
+def test_foreign_origin_is_refused_on_writes(make, sha):
+    c = make()
+    meta = meta_of(c, sha)
+    (pt,) = clear_points(meta, 1)
+    body = {"sheet_id": A1, "category": "switch", "subtype": "standard", "point": to_norm(meta, pt)}
+    store = c.app.state.store
+    events = len(store.events())
+    for origin in ("http://evil.example", "null", "http://127.0.0.1:9999", "https://127.0.0.1:8766"):
+        _guard(c.post(f"/api/documents/{sha}/devices", json=body, headers={"Origin": origin}), 403, "forbidden")
+    assert len(store.events()) == events  # nothing written
+    assert c.post(f"/api/documents/{sha}/devices", json=body, headers={"Origin": LOCAL}).status_code == 201
+    assert c.get("/api/config", headers={"Origin": "http://evil.example"}).status_code == 200  # reads: Host only
+
+
+def test_text_plain_or_no_content_type_on_a_json_endpoint_is_refused(make, sha):
+    c = make(detector=FakeDetector({A1: [("switch", "standard", 1080.4, 158.08)]}))
+    run = c.post(f"/api/documents/{sha}/analyze", json={"sheet_ids": [A1]}).json()
+    (dev,) = c.get(f"/api/documents/{sha}/devices").json()["devices"]
+    for headers in ({"Content-Type": "text/plain"}, {"Content-Type": "application/x-www-form-urlencoded"},
+                    {"Content-Type": "multipart/form-data; boundary=x"}, {}):
+        _guard(c.post(f"/api/devices/{dev['id']}/accept", content=b"{}", headers=headers), 415,
+               "unsupported_media_type")
+        _guard(c.post(f"/api/documents/{sha}/analyze", content=b"", headers=headers), 415, "unsupported_media_type")
+    assert c.get(f"/api/devices/{dev['id']}").json()["device"]["review_state"] == "proposed"
+    assert [r["id"] for r in c.get(f"/api/documents/{sha}/runs").json()] == [run["id"]]  # no run started
+    r = c.post(f"/api/devices/{dev['id']}/accept", content=b"{}",
+               headers={"Content-Type": "application/json; charset=utf-8"})
+    assert r.status_code == 200 and r.json()["review_state"] == "accepted"
+
+
+def test_upload_needs_the_client_header_and_checks_the_size_first(make, monkeypatch):
+    from takeoff.app import api as API
+
+    c = make()
+    data = blank_pdf("guarded")
+    r = c.post("/api/documents", params={"file_name": "x.pdf"}, content=data,
+               headers={"Content-Type": "application/pdf"})
+    _guard(r, 403, "forbidden")
+    assert len(c.get("/api/documents").json()) == 1  # nothing registered
+    assert upload(c, data, "x.pdf").status_code == 201
+
+    def never(_data):
+        raise AssertionError("the body was read and checked although Content-Length is over the limit")
+
+    monkeypatch.setattr(API, "MAX_UPLOAD_BYTES", 100)
+    monkeypatch.setattr(API, "check_pdf", never)
+    r = upload(c, blank_pdf("too big"), "big.pdf")
+    _guard(r, 400, "invalid_pdf")
+    assert "larger than" in r.json()["message"]
+
+
+def test_serve_warns_when_the_host_is_not_loopback():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("takeoff_app_cli", ROOT / "backend" / "tools" / "takeoff_app.py")
+    cli = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cli)
+    assert cli.host_warning("127.0.0.1") is None and cli.host_warning("localhost") is None
+    assert cli.host_warning("::1") is None
+    for host in ("0.0.0.0", "192.168.1.20", "my-laptop"):
+        w = cli.host_warning(host)
+        assert w and host in w and "not loopback" in w
