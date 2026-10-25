@@ -65,15 +65,18 @@ def intake(pdf_path: Path, document_id: str) -> list[SheetInfo]:
             n = page.number + 1
             info = dict(id=f"{document_id}:{n}", document_id=document_id, page_number=n)
             try:
+                if page.rotation % 360 != 0:
+                    raise S.SheetError(f"page {n} is rotated ({page.rotation}); rotated pages are not supported")
                 lines = L.text_lines(page)
                 sid = S.sheet_id(page, lines)
                 region = S.electrical_region(page, lines)
                 legend = _legend_locations(page, lines)
                 out.append(SheetInfo(**info, sheet_id=sid, region_bbox_pt=region["bbox_pt"],
                                      legend_found=len(legend) >= LEGEND_MIN_LABELS))
-            except S.SheetError as e:
+            except Exception as e:  # intake never raises on a readable PDF; the page is recorded with a note
+                note = str(e) if isinstance(e, S.SheetError) else f"intake failed: {type(e).__name__}: {e}"
                 out.append(SheetInfo(**info, sheet_id=f"page-{n}", region_bbox_pt=_full_page_pt(page),
-                                     legend_found=False, note=str(e)))
+                                     legend_found=False, note=note))
         return out
     finally:
         doc.close()
