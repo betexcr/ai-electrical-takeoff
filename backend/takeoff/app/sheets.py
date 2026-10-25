@@ -1,7 +1,9 @@
 """Sheet intake for any PDF, plus the per-request legend references used by the AI stages.
 
 ``intake`` never raises on a readable PDF: a page whose title block or electrical-plan region
-cannot be found becomes ``page-N`` with the full page as its region and a note. Everything here
+cannot be found becomes ``page-N`` with the full page as its region and a note. A sheet id is unique within a
+document and never holds a "/" (it is a route segment): a repeated title-block id gets ``#p<page>`` on the later
+page, a "/" becomes "-", each with an informational note (final review M-d). Everything here
 reuses the reviewer-side primitives (``groundtruth.sheets``) and the Milestone 1 symbol
 primitives (``pdf.symbols``); nothing is re-implemented. The PDF is opened from bytes and is
 never written.
@@ -24,6 +26,8 @@ from takeoff.pdf import layout as L
 from takeoff.pdf import symbols as SY
 
 LEGEND_MIN_LABELS = 5  # LEGEND_LABELS found exactly once for legend_found (Escondido: 27/27)
+DUPLICATE_ID_NOTE = "sheet id {sid} is also on page {first}; this page is {new}"
+SLASH_NOTE = "sheet id {raw!r} has a '/', which a route cannot carry; it is {new}"
 
 COMPOSITE_COLS = 4
 COMPOSITE_CELL_W = 640  # 4 columns -> 2560 px, within the 2576 px image limit
@@ -56,11 +60,17 @@ def _legend_locations(page: pymupdf.Page, lines) -> dict[str, dict]:
     return found
 
 
+def route_safe_id(raw: str) -> str:
+    """A title-block id usable as one route segment ("/" would split it)."""
+    return raw.replace("/", "-")
+
+
 def intake(pdf_path: Path, document_id: str) -> list[SheetInfo]:
-    """One SheetInfo per page of the PDF."""
+    """One SheetInfo per page of the PDF, with document-unique sheet ids."""
     doc = _open(pdf_path)
     try:
         out = []
+        first_page: dict[str, int] = {}
         for page in doc:
             n = page.number + 1
             info = dict(id=f"{document_id}:{n}", document_id=document_id, page_number=n)
@@ -68,11 +78,20 @@ def intake(pdf_path: Path, document_id: str) -> list[SheetInfo]:
                 if page.rotation % 360 != 0:
                     raise S.SheetError(f"page {n} is rotated ({page.rotation}); rotated pages are not supported")
                 lines = L.text_lines(page)
-                sid = S.sheet_id(page, lines)
+                raw = S.sheet_id(page, lines)
                 region = S.electrical_region(page, lines)
                 legend = _legend_locations(page, lines)
+                sid, notes = route_safe_id(raw), []
+                if sid != raw:
+                    notes.append(SLASH_NOTE.format(raw=raw, new=sid))
+                if sid in first_page:  # the same title-block id on an earlier page: keep both, distinctly
+                    new = f"{sid}#p{n}"
+                    notes.append(DUPLICATE_ID_NOTE.format(sid=sid, first=first_page[sid], page=n, new=new))
+                    sid = new
+                first_page.setdefault(sid, n)
                 out.append(SheetInfo(**info, sheet_id=sid, region_bbox_pt=region["bbox_pt"],
-                                     legend_found=len(legend) >= LEGEND_MIN_LABELS))
+                                     legend_found=len(legend) >= LEGEND_MIN_LABELS,
+                                     note="; ".join(notes) or None))
             except Exception as e:  # intake never raises on a readable PDF; the page is recorded with a note
                 note = str(e) if isinstance(e, S.SheetError) else f"intake failed: {type(e).__name__}: {e}"
                 out.append(SheetInfo(**info, sheet_id=f"page-{n}", region_bbox_pt=_full_page_pt(page),

@@ -56,7 +56,7 @@ class SheetInfo(_Model):
     sheet_id: str = Field(min_length=1)  # drawing sheet number, e.g. "A1-111"
     region_bbox_pt: PtRect | None = None
     legend_found: bool = False
-    note: str | None = None
+    note: str | None = None  # why intake could not read the page (then legend_found is False), or an id note
 
 
 class Tokens(_Model):

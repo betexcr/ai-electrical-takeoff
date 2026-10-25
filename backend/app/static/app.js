@@ -52,6 +52,10 @@ function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// Every id in a route is encoded: a sheet id is title-block text (it may hold "#", "?" or spaces), and device and
+// flag ids embed it (final review M-d).
+const enc = encodeURIComponent;
+
 function plural(n, word) { return `${n} ${word}${n === 1 ? "" : "s"}`; }
 
 function reviewer() {
@@ -207,18 +211,18 @@ async function refreshData() {
   if (!doc) return;
   const tok = st.selTok; // the selection this refresh started with (select() bumps it)
   const [devs, counts, eligible, bulk, runs] = await Promise.all([
-    api("GET", `/api/documents/${doc}/devices`),
-    api("GET", `/api/documents/${doc}/counts`),
-    api("GET", `/api/documents/${doc}/bulk-eligible`),
-    api("GET", `/api/documents/${doc}/bulk-actions`),
-    api("GET", `/api/documents/${doc}/runs`),
+    api("GET", `/api/documents/${enc(doc)}/devices`),
+    api("GET", `/api/documents/${enc(doc)}/counts`),
+    api("GET", `/api/documents/${enc(doc)}/bulk-eligible`),
+    api("GET", `/api/documents/${enc(doc)}/bulk-actions`),
+    api("GET", `/api/documents/${enc(doc)}/runs`),
   ]);
   Object.assign(st, { devices: devs.devices, openFlags: devs.open_flags, counts, eligible, bulk, runs });
   if (tok !== st.selTok || !st.selectedId) return; // the selection changed meanwhile: select() loads its own detail
   if (!st.devices.some((d) => d.id === st.selectedId)) { clearSelection(); return; }
   const id = st.selectedId;
   let det = null;
-  try { det = await api("GET", `/api/devices/${id}`, undefined, { quiet: true }); } catch (e) { det = null; }
+  try { det = await api("GET", `/api/devices/${enc(id)}`, undefined, { quiet: true }); } catch (e) { det = null; }
   if (tok === st.selTok && st.selectedId === id) st.detail = det; // never a stale detail over a newer selection
 }
 
@@ -230,7 +234,7 @@ async function loadDocument(docId, sheetId = null) {
   $("document").value = docId;
   clearSelection();
   st.exportResult = null;
-  st.sheets = await api("GET", `/api/documents/${docId}/sheets`);
+  st.sheets = await api("GET", `/api/documents/${enc(docId)}/sheets`);
   $("sheet").innerHTML = st.sheets.map((s) => `<option value="${esc(s.sheet_id)}">${esc(s.sheet_id)} (p${s.page_number})</option>`).join("");
   await refreshData();
   const start = st.sheets.some((s) => s.sheet_id === sheetId) ? sheetId : st.sheets[0]?.sheet_id;
@@ -240,7 +244,7 @@ async function loadDocument(docId, sheetId = null) {
 
 async function loadSheet(sheetId, keepView = false) {
   st.loading = true;
-  const meta = await api("GET", `/api/documents/${st.docId}/sheets/${sheetId}/meta`);
+  const meta = await api("GET", `/api/documents/${enc(st.docId)}/sheets/${enc(sheetId)}/meta`);
   if (st.sheetId !== sheetId) { st.newPoint = null; st.highlight = new Set(); st.highlightKey = null; }
   st.sheetId = sheetId; st.meta = meta;
   $("sheet").value = sheetId;
@@ -255,7 +259,7 @@ async function loadSheet(sheetId, keepView = false) {
       img.dataset.key = key;
       img.classList.remove("hidden");
       img.width = meta.image.width_px; img.height = meta.image.height_px;
-      await new Promise((res) => { img.onload = res; img.onerror = res; img.src = `/api/documents/${st.docId}/sheets/${sheetId}/image`; });
+      await new Promise((res) => { img.onload = res; img.onerror = res; img.src = `/api/documents/${enc(st.docId)}/sheets/${enc(sheetId)}/image`; });
       if (!keepView) fitView();
     }
   }
@@ -470,7 +474,8 @@ function renderActions() {
   line.dataset.awaiting = sr.awaiting; line.dataset.unflagged = sr.awaiting_unflagged; line.dataset.flagged = sr.awaiting_flagged;
   const last = st.bulk?.last_undoable;
   $("undo-bulk").disabled = !last;
-  $("undo-bulk").title = last ? `${plural(last.device_ids.length, "device")}, ${last.created_at.slice(0, 19)}` : "";
+  $("undo-bulk").title = last ? `${last.sheet_id === "*" ? "all sheets" : `sheet ${last.sheet_id}`}: ` +
+    `${plural(last.device_ids.length, "device")}, ${last.created_at.slice(0, 19)}` : "";
   $("review-flagged-status").textContent = st.flaggedNote;
 }
 
@@ -754,7 +759,7 @@ async function select(id) {
   renderTopbar(); renderOverlay(); renderDevice(); renderActions();
   if (!id) return;
   try {
-    const det = await api("GET", `/api/devices/${id}`);
+    const det = await api("GET", `/api/devices/${enc(id)}`);
     if (tok !== st.selTok) return;
     st.detail = det;
   } catch (e) { return; }
@@ -806,7 +811,7 @@ async function saveSelected() {
     }
   }
   let res;
-  try { res = await api("PATCH", `/api/devices/${dv.id}`, reason ? { changes, reason } : { changes }); }
+  try { res = await api("PATCH", `/api/devices/${enc(dv.id)}`, reason ? { changes, reason } : { changes }); }
   catch (e) { return; }
   st.pendingPoint = null; st.moving = false;
   let blocking = res.blocking_flags || [];
@@ -816,7 +821,7 @@ async function saveSelected() {
     const reason = prompt(disagreementPrompt(md, res.device));
     if (reason && reason.trim()) {
       try {
-        await api("POST", `/api/devices/${dv.id}/accept`, { reason: reason.trim() }, { quiet: true });
+        await api("POST", `/api/devices/${enc(dv.id)}/accept`, { reason: reason.trim() }, { quiet: true });
         blocking = [];
       } catch (e) {
         blocking = e.data?.blocking_flags || blocking;
@@ -841,7 +846,7 @@ async function acceptSelected() {
     body = { reason: reason.trim() };
   }
   try {
-    await api("POST", `/api/devices/${dv.id}/accept`, body, { quiet: true });
+    await api("POST", `/api/devices/${enc(dv.id)}/accept`, body, { quiet: true });
     st.blocking = null;
   } catch (e) {
     st.blocking = e.data?.blocking_flags || null;
@@ -853,7 +858,7 @@ async function acceptSelected() {
 async function rejectSelected() {
   const dv = selectedDevice();
   if (!dv || dv.origin === "manual" || dv.review_state === "rejected") return;
-  if (await guarded(() => api("POST", `/api/devices/${dv.id}/reject`, {})) === undefined) return;
+  if (await guarded(() => api("POST", `/api/devices/${enc(dv.id)}/reject`, {})) === undefined) return;
   st.blocking = null;
   await guarded(refresh);
 }
@@ -864,7 +869,7 @@ async function deleteSelected() {
   if (!canDelete(dv)) { toast(DELETE_DETECTED_MSG, true); return; } // Del/Backspace on a detection
   const reason = prompt("Reason for deleting this device?");
   if (!reason || !reason.trim()) return;
-  if (await guarded(() => api("POST", `/api/devices/${dv.id}/delete`, { reason: reason.trim() })) === undefined) return;
+  if (await guarded(() => api("POST", `/api/devices/${enc(dv.id)}/delete`, { reason: reason.trim() })) === undefined) return;
   clearSelection();
   await guarded(refresh);
 }
@@ -873,12 +878,12 @@ async function acknowledgeFlag(flagId) {
   const f = st.detail?.flags.find((x) => x.id === flagId);
   const reason = prompt(`Reason for acknowledging ${f ? f.type : "this flag"}? The device keeps its current state.`);
   if (!reason || !reason.trim()) return;
-  if (await guarded(() => api("POST", `/api/flags/${flagId}/acknowledge`, { reason: reason.trim() })) === undefined) return;
+  if (await guarded(() => api("POST", `/api/flags/${enc(flagId)}/acknowledge`, { reason: reason.trim() })) === undefined) return;
   await guarded(refresh);
 }
 
 async function resolveFlag(flagId, choice) {
-  if (await guarded(() => api("POST", `/api/flags/${flagId}/resolve`, { choice })) === undefined) return;
+  if (await guarded(() => api("POST", `/api/flags/${enc(flagId)}/resolve`, { choice })) === undefined) return;
   await guarded(refresh);
 }
 
@@ -891,7 +896,7 @@ async function saveNew() {
   const notes = $("new-notes").value.trim();
   if (notes) body.notes = notes;
   let dev;
-  try { dev = await api("POST", `/api/documents/${st.docId}/devices`, body); } catch (e) { return; }
+  try { dev = await api("POST", `/api/documents/${enc(st.docId)}/devices`, body); } catch (e) { return; }
   st.newPoint = null;
   await guarded(refreshData);
   await select(dev.id);
@@ -910,7 +915,7 @@ async function bulkAccept() {
   const sheet = st.sheetId;
   if (!n || !sheet) return;
   if (!confirm(`Accept ${n} unflagged proposals on sheet ${sheet}? Official totals will update.`)) return;
-  try { await api("POST", `/api/documents/${st.docId}/bulk-accept`, { expected_count: n, sheet_id: sheet }); }
+  try { await api("POST", `/api/documents/${enc(st.docId)}/bulk-accept`, { expected_count: n, sheet_id: sheet }); }
   catch (e) { await guarded(refresh); return; }
   await guarded(refresh);
   toast(`Bulk accept done on sheet ${sheet}: ${plural(n, "device")}`);
@@ -919,9 +924,10 @@ async function bulkAccept() {
 async function undoBulk() {
   const last = st.bulk?.last_undoable;
   if (!last) return;
-  if (!confirm(`Undo the last bulk accept (${plural(last.device_ids.length, "device")})? Devices changed since then keep their newer state.`)) return;
+  const where = last.sheet_id === "*" ? "on all sheets" : `on sheet ${last.sheet_id}`; // the bulk accept it undoes
+  if (!confirm(`Undo the last bulk accept ${where} (${plural(last.device_ids.length, "device")})? Devices changed since then keep their newer state.`)) return;
   let res;
-  try { res = await api("POST", `/api/bulk/${last.id}/undo`); } catch (e) { return; }
+  try { res = await api("POST", `/api/bulk/${enc(last.id)}/undo`); } catch (e) { return; }
   await guarded(refresh);
   toast(`Undone: ${res.device_ids.length} restored${res.skipped.length ? `, ${res.skipped.length} kept (changed since)` : ""}`);
 }
@@ -955,7 +961,7 @@ async function analyze() {
   st.polling = true;
   renderTopbar();
   try {
-    const run = await api("POST", `/api/documents/${st.docId}/analyze`, body);
+    const run = await api("POST", `/api/documents/${enc(st.docId)}/analyze`, body);
     upsertRun(run);
     renderStatus();
     await pollRun(run.id);
@@ -973,7 +979,7 @@ async function pollRun(runId) {
   let run = st.runs.find((r) => r.id === runId);
   while (runInProgress(run)) {
     await sleep(1000);
-    run = await api("GET", `/api/runs/${runId}`);
+    run = await api("GET", `/api/runs/${enc(runId)}`);
     upsertRun(run);
     renderStatus();
   }
@@ -989,7 +995,7 @@ async function resumePolling() {
 }
 
 async function exportTakeoff() {
-  try { st.exportResult = await api("POST", `/api/documents/${st.docId}/export`); } catch (e) { return; }
+  try { st.exportResult = await api("POST", `/api/documents/${enc(st.docId)}/export`); } catch (e) { return; }
   renderStatus();
 }
 

@@ -372,7 +372,7 @@ class Analyzer:
 
     def _process_sheet(self, run: Run, sheet_id: str, budget: AC.RequestBudget, ai: bool) -> None:
         info = next(s for s in self.store.list("sheets", sheet_id) if s.document_id == run.document_id)
-        if not info.legend_found or info.note:
+        if not info.legend_found:  # intake failures have no legend; an id note alone never skips a sheet
             unavailable = _stage("off") if not ai else _stage("unavailable", NO_LEGEND)
             now = utcnow()
             self._set_sheet(run, sheet_id, status="skipped_no_legend", message=NO_LEGEND_MESSAGE, started_at=now,

@@ -534,6 +534,8 @@ def test_bulk_accept_confirm_and_undo(page, server):
     dialogs.answers.append(True)
     page.click("#undo-bulk")
     wait_total(page, 0)
+    assert dialogs.messages[-1] == ("Undo the last bulk accept on sheet A1-111 (3 devices)? "
+                                    "Devices changed since then keep their newer state.")  # M-c: names its sheet
     assert all(d["review_state"] == "proposed" for d in server.devices(A1))
     assert server.call("GET", f"/api/documents/{server.doc}/bulk-actions")["last_undoable"] is None
     page.wait_for_function("document.getElementById('undo-bulk').disabled")
@@ -683,6 +685,36 @@ def test_page_upload_and_body_less_writes_pass_the_request_guard(page, server, t
     assert r.status_code == 403 and r.json()["code"] == "forbidden"
     r = server.http.post(f"/api/documents/{server.doc}/export", content=b"", headers={"Content-Type": "text/plain"})
     assert r.status_code == 415
+
+
+def test_a_suffixed_sheet_id_with_a_hash_is_shown_and_reviewed(page, server):
+    """M-d: the page encodes every id in its routes; a sheet "A1-111#p2" (and the device ids embedding it) works."""
+    import pymupdf
+    from urllib.parse import quote
+
+    src = pymupdf.open(PDF)
+    doc = pymupdf.open()
+    doc.insert_pdf(src, from_page=0, to_page=0)
+    doc.insert_pdf(src, from_page=0, to_page=0)
+    data = doc.tobytes()
+    doc.close()
+    src.close()
+    r = server.http.post("/api/documents", params={"file_name": "twice.pdf"}, content=data,
+                         headers={"Content-Type": "application/pdf", "X-Takeoff-Client": "1"})
+    up = r.json()["document"]["id"]
+    sid = "A1-111#p2"
+    server.detector.points_by_sheet = {sid: [("switch", "standard", 1080.4, 158.08)]}
+    server.call("POST", f"/api/documents/{up}/analyze", {"sheet_ids": [sid]})
+    (dev,) = server.call("GET", f"/api/documents/{up}/devices?sheet_id={quote(sid, safe='')}")["devices"]
+    page.goto(f"{server.url}/?doc={up}&sheet={quote(sid, safe='')}")
+    page.wait_for_selector("body[data-ready='1']")
+    page.wait_for_function("window.tk && tk.state.meta && tk.state.meta.sheet_id === %r && !tk.state.loading" % sid)
+    assert page.evaluate("document.getElementById('plan').naturalWidth") > 0  # the image route worked
+    assert "also on page 1" in page.text_content("#sheet-note")
+    select_device(page, dev["id"])
+    page.click("#accept-selected")
+    wait_total(page, 1)
+    assert server.call("GET", f"/api/devices/{quote(dev['id'], safe='')}")["device"]["review_state"] == "accepted"
 
 
 # --- AC-T16: review figures ----------------------------------------------------------------------------------------------

@@ -188,3 +188,33 @@ def test_legend_composite_is_deterministic_and_labelled(sheets):
     # fewer icons give a different (smaller) image
     one = dict(list(icons.items())[:1])
     assert TS.legend_composite(one) != a
+
+
+@pytest.fixture(scope="module")
+def twice_a1(tmp_path_factory):
+    """Page 1 of the supplied PDF twice: two pages with the same title-block id."""
+    src = pymupdf.open(PDF)
+    doc = pymupdf.open()
+    doc.insert_pdf(src, from_page=0, to_page=0)
+    doc.insert_pdf(src, from_page=0, to_page=0)
+    path = tmp_path_factory.mktemp("twice") / "twice.pdf"
+    doc.save(path)
+    doc.close()
+    src.close()
+    return path
+
+
+@needs_pdf
+def test_duplicate_sheet_ids_are_suffixed_with_a_note(twice_a1):
+    """M-d: a sheet id is unique within a document; the later page gets ``#p<page>`` and says why."""
+    first, second = TS.intake(twice_a1, DOC)
+    assert (first.sheet_id, first.note) == ("A1-111", None)
+    assert second.sheet_id == "A1-111#p2" and second.page_number == 2
+    assert second.legend_found is True  # still a readable sheet with its legend: it is analyzed, not skipped
+    assert second.note == TS.DUPLICATE_ID_NOTE.format(sid="A1-111", first=1, page=2, new="A1-111#p2")
+
+
+def test_sheet_id_never_contains_a_slash():
+    """M-d: a "/" in a title-block id (it would split the route) is replaced, with a note."""
+    assert TS.route_safe_id("E1/2") == "E1-2"
+    assert TS.route_safe_id("A1-111") == "A1-111"

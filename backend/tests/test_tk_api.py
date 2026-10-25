@@ -731,3 +731,31 @@ def test_serve_warns_when_the_host_is_not_loopback():
     for host in ("0.0.0.0", "192.168.1.20", "my-laptop"):
         w = cli.host_warning(host)
         assert w and host in w and "not loopback" in w
+
+
+def test_a_suffixed_sheet_id_works_in_every_route(make, tmp_path):
+    """M-d: two pages with the same title-block id; the later one is A1-111#p2 and is reached through encoded
+    routes, as are the device and flag ids that embed it."""
+    from urllib.parse import quote
+
+    src = pymupdf.open(PDF)
+    doc = pymupdf.open()
+    doc.insert_pdf(src, from_page=0, to_page=0)
+    doc.insert_pdf(src, from_page=0, to_page=0)
+    data = doc.tobytes()
+    doc.close()
+    src.close()
+    c = make(detector=FakeDetector({"A1-111#p2": [("switch", "standard", 1080.4, 158.08)]}))
+    up = upload(c, data, "twice.pdf").json()["document"]["id"]
+    assert [s["sheet_id"] for s in c.get(f"/api/documents/{up}/sheets").json()] == ["A1-111", "A1-111#p2"]
+    sid = quote("A1-111#p2", safe="")
+    meta = c.get(f"/api/documents/{up}/sheets/{sid}/meta")
+    assert meta.status_code == 200 and meta.json()["sheet_id"] == "A1-111#p2" and "also on page 1" in meta.json()["note"]
+    assert c.get(f"/api/documents/{up}/sheets/{sid}/image").status_code == 200
+    run = c.post(f"/api/documents/{up}/analyze", json={"sheet_ids": ["A1-111#p2"]}).json()
+    assert run["sheets"]["A1-111#p2"]["status"] == "done"  # an id note never skips a sheet
+    (dev,) = c.get(f"/api/documents/{up}/devices", params={"sheet_id": "A1-111#p2"}).json()["devices"]
+    assert "#" in dev["id"]
+    r = c.post(f"/api/devices/{quote(dev['id'], safe='')}/accept", json={})
+    assert r.status_code == 200 and r.json()["review_state"] == "accepted"
+    assert counts(c, up)["official"]["A1-111#p2"]["total"] == 1
