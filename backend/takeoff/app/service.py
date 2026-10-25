@@ -126,6 +126,11 @@ class TakeoffService:
     def counts(self, document_id: str) -> dict:
         devices = self.devices(document_id, include_deleted=True)
         flags = [f for f in self.store.list("flags") if f.document_id == document_id and f.open]
+        return self.derive_counts(document_id, devices, flags)
+
+    def derive_counts(self, document_id: str, devices: list[Device], flags: list[Flag]) -> dict:
+        """:func:`counts.derive` over the given records, with the sheets' rooms (the export derives its totals from
+        the very device list it writes, in the same call, through this)."""
         rooms = {}
         for sheet_id in sorted({d.sheet_id for d in devices if not d.deleted and d.review_state == "accepted"}):
             try:
