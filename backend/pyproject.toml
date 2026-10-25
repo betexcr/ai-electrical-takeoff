@@ -10,6 +10,7 @@ dependencies = [
     "pydantic>=2.8",
     "fastapi>=0.115",
     "uvicorn>=0.30",
+    "anthropic>=2.3.0",
 ]
 
 [dependency-groups]
@@ -29,4 +30,7 @@ packages = ["takeoff"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["e2e: browser end-to-end tests (Playwright + Chromium); deselect with -m 'not e2e'"]
+markers = [
+    "e2e: browser end-to-end tests (Playwright + Chromium); deselect with -m 'not e2e'",
+    "live: real, billed Anthropic API calls; skipped unless TAKEOFF_LIVE_AI=1",
+]
