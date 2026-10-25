@@ -70,14 +70,14 @@
     },
     {
       "file": "09_bulk_accepted.png",
-      "shows": "after confirming 'Accept 42 unflagged proposals on sheet A1-111?': A1's flagged proposals stay awaiting review; A2-A4 untouched; official totals 43"
+      "shows": "after confirming 'Accept 42 unflagged proposals on sheet A1-111?': A1's flagged proposals stay awaiting review; A2-A4 untouched; the per-sheet line under the button reads 'This sheet (A1-111): awaiting 12 = 0 unflagged + 12 flagged'; official totals 43"
     },
     {
       "file": "10_exported.png",
       "shows": "Export: the status bar states 'Export incomplete' with the manifest's reasons (A1's flagged proposals and every A2-A4 detection still await review); the local export path is shortened to its directory name for this screenshot"
     }
   ],
-  "analysis_seconds": 89.8,
+  "analysis_seconds": 89.4,
   "run_id": "run-001",
   "detector": "det0",
   "detector_version": "det/0",
@@ -276,6 +276,33 @@
       "A3-111": 49,
       "A4-111": 71
     },
+    "per_sheet_figures_before": {
+      "A1-111": {
+        "button_n": 42,
+        "awaiting": 54,
+        "unflagged": 42,
+        "flagged": 12
+      },
+      "A2-111": {
+        "button_n": 56,
+        "awaiting": 67,
+        "unflagged": 56,
+        "flagged": 11
+      },
+      "A3-111": {
+        "button_n": 49,
+        "awaiting": 82,
+        "unflagged": 49,
+        "flagged": 33
+      },
+      "A4-111": {
+        "button_n": 71,
+        "awaiting": 109,
+        "unflagged": 71,
+        "flagged": 38
+      }
+    },
+    "a1_line_after": "This sheet (A1-111): awaiting 12 = 0 unflagged + 12 flagged",
     "official_total_after": 43,
     "review_after": {
       "detected": 313,
@@ -309,7 +336,7 @@
     }
   },
   "export": {
-    "source_dir_name": "tk_001_20261025T201429Z",
+    "source_dir_name": "tk_001_20261025T203725Z",
     "copied_to": "export/ (next to this run.json)",
     "complete": false,
     "incomplete_reasons": [
@@ -363,6 +390,6 @@
       "room_key": "BEDROOM / STUDIO"
     }
   },
-  "finished_at": "2026-10-25T20:14:29Z",
+  "finished_at": "2026-10-25T20:37:25Z",
   "evidence": "published to reports/takeoff/demo/"
 }

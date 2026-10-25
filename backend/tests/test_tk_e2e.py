@@ -25,6 +25,7 @@ import os
 import re
 import shutil
 import socket
+import sys
 import threading
 import time
 import warnings
@@ -316,10 +317,16 @@ def assert_review_lines(page, server):
     r = server.counts()["review"]
     for key, want in review_lines_expected(r).items():
         assert page.inner_text(f'#review-lines [data-line="{key}"]').strip() == want, key
-    # the bulk button is scoped to the sheet shown: its N is that sheet's unflagged proposals
+    # the bulk button is scoped to the sheet shown: its N is that sheet's unflagged proposals, and the sheet's
+    # line beside it (from GET /counts review_by_sheet) shows awaiting X = U unflagged + F flagged with N == U
     sid = page.evaluate("tk.state.sheetId")
     n = server.call("GET", f"/api/documents/{server.doc}/bulk-eligible?sheet_id={sid}")["count"]
     assert page.inner_text("#bulk-accept").strip() == f"Accept all unflagged ({n})"
+    s = server.counts()["review_by_sheet"].get(sid, {"awaiting": 0, "awaiting_unflagged": 0, "awaiting_flagged": 0})
+    assert page.inner_text("#sheet-review").strip() == (f"This sheet ({sid}): awaiting {s['awaiting']} = "
+                                                         f"{s['awaiting_unflagged']} unflagged + "
+                                                         f"{s['awaiting_flagged']} flagged")
+    assert n == s["awaiting_unflagged"] and s["awaiting"] == s["awaiting_unflagged"] + s["awaiting_flagged"]
     return r
 
 
@@ -974,7 +981,12 @@ class Evidence:
         (self.out / "run.json").write_text(json.dumps(self.record, indent=2) + "\n", encoding="utf-8", newline="\n")
 
     def publish(self) -> str:
-        """Swap the staged evidence into ``target`` (only with ``TAKEOFF_DEMO_EVIDENCE=1``). Returns what happened."""
+        """Swap the staged evidence into ``target`` (only with ``TAKEOFF_DEMO_EVIDENCE=1``). Returns what happened.
+
+        Never destructive: the new files are staged next to ``target``; the old managed items are renamed into a
+        ``.<name>.previous`` backup; the new ones are renamed in; the backup is deleted only after that succeeded,
+        and restored if anything failed. An existing ``run.json`` that cannot be read is never overwritten.
+        """
         try:
             rel = self.target.relative_to(ROOT).as_posix()
         except ValueError:
@@ -982,12 +994,14 @@ class Evidence:
         if os.environ.get(EVIDENCE_ENV) != "1":
             return f"not published: {EVIDENCE_ENV} is not 1 (evidence staged under pytest's tmp_path only)"
         old = self.target / "run.json"
-        if old.exists() and self.record.get("ai_implementation") != "claude":
+        if old.exists():
             try:
-                prev = json.loads(old.read_text(encoding="utf-8")).get("ai_implementation")
-            except (OSError, ValueError):
-                prev = None
-            if prev == "claude":
+                prev = json.loads(old.read_text(encoding="utf-8"))["ai_implementation"]
+            except (OSError, ValueError, KeyError, TypeError) as e:
+                msg = f"not published: the existing {rel}/run.json cannot be read ({type(e).__name__}); left as it is"
+                warnings.warn(msg)
+                return msg
+            if prev == "claude" and self.record.get("ai_implementation") != "claude":
                 msg = (f"not published: {rel} holds live-model evidence (ai_implementation 'claude'); a "
                        f"'{self.record.get('ai_implementation')}' run never replaces it")
                 warnings.warn(msg)
@@ -995,20 +1009,46 @@ class Evidence:
         self.record["evidence"] = f"published to {rel}/"
         self.write()
         incoming = self.target.parent / f".{self.target.name}.incoming"
-        if incoming.exists():
-            shutil.rmtree(incoming)
+        backup = self.target.parent / f".{self.target.name}.previous"
+        for d in (incoming, backup):
+            if d.exists():
+                shutil.rmtree(d)
+        # 1. stage the new files next to the target
         incoming.mkdir(parents=True)
         for p in self.out.iterdir():
             if _managed(p):
                 (shutil.copytree if p.is_dir() else shutil.copy2)(p, incoming / p.name)
         self.target.mkdir(parents=True, exist_ok=True)
-        for p in list(self.target.iterdir()):
-            if _managed(p):
-                shutil.rmtree(p) if p.is_dir() else p.unlink()
-        for p in list(incoming.iterdir()):
-            p.rename(self.target / p.name)
+        backup.mkdir()
+        moved_out: list[str] = []
+        moved_in: list[str] = []
+        try:
+            # 2. the old managed items into the backup
+            for p in sorted(self.target.iterdir()):
+                if _managed(p):
+                    _rename(p, backup / p.name)
+                    moved_out.append(p.name)
+            # 3. the new items in
+            for p in sorted(incoming.iterdir()):
+                _rename(p, self.target / p.name)
+                moved_in.append(p.name)
+        except BaseException:
+            for name in moved_in:  # undo: the new items out, the old ones back
+                q = self.target / name
+                shutil.rmtree(q) if q.is_dir() else q.unlink()
+            for name in moved_out:
+                _rename(backup / name, self.target / name)
+            shutil.rmtree(incoming, ignore_errors=True)
+            backup.rmdir()
+            raise
+        # 4. only now drop the backup
+        shutil.rmtree(backup)
         incoming.rmdir()
         return self.record["evidence"]
+
+
+def _rename(src: Path, dst: Path) -> None:
+    src.rename(dst)
 
 
 def preflight_summary() -> dict:
@@ -1411,7 +1451,25 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
         def eligible_on(sid):
             return srv.call("GET", f"/api/documents/{srv.doc}/bulk-eligible?sheet_id={sid}")["count"]
 
+        def sheet_figures_on_page(sid):
+            """The page's bulk N and per-sheet line for ``sid``, checked against GET /counts (AC-T16 per sheet)."""
+            choose_sheet(page, sid)
+            r = assert_review_lines(page, srv)
+            line = page.locator("#sheet-review")
+            x, u, f = (int(line.get_attribute(f"data-{k}")) for k in ("awaiting", "unflagged", "flagged"))
+            n_btn = int(re.fullmatch(r"Accept all unflagged \((\d+)\)", page.inner_text("#bulk-accept").strip())[1])
+            assert n_btn == u and x == u + f, (sid, n_btn, x, u, f)
+            return {"button_n": n_btn, "awaiting": x, "unflagged": u, "flagged": f}, r
+
         before = {sid: eligible_on(sid) for sid in SHEETS}
+        per_sheet_before = {}
+        for sid in SHEETS:
+            per_sheet_before[sid], doc_review = sheet_figures_on_page(sid)
+        # over all sheets: the sheets' N sum to the document's unflagged figure, their X to its awaiting figure
+        assert sum(v["button_n"] for v in per_sheet_before.values()) == doc_review["awaiting_unflagged"]
+        assert sum(v["awaiting"] for v in per_sheet_before.values()) == doc_review["awaiting"]
+        assert {sid: v["button_n"] for sid, v in per_sheet_before.items()} == before
+        choose_sheet(page, A1)
         k2 = srv.counts()
         n = before[A1]
         assert n > 0 and all(before[sid] > 0 for sid in SHEETS)
@@ -1426,13 +1484,19 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
         assert after == {**before, A1: 0}  # the other sheets are untouched
         assert all(d["review_state"] == "proposed" for sid in SHEETS[1:] for d in srv.devices(sid))
         assert_review_lines(page, srv)
+        a1_after = int(page.get_attribute("#sheet-review", "data-unflagged"))
+        assert a1_after == 0 and k3["review_by_sheet"][A1]["awaiting_unflagged"] == 0
+        assert all(k3["review_by_sheet"][sid] == k2["review_by_sheet"][sid] for sid in SHEETS[1:])
         record["bulk_accept"] = {"confirmation": dialogs.messages[-1], "accepted": n, "sheet": A1,
                                  "scope": "the sheet shown (A1-111); flagged proposals excluded",
                                  "eligible_before": before, "eligible_after": after,
+                                 "per_sheet_figures_before": per_sheet_before,
+                                 "a1_line_after": page.inner_text("#sheet-review").strip(),
                                  "official_total_after": k3["review"]["official_total"],
                                  "review_after": k3["review"]}
         ev.shot("bulk_accepted", f"after confirming 'Accept {n} unflagged proposals on sheet {A1}?': A1's flagged "
-                                 f"proposals stay awaiting review; A2-A4 untouched; official totals "
+                                 f"proposals stay awaiting review; A2-A4 untouched; the per-sheet line under the button reads "
+                                 f"'{page.inner_text('#sheet-review').strip()}'; official totals "
                                  f"{k3['review']['official_total']}", panel="#review-lines")
         # R1-03 on the real takeoff: every officially counted device has its counted marker on its sheet
         invariant = {}
@@ -1605,7 +1669,33 @@ def test_demo_evidence_publishes_only_on_request_and_never_over_live_evidence(tm
     assert sorted(p.name for p in target.iterdir()) == ["01_new.png", "README.md", "export", "keep", "run.json"]
     assert json.loads((target / "run.json").read_text(encoding="utf-8"))["ai_implementation"] == "fake"
     assert (target / "README.md").read_text(encoding="utf-8") == "hand-written"
-    assert not (tmp_path / ".demo.incoming").exists()
+    assert not (tmp_path / ".demo.incoming").exists() and not (tmp_path / ".demo.previous").exists()
+
+    # a failure while renaming the new files in restores the previous evidence exactly
+    before = {p.name: (p.read_bytes() if p.is_file() else None) for p in target.iterdir()}
+    calls = {"in": 0}
+
+    def flaky(src, dst):
+        if src.parent.name == ".demo.incoming":
+            calls["in"] += 1
+            if calls["in"] == 2:
+                raise OSError("simulated rename failure")
+        src.rename(dst)
+
+    monkeypatch.setattr(sys.modules[__name__], "_rename", flaky)
+    with pytest.raises(OSError, match="simulated"):
+        staged("fake").publish()
+    assert {p.name: (p.read_bytes() if p.is_file() else None) for p in target.iterdir()} == before
+    assert (target / "export" / "totals.json").exists()
+    assert not (tmp_path / ".demo.incoming").exists() and not (tmp_path / ".demo.previous").exists()
+    monkeypatch.undo()
+
+    # an unreadable run.json is never overwritten
+    monkeypatch.setenv(EVIDENCE_ENV, "1")
+    (target / "run.json").write_text("{not json", encoding="utf-8")
+    with pytest.warns(UserWarning, match="cannot be read"):
+        assert staged("fake").publish().startswith("not published")
+    assert (target / "run.json").read_text(encoding="utf-8") == "{not json"
 
 
 def test_originals_untouched_by_e2e_session():

@@ -89,7 +89,7 @@ uv run python tools/takeoff_app.py serve --ai-max-requests 150    # per-run AI r
 5. Change one proposal's category and Save. A saved correction is an acceptance, and the totals change at once.
 6. Reload: the correction and its history persist.
 7. Zoom (wheel) and pan (drag): the markers stay on their symbols.
-8. Click **Accept all unflagged (N)**, then confirm. It covers the sheet shown only (the confirmation names the sheet), and flagged proposals are never included.
+8. Click **Accept all unflagged (N)**, then confirm. It covers the sheet shown only, and the confirmation names the sheet. The line under the button, "This sheet (…): awaiting X = U unflagged + F flagged", shows that sheet's figures, and N = U. The review lines above it are document-wide. Flagged proposals are never included.
 9. **Export**. The status bar says whether the takeoff is complete, and gives the reasons if not. `totals.json` equals both the API's totals and the totals recomputed from `devices_official.csv`.
 
 The automated version is `tests/test_tk_e2e.py::test_demo_path_end_to_end`. Its published screenshots are in [`reports/takeoff/demo/`](reports/takeoff/demo/README.md); run it with `TAKEOFF_DEMO_EVIDENCE=1` to refresh them. It drives zoom with a real mouse wheel and pan with a real drag. `::test_missed_ceiling_fan_is_added_manually_and_counted` forces the "fan missed" branch.

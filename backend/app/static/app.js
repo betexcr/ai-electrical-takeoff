@@ -439,7 +439,7 @@ function renderReview() {
     ["open_flags", `Accepted with open flags ${r.accepted_with_open_flags} (still counted)`],
   ];
   $("review-lines").innerHTML = lines.map(([k, t]) => `<div data-line="${k}">${esc(t)}</div>`).join("") +
-    `<div class="muted">All sheets of this document, from the saved device records.</div>`;
+    `<div class="muted">Document-wide (all sheets), from the saved device records.</div>`;
 }
 
 function renderActions() {
@@ -452,6 +452,12 @@ function renderActions() {
   b.textContent = `Accept all unflagged (${n})`;
   b.disabled = n === 0;
   b.title = `This sheet only (${st.sheetId || "none"}); flagged proposals and AI-only candidates are never included`;
+  // The sheet's own review figures (GET /counts review_by_sheet, the same derivation as the document-wide lines).
+  const sr = st.counts?.review_by_sheet?.[st.sheetId] || { awaiting: 0, awaiting_unflagged: 0, awaiting_flagged: 0 };
+  const line = $("sheet-review");
+  line.textContent = st.sheetId ? `This sheet (${st.sheetId}): awaiting ${sr.awaiting} = ${sr.awaiting_unflagged} ` +
+    `unflagged + ${sr.awaiting_flagged} flagged` : "";
+  line.dataset.awaiting = sr.awaiting; line.dataset.unflagged = sr.awaiting_unflagged; line.dataset.flagged = sr.awaiting_flagged;
   const last = st.bulk?.last_undoable;
   $("undo-bulk").disabled = !last;
   $("undo-bulk").title = last ? `${plural(last.device_ids.length, "device")}, ${last.created_at.slice(0, 19)}` : "";

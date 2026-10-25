@@ -81,19 +81,8 @@ def _official(accepted: list[Device], rooms: Mapping[str, list[dict]] | None) ->
     return out
 
 
-def derive(devices: Iterable[Device], open_flags: Iterable[Flag],
-           rooms: Mapping[str, list[dict]] | None = None) -> dict:
-    """``{"review": {...}, "official": {sheet_id: {...}}}`` for one document's devices and flags.
-
-    ``open_flags`` may contain closed flags; they are ignored. ``rooms`` maps a sheet id to that sheet's rooms
-    (``sheet_view(...)["rooms"]``); room rows are disambiguated over them when given.
-    """
-    live = [d for d in devices if not d.deleted]
-    flags_by_device: dict[str, list[Flag]] = defaultdict(list)
-    for f in open_flags:
-        if f.open:
-            flags_by_device[f.device_id].append(f)
-
+def _review(live: list[Device], flags_by_device: Mapping[str, list[Flag]]) -> dict:
+    """The §4.17 review figures over ``live`` (non-deleted) devices."""
     automated = [d for d in live if d.origin in AUTOMATED]
     awaiting = [d for d in automated if d.review_state == "proposed"]
     unflagged = sum(1 for d in awaiting if bulk_eligible(d, flags_by_device.get(d.id, ())))
@@ -102,7 +91,7 @@ def derive(devices: Iterable[Device], open_flags: Iterable[Flag],
     # Manual devices are accepted on creation and never rejected; counting accepted ones keeps
     # official_total == accepted_detected + manual even for a record that breaks that rule.
     manual = sum(1 for d in accepted if d.origin == "manual")
-    review = {
+    return {
         "detected": len(automated),
         "detected_ai_only": sum(1 for d in automated if d.origin == "ai"),
         "accepted_detected": accepted_detected,
@@ -115,4 +104,27 @@ def derive(devices: Iterable[Device], open_flags: Iterable[Flag],
         "accepted_with_open_flags": sum(1 for d in accepted
                                         if any(needs_review(f) for f in flags_by_device.get(d.id, ()))),
     }
-    return {"review": review, "official": _official(accepted, rooms)}
+
+
+def derive(devices: Iterable[Device], open_flags: Iterable[Flag],
+           rooms: Mapping[str, list[dict]] | None = None) -> dict:
+    """``{"review": {...}, "review_by_sheet": {sheet_id: {...}}, "official": {sheet_id: {...}}}`` for one
+    document's devices and flags.
+
+    ``review`` is document-wide; ``review_by_sheet`` holds the same figures for each sheet that has a non-deleted
+    device (every figure is additive, so the sheets sum to ``review``; the page's per-sheet bulk button reads its
+    sheet's ``awaiting_unflagged``). ``open_flags`` may contain closed flags; they are ignored. ``rooms`` maps a
+    sheet id to that sheet's rooms (``sheet_view(...)["rooms"]``); room rows are disambiguated over them when given.
+    """
+    live = [d for d in devices if not d.deleted]
+    flags_by_device: dict[str, list[Flag]] = defaultdict(list)
+    for f in open_flags:
+        if f.open:
+            flags_by_device[f.device_id].append(f)
+    accepted = [d for d in live if d.review_state == "accepted"]
+    return {
+        "review": _review(live, flags_by_device),
+        "review_by_sheet": {sid: _review([d for d in live if d.sheet_id == sid], flags_by_device)
+                            for sid in sorted({d.sheet_id for d in live})},
+        "official": _official(accepted, rooms),
+    }

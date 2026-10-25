@@ -139,6 +139,35 @@ def test_review_identities_hold_for_random_states():
     assert r["official_total"] == len(accepted)  # every accepted, non-deleted device, whatever its origin
 
 
+def test_review_by_sheet_holds_the_identities_and_sums_to_the_document():
+    rng = random.Random(20261026)
+    sheets = [SHEET, "A2-111", "A3-111"]
+    devices, flags = [], []
+    for i in range(400):
+        d = dev(f"d{i}", state=rng.choice(["proposed", "accepted", "rejected"]),
+                origin=rng.choice(["detector", "ai", "manual"]), deleted=rng.random() < 0.1, sheet=rng.choice(sheets))
+        devices.append(d)
+        for n in range(rng.choice([0, 0, 1])):
+            flags.append(flag(d.id, rng.choice(F.VALIDATION_TYPES + F.DECISION_TYPES),
+                              severity=rng.choice(["review", "info"]), open=rng.random() < 0.7, n=n))
+    got = C.derive(devices, flags)
+    doc, per = got["review"], got["review_by_sheet"]
+    assert set(per) == {d.sheet_id for d in devices if not d.deleted}
+    for sid, r in per.items():
+        assert r["detected"] == r["accepted_detected"] + r["rejected"] + r["awaiting"]
+        assert r["awaiting"] == r["awaiting_unflagged"] + r["awaiting_flagged"]
+        assert r["official_total"] == r["accepted_detected"] + r["manual"]
+        # the sheet's unflagged figure is that sheet's bulk-eligible proposals (the page's per-sheet N)
+        here = [d for d in devices if d.sheet_id == sid and not d.deleted and d.origin in ("detector", "ai")
+                and d.review_state == "proposed"]
+        assert r["awaiting_unflagged"] == sum(F.bulk_eligible(d, [f for f in flags if f.open and f.device_id == d.id])
+                                              for d in here)
+        assert r["official_total"] == got["official"].get(sid, {}).get("total", 0)
+    for key in doc:  # every figure is additive over the sheets
+        assert sum(r[key] for r in per.values()) == doc[key], key
+    assert all(0 < per[s]["awaiting_unflagged"] for s in sheets)
+
+
 def test_k_and_unflagged_hand_built():
     devices = [dev("acc-review"), dev("acc-info"), dev("acc-md-info"), dev("acc-closed"),
                dev("p-review", state="proposed"), dev("p-info", state="proposed"),

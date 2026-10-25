@@ -506,3 +506,36 @@ def test_analyze_with_ai_off(make, sha, tmp_path):
     out = Path(r.json()["path"])
     assert out.parent == tmp_path / "off" / "exports" and (out / "manifest.json").exists()
     assert r.json()["manifest"]["complete"] is False and r.json()["manifest"]["incomplete_reasons"]
+
+
+def test_counts_by_sheet_match_the_per_sheet_bulk_scope(make, sha, tmp_path):
+    probe = make(data=tmp_path / "probe")
+    a1, a2 = clear_points(meta_of(probe, sha, A1), 3), clear_points(meta_of(probe, sha, "A2-111"), 2)
+    dup = (a2[0][0] + 1.0, a2[0][1])  # within the duplicate tolerance: both A2 switches there are flagged
+    detector = FakeDetector({A1: [("switch", "standard", *pt) for pt in a1],
+                             "A2-111": [("switch", "standard", *pt) for pt in (*a2, dup)]})
+    c = make(data=tmp_path / "bysheet", detector=detector)
+    r = c.post(f"/api/documents/{sha}/analyze", json={"sheet_ids": [A1, "A2-111"]})
+    assert r.status_code == 200, r.text
+
+    def state():
+        k = counts(c, sha)
+        n = {sid: c.get(f"/api/documents/{sha}/bulk-eligible", params={"sheet_id": sid}).json()["count"]
+             for sid in (A1, "A2-111")}
+        return k, n
+
+    k, n = state()
+    per = k["review_by_sheet"]
+    assert set(per) == {A1, "A2-111"}
+    assert {sid: (r["awaiting"], r["awaiting_unflagged"], r["awaiting_flagged"]) for sid, r in per.items()} == \
+        {A1: (3, 3, 0), "A2-111": (3, 1, 2)}
+    for sid, r in per.items():
+        assert r["awaiting_unflagged"] == n[sid] and r["awaiting"] == r["awaiting_unflagged"] + r["awaiting_flagged"]
+    assert sum(n.values()) == k["review"]["awaiting_unflagged"]
+    assert sum(r["awaiting"] for r in per.values()) == k["review"]["awaiting"]
+
+    r = c.post(f"/api/documents/{sha}/bulk-accept", json={"expected_count": 3, "sheet_id": A1})
+    assert r.status_code == 200, r.text
+    k2, n2 = state()
+    assert k2["review_by_sheet"][A1]["awaiting_unflagged"] == 0 == n2[A1]
+    assert k2["review_by_sheet"]["A2-111"] == per["A2-111"] and n2["A2-111"] == n["A2-111"]
