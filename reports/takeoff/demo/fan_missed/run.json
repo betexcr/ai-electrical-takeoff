@@ -46,7 +46,7 @@
     ]
   },
   "fan": {
-    "device_id": "1333b83c23aa4eae82222d08a0889606",
+    "device_id": "7089fd92335f4915acc18bbc7dbbe6f8",
     "point_pt": [
       1276.181,
       506.07
@@ -62,5 +62,6 @@
     "room_key": "BEDROOM / STUDIO",
     "official_ceiling_fans": 1,
     "complete": false
-  }
+  },
+  "evidence": "published to reports/takeoff/demo/fan_missed/"
 }

@@ -2,7 +2,8 @@
 //
 // Detectors propose, reviewers decide, saved device records determine the official totals.
 // * Every figure on this page comes from the API: the review lines from GET /counts `review`, the official totals
-//   from GET /counts `official`, the bulk button's N from GET /bulk-eligible. Nothing is counted here from markers.
+//   from GET /counts `official`, the bulk button's N from GET /bulk-eligible (the ids on the current sheet: bulk
+//   accept is scoped to the sheet shown). Nothing is counted here from markers.
 //   Each totals row also names the counted devices it covers (data-ids), so every number traces to markers.
 // * Coordinates and the view transform are the shared plan-view code (/shared/planview.js). Markers are drawn in
 //   screen space (constant size); window.tk exposes the state and the view for the end-to-end tests.
@@ -446,11 +447,11 @@ function renderActions() {
   $("accept-selected").disabled = !d || d.review_state === "accepted";
   $("reject-selected").disabled = !d || d.origin === "manual" || d.review_state === "rejected";
   $("reject-selected").title = d && d.origin === "manual" ? "A manual device is deleted, not rejected" : "";
-  const n = st.eligible?.count || 0;
+  const n = sheetEligibleIds().length;
   const b = $("bulk-accept");
   b.textContent = `Accept all unflagged (${n})`;
   b.disabled = n === 0;
-  b.title = "Every sheet of this document; flagged proposals and AI-only candidates are never included";
+  b.title = `This sheet only (${st.sheetId || "none"}); flagged proposals and AI-only candidates are never included`;
   const last = st.bulk?.last_undoable;
   $("undo-bulk").disabled = !last;
   $("undo-bulk").title = last ? `${plural(last.device_ids.length, "device")}, ${last.created_at.slice(0, 19)}` : "";
@@ -619,7 +620,9 @@ function renderDevice({ keepForm = false } = {}) {
     ["Room", `${esc(dv.room ? dv.room.name : "none")} <span class="muted">· source: ${esc(roomSource)}</span>`],
     ["State", `${esc(dv.review_state)}${dv.accept_kind ? ` <span class="muted">(${esc(dv.accept_kind)})</span>` : ""}`],
     ["Origin", esc(dv.origin)],
-    [st.config.score_label, detn && detn.score !== null && detn.score !== undefined ? Number(detn.score).toFixed(2) : '<span class="muted">none (no detection)</span>'],
+    [st.config.score_label, !detn ? '<span class="muted">none (no detection)</span>'
+      : detn.score !== null && detn.score !== undefined ? Number(detn.score).toFixed(2)
+      : '<span class="muted">none (no raster score)</span>'],
     ["Run", run ? esc(`${run.id} · ${run.detector} ${run.detector_version} · ${run.merge_version}` +
       (run.ai_versions?.verify ? ` · ${run.ai_versions.verify} · ${run.ai_versions.discover}` : "")) : '<span class="muted">none (added manually)</span>'],
     ["Subtype source", esc(detn?.subtype_source || "none")],
@@ -873,14 +876,21 @@ async function saveNew() {
   toast(`Added ${describe(dev.category, dev.subtype)} (manual, counted)`);
 }
 
+// The bulk-eligible ids (GET /bulk-eligible, the whole document) that lie on the sheet shown.
+function sheetEligibleIds() {
+  const here = new Set(st.devices.filter((d) => d.sheet_id === st.sheetId).map((d) => d.id));
+  return (st.eligible?.ids || []).filter((id) => here.has(id));
+}
+
 async function bulkAccept() {
-  const n = st.eligible?.count || 0;
-  if (!n) return;
-  if (!confirm(`Accept ${n} unflagged proposals? Official totals will update.`)) return;
-  try { await api("POST", `/api/documents/${st.docId}/bulk-accept`, { expected_count: n }); }
+  const n = sheetEligibleIds().length;
+  const sheet = st.sheetId;
+  if (!n || !sheet) return;
+  if (!confirm(`Accept ${n} unflagged proposals on sheet ${sheet}? Official totals will update.`)) return;
+  try { await api("POST", `/api/documents/${st.docId}/bulk-accept`, { expected_count: n, sheet_id: sheet }); }
   catch (e) { await guarded(refresh); return; }
   await guarded(refresh);
-  toast(`Bulk accept done: ${plural(n, "device")}`);
+  toast(`Bulk accept done on sheet ${sheet}: ${plural(n, "device")}`);
 }
 
 async function undoBulk() {

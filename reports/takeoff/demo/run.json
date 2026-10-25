@@ -62,22 +62,22 @@
     },
     {
       "file": "07_zoomed.png",
-      "shows": "zoomed in (4x fit) on the bedroom fan hub: markers sit on their symbols"
+      "shows": "after a real mouse-wheel zoom at the bedroom fan hub (scale x2.46): markers sit on their symbols (worst 0.000 px)"
     },
     {
       "file": "08_panned.png",
-      "shows": "the same view panned; every probed marker stayed within 1.5 px (worst 0.000 px)"
+      "shows": "after a real mouse drag of (120, -70) px: every probed marker stayed within 1.5 px (worst 0.000 px)"
     },
     {
       "file": "09_bulk_accepted.png",
-      "shows": "after confirming 'Accept 218 unflagged proposals?': flagged proposals stay awaiting review; official totals 219"
+      "shows": "after confirming 'Accept 42 unflagged proposals on sheet A1-111?': A1's flagged proposals stay awaiting review; A2-A4 untouched; official totals 43"
     },
     {
       "file": "10_exported.png",
-      "shows": "Export: the status bar states 'Export incomplete' with the reasons (flagged proposals still awaiting review on every sheet), as manifest.json does"
+      "shows": "Export: the status bar states 'Export incomplete' with the manifest's reasons (A1's flagged proposals and every A2-A4 detection still await review); the local export path is shortened to its directory name for this screenshot"
     }
   ],
-  "analysis_seconds": 116.8,
+  "analysis_seconds": 89.8,
   "run_id": "run-001",
   "detector": "det0",
   "detector_version": "det/0",
@@ -164,6 +164,7 @@
         252.48
       ],
       "ai_line": "AI second opinion: agrees \u00b7 test double, not a model",
+      "score_shown": "0.83",
       "open_flags": []
     },
     "receptacle": {
@@ -175,6 +176,7 @@
         197.46
       ],
       "ai_line": "AI second opinion: agrees \u00b7 test double, not a model",
+      "score_shown": "none (no raster score)",
       "open_flags": []
     }
   },
@@ -244,24 +246,47 @@
       ]
     ],
     "max_error_px": 0.0,
-    "tolerance_px": 1.5
+    "tolerance_px": 1.5,
+    "mouse_wheel": {
+      "scale_ratio": 2.46,
+      "max_error_px": 0.0
+    },
+    "mouse_drag": {
+      "delta_px": [
+        120,
+        -70
+      ],
+      "max_error_px": 0.0
+    }
   },
   "bulk_accept": {
-    "confirmation": "Accept 218 unflagged proposals? Official totals will update.",
-    "accepted": 218,
-    "of_which_on_A1": 42,
-    "scope": "every sheet of the document (the page's button); flagged proposals excluded",
-    "official_total_after": 219,
+    "confirmation": "Accept 42 unflagged proposals on sheet A1-111? Official totals will update.",
+    "accepted": 42,
+    "sheet": "A1-111",
+    "scope": "the sheet shown (A1-111); flagged proposals excluded",
+    "eligible_before": {
+      "A1-111": 42,
+      "A2-111": 56,
+      "A3-111": 49,
+      "A4-111": 71
+    },
+    "eligible_after": {
+      "A1-111": 0,
+      "A2-111": 56,
+      "A3-111": 49,
+      "A4-111": 71
+    },
+    "official_total_after": 43,
     "review_after": {
       "detected": 313,
       "detected_ai_only": 0,
-      "accepted_detected": 219,
+      "accepted_detected": 43,
       "rejected": 0,
-      "awaiting": 94,
-      "awaiting_unflagged": 0,
+      "awaiting": 270,
+      "awaiting_unflagged": 176,
       "awaiting_flagged": 94,
       "manual": 0,
-      "official_total": 219,
+      "official_total": 43,
       "accepted_with_open_flags": 0
     }
   },
@@ -271,31 +296,32 @@
       "counted_markers": 43
     },
     "A2-111": {
-      "official": 56,
-      "counted_markers": 56
+      "official": 0,
+      "counted_markers": 0
     },
     "A3-111": {
-      "official": 49,
-      "counted_markers": 49
+      "official": 0,
+      "counted_markers": 0
     },
     "A4-111": {
-      "official": 71,
-      "counted_markers": 71
+      "official": 0,
+      "counted_markers": 0
     }
   },
   "export": {
-    "source_dir_name": "tk_001_20261025T162800Z",
-    "copied_to": "reports/takeoff/demo/export/",
+    "source_dir_name": "tk_001_20261025T201429Z",
+    "copied_to": "export/ (next to this run.json)",
     "complete": false,
     "incomplete_reasons": [
-      "94 detected devices awaiting review",
+      "270 detected devices awaiting review",
       "94 open room_ambiguous flags"
     ],
-    "sheets_still_awaiting_review_other_than_A1": [
-      "A2-111",
-      "A3-111",
-      "A4-111"
-    ],
+    "awaiting_review_by_sheet": {
+      "A1-111": 12,
+      "A2-111": 67,
+      "A3-111": 82,
+      "A4-111": 109
+    },
     "totals_json_equals_api_counts": true,
     "totals_json_equals_csv_recomputation": true,
     "manifest_ai_usage_equals_verdict_sums": true,
@@ -329,13 +355,14 @@
         ]
       }
     },
-    "official_records": 219,
-    "review_records": 94,
-    "official_total": 219,
+    "official_records": 43,
+    "review_records": 270,
+    "official_total": 43,
     "fan_row": {
       "origin_reported": "detector_accepted",
       "room_key": "BEDROOM / STUDIO"
     }
   },
-  "finished_at": "2026-10-25T16:28:01Z"
+  "finished_at": "2026-10-25T20:14:29Z",
+  "evidence": "published to reports/takeoff/demo/"
 }

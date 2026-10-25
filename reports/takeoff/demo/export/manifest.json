@@ -3,30 +3,30 @@
  "ai_test_double": true,
  "complete": false,
  "counts": {
-  "official_records": 219,
-  "review_records": 94
+  "official_records": 43,
+  "review_records": 270
  },
- "created_at": "2026-10-25T16:28:00.840+00:00",
+ "created_at": "2026-10-25T20:14:29.329+00:00",
  "created_by": "e2e",
  "document_name": "Escondido_Electrical_Plans_Ceiling_Fans.pdf",
  "document_sha256": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
  "export_format": "takeoff-export/1",
  "files": {
   "devices_official.csv": {
-   "bytes": 71817,
-   "sha256": "3886d298df9e216a84eedc3f2192a07ecdd5e07f6ae731873f1b4cc35453c029"
+   "bytes": 14604,
+   "sha256": "c8f9855605fa4ad3a0750b8a6b189e307af1329afcd4e77162ec26238cb27d55"
   },
   "devices_review.csv": {
-   "bytes": 31430,
-   "sha256": "0c32c9fb8d9d851164cdb4832b834de9a54b37736876161f5c9a874220e5a12b"
+   "bytes": 86179,
+   "sha256": "e9714ae7ee6dcd31d7e8d0049ff185c93253672af8cae395342b729d03f14c29"
   },
   "totals.json": {
-   "bytes": 10344,
-   "sha256": "f4e966bcb7128592393ef434c07a82046991fe8c66cfa579e3c056b3154051d2"
+   "bytes": 2265,
+   "sha256": "dc600c3a8eb9299364b801113869d5b0a323d0cb07ddedd4e6956a308ff15fa5"
   }
  },
  "incomplete_reasons": [
-  "94 detected devices awaiting review",
+  "270 detected devices awaiting review",
   "94 open room_ambiguous flags"
  ],
  "merge_version": "takeoff-merge/1",
@@ -38,15 +38,15 @@
   "devices_review.csv": "origin_reported is the internal origin: detector | ai | manual; none of these rows is in any total"
  },
  "review": {
-  "accepted_detected": 219,
+  "accepted_detected": 43,
   "accepted_with_open_flags": 0,
-  "awaiting": 94,
+  "awaiting": 270,
   "awaiting_flagged": 94,
-  "awaiting_unflagged": 0,
+  "awaiting_unflagged": 176,
   "detected": 313,
   "detected_ai_only": 0,
   "manual": 0,
-  "official_total": 219,
+  "official_total": 43,
   "rejected": 0
  },
  "runs": [
@@ -242,11 +242,11 @@
      }
     }
    },
-   "created_at": "2026-10-25T16:25:59.732+00:00",
+   "created_at": "2026-10-25T20:12:56.335+00:00",
    "created_by": "e2e",
    "detector": "det0",
    "detector_version": "det/0",
-   "finished_at": "2026-10-25T16:27:55.911+00:00",
+   "finished_at": "2026-10-25T20:14:25.264+00:00",
    "id": "run-001",
    "merge_version": "takeoff-merge/1",
    "sheets": {

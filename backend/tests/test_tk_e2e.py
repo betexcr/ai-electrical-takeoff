@@ -6,8 +6,9 @@ AI test doubles (``FakeVerifier`` / ``FakeDiscoverer``); only A1 is analyzed. No
 
 The demo path (AC-T13, §4.14, §4.16) is the exception to the scripted detector: it runs the real det/0 on all 4
 sheets in the background, as the page does, and writes its screenshots, ``run.json`` and a copy of the export to
-``reports/takeoff/demo/``. It uses Claude only when ``reports/takeoff/ai_preflight.json`` shows every check passed
-*and* ``TAKEOFF_LIVE_AI=1``; otherwise it uses the test doubles, labelled "test double, not a model".
+a staging directory under ``tmp_path``; with ``TAKEOFF_DEMO_EVIDENCE=1`` a passing run publishes them to ``reports/takeoff/demo/``. It uses
+Claude only when ``reports/takeoff/ai_preflight.json`` shows every check passed *and* ``TAKEOFF_LIVE_AI=1``; otherwise
+it uses the test doubles, labelled "test double, not a model".
 
 Expected screen positions are recomputed here in Python from the served image mapping and the page's view transform
 (the same independent re-implementation as ``test_gt_e2e.py``), never taken from the page's own helpers. The figures
@@ -26,6 +27,7 @@ import shutil
 import socket
 import threading
 import time
+import warnings
 from collections import Counter
 from pathlib import Path
 
@@ -314,7 +316,10 @@ def assert_review_lines(page, server):
     r = server.counts()["review"]
     for key, want in review_lines_expected(r).items():
         assert page.inner_text(f'#review-lines [data-line="{key}"]').strip() == want, key
-    assert page.inner_text("#bulk-accept").strip() == f"Accept all unflagged ({r['awaiting_unflagged']})"
+    # the bulk button is scoped to the sheet shown: its N is that sheet's unflagged proposals
+    sid = page.evaluate("tk.state.sheetId")
+    n = server.call("GET", f"/api/documents/{server.doc}/bulk-eligible?sheet_id={sid}")["count"]
+    assert page.inner_text("#bulk-accept").strip() == f"Accept all unflagged ({n})"
     return r
 
 
@@ -468,6 +473,12 @@ def test_move_create_reject_delete_from_the_plan(page, server):
     page.wait_for_function("!tk.state.loading")
     assert official_total(page) == 1 == server.counts()["review"]["official_total"]
     assert page.locator(f"{marker(d0['id'])}.counted").count() == 1
+    kept = server.device(d0["id"])["device"]
+    assert math.dist(kept["point_pt"], target) <= 0.5, kept["point_pt"]
+    view = page.evaluate("tk.view")
+    got = center_of(page, f'{marker(d0["id"])} circle.core')
+    want = expected_screen(m, view, kept["point"]["u"], kept["point"]["v"])
+    assert abs(got[0] - want[0]) <= 1.5 and abs(got[1] - want[1]) <= 1.5, (got, want)
     assert page.locator(f"{marker(d1['id'])}.state-rejected").count() == 1
     assert page.locator(marker(manual["id"])).count() == 0
 
@@ -489,13 +500,13 @@ def test_bulk_accept_confirm_and_undo(page, server):
     dialogs.answers.append(None)  # cancel: nothing happens
     page.click("#bulk-accept")
     page.wait_for_timeout(300)
-    assert dialogs.messages == ["Accept 3 unflagged proposals? Official totals will update."]
+    assert dialogs.messages == ["Accept 3 unflagged proposals on sheet A1-111? Official totals will update."]
     assert server.counts()["review"]["official_total"] == 0 and official_total(page) == 0
 
     dialogs.answers.append(True)
     page.click("#bulk-accept")
     wait_total(page, 3)
-    assert dialogs.messages[-1] == "Accept 3 unflagged proposals? Official totals will update."
+    assert dialogs.messages[-1] == "Accept 3 unflagged proposals on sheet A1-111? Official totals will update."
     assert sorted(d["id"] for d in server.devices(A1) if d["review_state"] == "accepted") == sorted(eligible["ids"])
     r = assert_review_lines(page, server)
     assert r["awaiting_unflagged"] == 0 and page.locator("#bulk-accept").is_disabled()
@@ -922,18 +933,30 @@ FAN = ("ceiling_fan", "optional_pre_wire")
 AI_FLAG_TYPES = ("model_disagrees", "ai_only_candidate")
 
 
-class Evidence:
-    """Screenshots and ``run.json`` for one demo test, in a directory cleared of its previous outputs first (the
-    hand-written ``README.md`` is kept)."""
+EVIDENCE_ENV = "TAKEOFF_DEMO_EVIDENCE"
 
-    def __init__(self, page, out: Path, record: dict):
-        self.page, self.out, self.record = page, out, record
-        out.mkdir(parents=True, exist_ok=True)
-        for p in out.iterdir():
-            if p.is_file() and (p.suffix == ".png" or p.name == "run.json"):
-                p.unlink()
-            elif p.is_dir() and p.name == "export":
-                shutil.rmtree(p)
+
+def _managed(path: Path) -> bool:
+    """The evidence a demo test owns in its directory: screenshots, ``run.json`` and ``export/`` (never the
+    hand-written ``README.md`` or another test's subdirectory)."""
+    return (path.is_file() and (path.suffix == ".png" or path.name == "run.json")) or \
+        (path.is_dir() and path.name == "export")
+
+
+class Evidence:
+    """Screenshots and ``run.json`` for one demo test.
+
+    Everything is written to a staging directory under ``tmp_path``, so a default test run never touches the
+    committed evidence. :meth:`publish` (called only after every assertion held) swaps the staged files into
+    ``target`` when ``TAKEOFF_DEMO_EVIDENCE=1``; it never replaces live-model evidence with a test-double run.
+    """
+
+    def __init__(self, page, target: Path, record: dict, stage_root: Path):
+        self.page, self.target, self.record = page, target, record
+        self.out = stage_root / f"evidence_{target.name}"
+        if self.out.exists():
+            shutil.rmtree(self.out)
+        self.out.mkdir(parents=True)
         self.record.setdefault("screenshots", [])
 
     def shot(self, name: str, what: str, panel: str = "#device") -> None:
@@ -949,6 +972,43 @@ class Evidence:
 
     def write(self) -> None:
         (self.out / "run.json").write_text(json.dumps(self.record, indent=2) + "\n", encoding="utf-8", newline="\n")
+
+    def publish(self) -> str:
+        """Swap the staged evidence into ``target`` (only with ``TAKEOFF_DEMO_EVIDENCE=1``). Returns what happened."""
+        try:
+            rel = self.target.relative_to(ROOT).as_posix()
+        except ValueError:
+            rel = self.target.name
+        if os.environ.get(EVIDENCE_ENV) != "1":
+            return f"not published: {EVIDENCE_ENV} is not 1 (evidence staged under pytest's tmp_path only)"
+        old = self.target / "run.json"
+        if old.exists() and self.record.get("ai_implementation") != "claude":
+            try:
+                prev = json.loads(old.read_text(encoding="utf-8")).get("ai_implementation")
+            except (OSError, ValueError):
+                prev = None
+            if prev == "claude":
+                msg = (f"not published: {rel} holds live-model evidence (ai_implementation 'claude'); a "
+                       f"'{self.record.get('ai_implementation')}' run never replaces it")
+                warnings.warn(msg)
+                return msg
+        self.record["evidence"] = f"published to {rel}/"
+        self.write()
+        incoming = self.target.parent / f".{self.target.name}.incoming"
+        if incoming.exists():
+            shutil.rmtree(incoming)
+        incoming.mkdir(parents=True)
+        for p in self.out.iterdir():
+            if _managed(p):
+                (shutil.copytree if p.is_dir() else shutil.copy2)(p, incoming / p.name)
+        self.target.mkdir(parents=True, exist_ok=True)
+        for p in list(self.target.iterdir()):
+            if _managed(p):
+                shutil.rmtree(p) if p.is_dir() else p.unlink()
+        for p in list(incoming.iterdir()):
+            p.rename(self.target / p.name)
+        incoming.rmdir()
+        return self.record["evidence"]
 
 
 def preflight_summary() -> dict:
@@ -1040,6 +1100,7 @@ def add_fan_at_hub(page, server, m, hub, ev: Evidence | None = None) -> dict:
     show_device(page, m, dev)
     text = page.inner_text("#device")
     assert "ceiling_fan" in text and "manual" in text and "accepted" in text
+    assert re.search(re.escape(SCORE_LABEL) + r"\s+none \(no detection\)", text), text
     after = server.counts()
     assert row_room_of(page, dev["id"]) == room
     fan_before, fan_after = room_ceiling_fans(before, A1, room), room_ceiling_fans(after, A1, room)
@@ -1109,13 +1170,42 @@ def assert_aligned(page, m, devices, factors=(1.0, 3.0), pans=((0, 0), (137.5, -
     return worst
 
 
+def assert_aligned_now(page, m, devices) -> float:
+    """Every probed marker at its independently computed position for the view the page has now."""
+    view = page.evaluate("tk.view")
+    worst = 0.0
+    for d in devices:
+        got = center_of(page, f'{marker(d["id"])} circle.core')
+        want = expected_screen(m, view, d["point"]["u"], d["point"]["v"])
+        assert got is not None, d["id"]
+        err = max(abs(got[0] - want[0]), abs(got[1] - want[1]))
+        assert err <= ALIGN_PX, (d["id"], view, got, want)
+        worst = max(worst, err)
+    return worst
+
+
+def free_plan_point(page) -> tuple[float, float]:
+    """A viewport point (page coordinates) on the drawing with no marker or layer switch under it: a drag there pans."""
+    pt = page.evaluate("""(() => {
+        const r = document.getElementById('viewport').getBoundingClientRect();
+        for (let fy = 0.3; fy <= 0.8; fy += 0.05) for (let fx = 0.2; fx <= 0.8; fx += 0.05) {
+            const x = r.left + r.width * fx, y = r.top + r.height * fy;
+            const el = document.elementFromPoint(x, y);
+            if (el && document.getElementById('viewport').contains(el) && !el.closest('.device')
+                && !el.closest('#layers')) return [x, y];
+        }
+        return null; })()""")
+    assert pt is not None
+    return pt[0], pt[1]
+
+
 def test_demo_path_end_to_end(page, tmp_path, cache_dir):
     pre = preflight_summary()
     impl, why = choose_ai(pre)
     record = {"test": "backend/tests/test_tk_e2e.py::test_demo_path_end_to_end", "pdf_sha256": None,
               "ai_implementation": impl, "ai_choice": why, "ai_preflight": pre,
               "result": "did not finish: an assertion or error stopped the test (see the pytest output)"}
-    ev = Evidence(page, DEMO_DIR, record)
+    ev = Evidence(page, DEMO_DIR, record, tmp_path)
     srv = Server(tmp_path, cache_dir, detector=None, background=True, ai="claude" if impl == "claude" else None)
     try:
         record["pdf_sha256"] = srv.doc
@@ -1179,8 +1269,13 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
             ai_line = page.inner_text("#ai-line").strip()
             if impl == "fake":
                 assert ai_line == "AI second opinion: agrees" + FAKE
+            score = next(r["detection"]["score"] for r in srv.device(d["id"])["evidence"]
+                         if r["evidence"]["outcome"] == "created")
+            score_text = "none (no raster score)" if score is None else f"{score:.2f}"
+            assert re.search(re.escape(SCORE_LABEL) + r"\s+" + re.escape(score_text), text), (score, text)
+            assert "no detection" not in text
             inspected[cat] = {"device_id": d["id"], "subtype": d["subtype"], "room": (d["room"] or {}).get("name"),
-                              "point_pt": d["point_pt"], "ai_line": ai_line,
+                              "point_pt": d["point_pt"], "ai_line": ai_line, "score_shown": score_text,
                               "open_flags": open_by_device.get(d["id"], [])}
             ev.shot(f"inspect_{cat}", f"A1 {cat} selected: category, legend subtype, room and source, review "
                                       f"state, origin, '{SCORE_LABEL}', run and versions, AI line, evidence, history")
@@ -1283,36 +1378,62 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
         record["alignment"] = {"devices": [d["id"] for d in probes], "zoom_factors_of_fit": [1.0, 3.0],
                                "pans_px": [[0, 0], [137.5, -61.25]], "max_error_px": round(worst, 3),
                                "tolerance_px": ALIGN_PX}
-        set_view_centered(page, m, hub["norm"]["u"], hub["norm"]["v"], fit_scale(page, m) * 4)
-        ev.shot("zoomed", "zoomed in (4x fit) on the bedroom fan hub: markers sit on their symbols")
-        page.evaluate("(() => { const v = tk.view; tk.setView(v.s, v.tx + 137.5, v.ty - 61.25); })()")
-        ev.shot("panned", f"the same view panned; every probed marker stayed within {ALIGN_PX} px "
-                          f"(worst {worst:.3f} px)")
+        # a real mouse-wheel zoom at the fan hub, then a real drag pan, each checked the same way
+        set_view_centered(page, m, hub["norm"]["u"], hub["norm"]["v"], fit_scale(page, m) * 1.5)
+        vp = viewport_rect(page)
+        s0 = page.evaluate("tk.view.s")
+        page.mouse.move(vp["x"] + vp["w"] / 2, vp["y"] + vp["h"] / 2)
+        page.mouse.wheel(0, -600)
+        page.wait_for_function(f"tk.view.s > {s0 * 1.5}")
+        s1 = page.evaluate("tk.view.s")
+        worst_wheel = assert_aligned_now(page, m, probes)
+        ev.shot("zoomed", f"after a real mouse-wheel zoom at the bedroom fan hub (scale x{s1 / s0:.2f}): markers sit "
+                          f"on their symbols (worst {worst_wheel:.3f} px)")
+        v0 = page.evaluate("tk.view")
+        x, y = free_plan_point(page)
+        page.mouse.move(x, y)
+        page.mouse.down()
+        for k in range(1, 11):
+            page.mouse.move(x + 12.0 * k, y - 7.0 * k)
+        page.mouse.up()
+        v1 = page.evaluate("tk.view")
+        assert v1["s"] == v0["s"] and abs(v1["tx"] - v0["tx"] - 120) <= 0.5 and abs(v1["ty"] - v0["ty"] + 70) <= 0.5
+        worst_drag = assert_aligned_now(page, m, probes)
+        assert page.evaluate("!tk.state.newPoint && !tk.state.placing")  # a drag is not a click on the plan
+        record["alignment"]["mouse_wheel"] = {"scale_ratio": round(s1 / s0, 3), "max_error_px": round(worst_wheel, 3)}
+        record["alignment"]["mouse_drag"] = {"delta_px": [120, -70], "max_error_px": round(worst_drag, 3)}
+        ev.shot("panned", f"after a real mouse drag of (120, -70) px: every probed marker stayed within {ALIGN_PX} px "
+                          f"(worst {worst_drag:.3f} px)")
         page.locator("#viewport").focus()
         page.keyboard.press("f")  # back to the fitted view
 
-        # 8. bulk accept, after the confirmation (the button covers every sheet's unflagged proposals)
-        eligible = srv.call("GET", f"/api/documents/{srv.doc}/bulk-eligible")
-        eligible_a1 = srv.call("GET", f"/api/documents/{srv.doc}/bulk-eligible?sheet_id={A1}")
+        # 8. bulk accept on A1, after the confirmation (the page's button is scoped to the sheet shown)
+        def eligible_on(sid):
+            return srv.call("GET", f"/api/documents/{srv.doc}/bulk-eligible?sheet_id={sid}")["count"]
+
+        before = {sid: eligible_on(sid) for sid in SHEETS}
         k2 = srv.counts()
-        n = eligible["count"]
-        assert n == k2["review"]["awaiting_unflagged"] > 0
+        n = before[A1]
+        assert n > 0 and all(before[sid] > 0 for sid in SHEETS)
+        assert page.inner_text("#bulk-accept").strip() == f"Accept all unflagged ({n})"
         dialogs.answers.append(True)
         page.click("#bulk-accept")
         wait_total(page, k2["review"]["official_total"] + n, timeout=30_000)
-        assert dialogs.messages[-1] == f"Accept {n} unflagged proposals? Official totals will update."
+        assert dialogs.messages[-1] == f"Accept {n} unflagged proposals on sheet {A1}? Official totals will update."
         k3 = srv.counts()
         assert k3["review"]["official_total"] == k2["review"]["official_total"] + n
-        assert srv.call("GET", f"/api/documents/{srv.doc}/bulk-eligible?sheet_id={A1}")["count"] == 0
+        after = {sid: eligible_on(sid) for sid in SHEETS}
+        assert after == {**before, A1: 0}  # the other sheets are untouched
+        assert all(d["review_state"] == "proposed" for sid in SHEETS[1:] for d in srv.devices(sid))
         assert_review_lines(page, srv)
-        record["bulk_accept"] = {"confirmation": dialogs.messages[-1], "accepted": n,
-                                 "of_which_on_A1": eligible_a1["count"], "scope": "every sheet of the document "
-                                 "(the page's button); flagged proposals excluded",
+        record["bulk_accept"] = {"confirmation": dialogs.messages[-1], "accepted": n, "sheet": A1,
+                                 "scope": "the sheet shown (A1-111); flagged proposals excluded",
+                                 "eligible_before": before, "eligible_after": after,
                                  "official_total_after": k3["review"]["official_total"],
                                  "review_after": k3["review"]}
-        ev.shot("bulk_accepted", f"after confirming 'Accept {n} unflagged proposals?': flagged proposals stay "
-                                 f"awaiting review; official totals {k3['review']['official_total']}",
-                panel="#review-lines")
+        ev.shot("bulk_accepted", f"after confirming 'Accept {n} unflagged proposals on sheet {A1}?': A1's flagged "
+                                 f"proposals stay awaiting review; A2-A4 untouched; official totals "
+                                 f"{k3['review']['official_total']}", panel="#review-lines")
         # R1-03 on the real takeoff: every officially counted device has its counted marker on its sheet
         invariant = {}
         for sid in SHEETS:
@@ -1337,13 +1458,15 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
         assert totals == api_counts["official"]
         assert totals_from_csv(out / "devices_official.csv") == json.loads(json.dumps(totals, sort_keys=True))
         assert manifest["review"] == api_counts["review"]
-        awaiting_elsewhere = sorted({d["sheet_id"] for d in srv.devices() if d["review_state"] == "proposed"
-                                     and d["sheet_id"] != A1})
-        assert awaiting_elsewhere, "other sheets should still await review"
-        assert manifest["complete"] is False and manifest["incomplete_reasons"]
+        # A2-A4 were never reviewed: every one of their detections is still awaiting review, and that is the reason
+        awaiting_by_sheet = dict(sorted(Counter(d["sheet_id"] for d in srv.devices()
+                                                if d["review_state"] == "proposed").items()))
+        for sid in SHEETS[1:]:
+            assert awaiting_by_sheet[sid] == run["sheets"][sid]["n_detections"], sid
         awaiting = api_counts["review"]["awaiting"]
-        assert f"{awaiting} detected device{'s' if awaiting != 1 else ''} awaiting review" in \
-            manifest["incomplete_reasons"]
+        assert awaiting == sum(awaiting_by_sheet.values())
+        assert manifest["complete"] is False
+        assert manifest["incomplete_reasons"][0] == f"{awaiting} detected devices awaiting review"
         assert "Export incomplete" in page.inner_text("#export-status")
         (mrun,) = manifest["runs"]
         summed = usage_from_verdicts(srv.app.state.store, run["id"])
@@ -1357,10 +1480,10 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
             assert manifest["ai_note"].endswith("(test double, not a model)")
         fan_row = next((r for r in csv_rows(out / "devices_official.csv") if r["id"] == record["fan"]["device_id"]),
                        None)
-        shutil.copytree(out, DEMO_DIR / "export")
-        record["export"] = {"source_dir_name": out.name, "copied_to": "reports/takeoff/demo/export/",
+        shutil.copytree(out, ev.out / "export")
+        record["export"] = {"source_dir_name": out.name, "copied_to": "export/ (next to this run.json)",
                             "complete": manifest["complete"], "incomplete_reasons": manifest["incomplete_reasons"],
-                            "sheets_still_awaiting_review_other_than_A1": awaiting_elsewhere,
+                            "awaiting_review_by_sheet": awaiting_by_sheet,
                             "totals_json_equals_api_counts": True, "totals_json_equals_csv_recomputation": True,
                             "manifest_ai_usage_equals_verdict_sums": True, "ai_usage_summed": summed,
                             "official_records": manifest["counts"]["official_records"],
@@ -1369,10 +1492,18 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
                             "fan_row": ({"origin_reported": fan_row["origin_reported"],
                                          "room_key": fan_row["room_key"]} if fan_row else
                                         "not in the official records (the detected fan is still awaiting review)")}
-        ev.shot("exported", "Export: the status bar states 'Export incomplete' with the reasons (flagged proposals "
-                            "still awaiting review on every sheet), as manifest.json does")
+        # the status bar ends with the server's export path; the screenshot shows only its directory name
+        page.evaluate("([path, name]) => { const el = document.getElementById('export-status'); "
+                      "el.textContent = el.textContent.replace(path, '<exports>/' + name); el.title = ''; }",
+                      [res["path"], out.name])
+        assert res["path"] not in page.inner_text("#export-status")
+        ev.shot("exported", "Export: the status bar states 'Export incomplete' with the manifest's reasons (A1's "
+                            "flagged proposals and every A2-A4 detection still await review); the local export "
+                            "path is shortened to its directory name for this screenshot")
         record["finished_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         record["result"] = "passed: every step's assertions held"
+        record["evidence"] = ev.publish()
+        print(f"demo evidence: {record['evidence']}")
     finally:
         ev.write()
         srv.stop()
@@ -1405,7 +1536,7 @@ def test_missed_ceiling_fan_is_added_manually_and_counted(page, tmp_path, cache_
               "ai_implementation": "fake", "ai_choice": "deterministic test: FakeVerifier and an empty "
                                                        "FakeDiscoverer (test doubles, not a model)",
               "result": "did not finish: an assertion or error stopped the test (see the pytest output)"}
-    ev = Evidence(page, DEMO_DIR / "fan_missed", record)
+    ev = Evidence(page, DEMO_DIR / "fan_missed", record, tmp_path)
     try:
         run = srv.call("POST", f"/api/documents/{srv.doc}/analyze", {"sheet_ids": [A1]})
         assert run["sheets"][A1]["status"] == "done", run
@@ -1440,9 +1571,41 @@ def test_missed_ceiling_fan_is_added_manually_and_counted(page, tmp_path, cache_
         record["export"] = {"origin_reported": row["origin_reported"], "room_key": row["room_key"],
                             "official_ceiling_fans": fans, "complete": res["manifest"]["complete"]}
         record["result"] = "passed: every assertion held"
+        record["evidence"] = ev.publish()
+        print(f"fan-missed evidence: {record['evidence']}")
     finally:
         ev.write()
         srv.stop()
+
+
+def test_demo_evidence_publishes_only_on_request_and_never_over_live_evidence(tmp_path, monkeypatch):
+    target = tmp_path / "demo"
+    target.mkdir()
+    (target / "README.md").write_text("hand-written", encoding="utf-8")
+    (target / "keep").mkdir()  # another test's subdirectory
+    (target / "01_old.png").write_bytes(b"old")
+    (target / "run.json").write_text(json.dumps({"ai_implementation": "claude"}), encoding="utf-8")
+
+    def staged(impl):
+        ev = Evidence(None, target, {"ai_implementation": impl}, tmp_path / f"stage-{impl}")
+        (ev.out / "01_new.png").write_bytes(b"new")
+        (ev.out / "export").mkdir()
+        (ev.out / "export" / "totals.json").write_text("{}", encoding="utf-8")
+        return ev
+
+    monkeypatch.delenv(EVIDENCE_ENV, raising=False)
+    assert staged("fake").publish().startswith("not published")
+    monkeypatch.setenv(EVIDENCE_ENV, "1")
+    with pytest.warns(UserWarning, match="live-model evidence"):
+        assert staged("fake").publish().startswith("not published")
+    assert sorted(p.name for p in target.iterdir()) == ["01_old.png", "README.md", "keep", "run.json"]
+
+    (target / "run.json").write_text(json.dumps({"ai_implementation": "fake"}), encoding="utf-8")
+    assert staged("fake").publish().startswith("published")
+    assert sorted(p.name for p in target.iterdir()) == ["01_new.png", "README.md", "export", "keep", "run.json"]
+    assert json.loads((target / "run.json").read_text(encoding="utf-8"))["ai_implementation"] == "fake"
+    assert (target / "README.md").read_text(encoding="utf-8") == "hand-written"
+    assert not (tmp_path / ".demo.incoming").exists()
 
 
 def test_originals_untouched_by_e2e_session():
