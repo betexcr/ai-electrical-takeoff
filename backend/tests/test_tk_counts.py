@@ -190,3 +190,17 @@ def test_room_rows_disambiguate_over_sheet_rooms():
     devices = [dev("w1", room=cl_west), dev("e1", room=cl_east, state="proposed")]
     assert set(C.derive(devices, [], rooms)["official"][SHEET]["by_room"]) == {"CL @(200,300)"}
     assert set(C.derive(devices, [])["official"][SHEET]["by_room"]) == {"CL"}  # fallback: counted devices only
+
+
+def test_rooms_unavailable_still_counts_every_device_under_its_saved_room():
+    """I3d: without the sheet's room view the devices are counted under their saved room, or "room unavailable"."""
+    devices = [dev("a"), dev("b", room=None), dev("c", subtype="dimmer")]
+    got = C.derive(devices, [], {}, unavailable={SHEET: "FileNotFoundError: plans.pdf"})
+    sheet = got["official"][SHEET]
+    assert sheet["total"] == 3
+    assert sheet["by_room"] == {"Kitchen": {"switch": {"dimmer": 1, "standard": 1}},
+                                C.ROOM_UNAVAILABLE: {"switch": {"standard": 1}}}
+    assert got["rooms_unavailable"] == {SHEET: "FileNotFoundError: plans.pdf"}
+    # with the view (or no failure recorded) a device without a room is UNASSIGNED, as before
+    assert set(C.derive(devices, [])["official"][SHEET]["by_room"]) == {"Kitchen", "UNASSIGNED"}
+    assert C.derive(devices, [])["rooms_unavailable"] == {}

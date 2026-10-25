@@ -30,7 +30,7 @@ from takeoff.ai import common as AC
 from takeoff.app import counts as COUNTS
 from takeoff.app import models as TM
 from takeoff.app.models import Device, Flag
-from takeoff.app.service import TakeoffService
+from takeoff.app.service import TakeoffError, TakeoffService
 from takeoff.app.store import TakeoffStore
 from takeoff.groundtruth import taxonomy as T
 from takeoff.groundtruth.export import room_key as gt_room_key
@@ -95,7 +95,7 @@ class _Snapshot:
         for sheet_id in sorted({d.sheet_id for d in self.devices}):
             try:
                 self.rooms[sheet_id] = service.views(document_id, sheet_id)["rooms"]
-            except LookupError:
+            except (LookupError, TakeoffError):  # rows fall back to the saved rooms, as in the totals
                 pass
 
 
@@ -305,7 +305,9 @@ def export_takeoff(service: TakeoffService, document_id: str, out_root: Path, ac
     live = {d.id for d in snap.devices if not d.deleted}
     flags = [f for f in snap.open_flags if f.device_id in live]  # a deleted device's flags are in no figure
     blocking = _blocking_reasons(counts["review"], snap.devices, flags)
-    informational = _unavailable(runs)
+    informational = _unavailable(runs) + [
+        f"Rooms unavailable on {sid} ({why}); its devices are counted under their saved rooms"
+        for sid, why in sorted(counts["rooms_unavailable"].items())]
     manifest = {
         "export_format": EXPORT_FORMAT, "schema_version": TM.SCHEMA_VERSION, "merge_version": TM.MERGE_VERSION,
         "taxonomy_version": T.TAXONOMY_VERSION, "store_version": TakeoffStore.STORE_VERSION,

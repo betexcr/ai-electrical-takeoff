@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+import shutil
 from pathlib import Path
 
 import cv2
@@ -209,6 +210,97 @@ def test_upload_same_pdf_twice_is_one_document(make, tmp_path, sha):
     assert again.status_code == 200 and again.json()["document"]["id"] == sha
     assert again.json()["document"]["source"] == "supplied" and again.json()["created"] is False
     assert files_under(tmp_path / "data" / "documents") == [stored]
+
+
+def _device_on_a1(c, doc) -> dict:
+    meta = meta_of(c, doc)
+    (pt,) = clear_points(meta, 1)
+    r = c.post(f"/api/documents/{doc}/devices", json={"sheet_id": A1, "category": "switch", "subtype": "standard",
+                                                       "point": to_norm(meta, pt)})
+    assert r.status_code == 201, r.text
+    return r.json()
+
+
+def test_moved_supplied_pdf_is_repointed_by_sha_and_the_takeoff_keeps_working(tmp_path, sha):
+    """I3 (the reviewer's moved.py): the project and its PDF move; the next start re-points the document by SHA."""
+    old, new = tmp_path / "old" / "plans.pdf", tmp_path / "new" / "plans.pdf"
+    old.parent.mkdir()
+    new.parent.mkdir()
+    shutil.copy(PDF, old)
+    data = tmp_path / "data"
+    with TestClient(create_app(data, old, ai="off", background=False, detector=FakeDetector())) as c:
+        dev = _device_on_a1(c, sha)
+        before = counts(c, sha)
+        assert c.get("/api/documents").json()[0]["stored_path"] == str(old.resolve())
+    shutil.move(str(old), str(new))
+    shutil.rmtree(data / "cache", ignore_errors=True)
+    with TestClient(create_app(data, new, ai="off", background=False, detector=FakeDetector())) as c:
+        r = c.get(f"/api/documents/{sha}/counts")
+        assert r.status_code == 200, r.text
+        assert r.json()["official"] == before["official"] and r.json()["review"] == before["review"]
+        assert r.json()["rooms_unavailable"] == {}
+        (doc,) = c.get("/api/documents").json()
+        assert doc["stored_path"] == str(new.resolve())
+        store = c.app.state.store
+        (ev,) = [e for e in store.events("document", sha) if e.action == "repoint"]
+        assert (ev.before["stored_path"], ev.after["stored_path"]) == (str(old.resolve()), str(new.resolve()))
+        assert store.get("devices", dev["id"]).revision == 1  # re-pointing never touches a device
+        r = c.patch(f"/api/devices/{dev['id']}", json={"changes": {"notes": "after the move"}})
+        assert r.status_code == 200, r.text
+        meta = meta_of(c, sha)
+        moved = dict(dev["point"], u=dev["point"]["u"] + 1.0 / (meta["geometry"]["crop_native"][2]
+                                                               - meta["geometry"]["crop_native"][0]))
+        r = c.patch(f"/api/devices/{dev['id']}", json={"changes": {"point": moved}})
+        assert r.status_code == 200, r.text
+
+
+def test_counts_degrade_when_the_pdf_is_missing_and_recover_when_it_is_back(tmp_path, sha):
+    """I3c/d: the stored PDF is gone and nothing re-points it: /counts still answers from the saved devices, and the
+    next request after the file is restored at its stored path works (the failure is not remembered)."""
+    where = tmp_path / "plans.pdf"
+    shutil.copy(PDF, where)
+    data = tmp_path / "data"
+    with TestClient(create_app(data, where, ai="off", background=False, detector=FakeDetector())) as c:
+        dev = _device_on_a1(c, sha)
+        before = counts(c, sha)
+    hidden = tmp_path / "hidden.pdf"
+    shutil.move(str(where), str(hidden))
+    with TestClient(create_app(data, None, ai="off", background=False, detector=FakeDetector())) as c:
+        k = counts(c, sha)
+        assert k["review"] == before["review"] and k["official"] == before["official"]
+        assert set(k["rooms_unavailable"]) == {A1} and "FileNotFoundError" in k["rooms_unavailable"][A1]
+        assert c.get(f"/api/documents/{sha}/sheets/{A1}/meta").json()["view_error"]
+        shutil.move(str(hidden), str(where))
+        assert counts(c, sha)["rooms_unavailable"] == {}
+        assert meta_of(c, sha)["view_error"] is None
+        r = c.patch(f"/api/devices/{dev['id']}", json={"changes": {"notes": "file is back"}})
+        assert r.status_code == 200, r.text
+
+
+def test_uploads_are_stored_relative_to_the_data_dir(tmp_path, cache):
+    """I3b: an upload's stored path is relative to the data directory, so the directory can move."""
+    data = blank_pdf("relative")
+    up_sha = hashlib.sha256(data).hexdigest()
+    with TestClient(create_app(tmp_path / "data", None, ai="off", background=False, cache_dir=cache)) as c:
+        body = upload(c, data, "rel.pdf").json()
+        assert body["document"]["stored_path"] == f"documents/{up_sha}.pdf"
+    shutil.move(str(tmp_path / "data"), str(tmp_path / "moved-data"))
+    with TestClient(create_app(tmp_path / "moved-data", None, ai="off", background=False, cache_dir=cache)) as c:
+        sheet = c.get(f"/api/documents/{up_sha}/sheets").json()[0]["sheet_id"]
+        assert meta_of(c, up_sha, sheet)["view_error"] is None
+
+
+def test_upload_restores_a_missing_stored_file(make, tmp_path):
+    """I3a for uploads: the same bytes uploaded again re-store the file when the stored copy is gone."""
+    c = make()
+    data = blank_pdf("restore me")
+    up_sha = hashlib.sha256(data).hexdigest()
+    upload(c, data, "r.pdf")
+    stored = tmp_path / "data" / "documents" / f"{up_sha}.pdf"
+    stored.unlink()
+    again = upload(c, data, "r.pdf")
+    assert again.status_code == 200 and again.json()["created"] is False
+    assert stored.read_bytes() == data
 
 
 def test_upload_non_pdf_is_400_and_writes_nothing(make, tmp_path):

@@ -4,7 +4,12 @@ analyzer, the export and the AI stages, plus the layout-A page.
 * **Documents** are PDFs identified by SHA-256. The supplied PDF is registered at startup (``source="supplied"``);
   an upload is a raw ``application/pdf`` body that must open with PyMuPDF, otherwise ``invalid_pdf`` (400) and
   nothing is written. The same bytes twice are one document: no second file, no second intake, the takeoff
-  untouched. Uploads are stored under ``<data>/documents/<sha256>.pdf``; no PDF is ever modified.
+  untouched. Uploads are stored under ``<data>/documents/<sha256>.pdf``, recorded relative to the data directory
+  (so the directory can move); no PDF is ever modified.
+* **A moved PDF is re-pointed by SHA** (final review I3): when the supplied PDF's bytes match a stored document at
+  another path, the document's ``stored_path`` is updated (one ``repoint`` event; no device changes). An upload of
+  a document whose stored copy is gone writes it again. A legacy absolute path that no longer exists falls back to
+  ``<data>/documents/<file name>``.
 * **Everything is document-scoped**: a sheet id such as ``A1-111`` is unique only within its document.
 * **Errors** are ``{code, message, ...details}`` with the code's status (``TakeoffError``); request-shape errors are
   ``invalid`` (422). The actor of every mutation is the ``X-Reviewer`` header, else the default reviewer.
@@ -251,11 +256,28 @@ def create_app(data_dir: Path | str, supplied_pdf: Path | str | None, default_re
 
     store = TakeoffStore(data_dir / "takeoff.sqlite")
 
+    def stored_value(path: Path) -> str:
+        """What ``Document.stored_path`` records: relative (POSIX) under the data dir, else absolute."""
+        path = Path(path).resolve()
+        try:
+            return path.relative_to(data_dir.resolve()).as_posix()
+        except ValueError:
+            return str(path)
+
+    def resolve_stored(stored: str) -> Path:
+        p = Path(stored)
+        if not p.is_absolute():
+            return data_dir / p
+        if p.exists():
+            return p
+        fallback = documents_dir / p.name  # a legacy absolute path into a data dir that has since moved
+        return fallback if fallback.exists() else p
+
     def pdf_path_of(document_id: str) -> Path:
         doc = store.find("documents", document_id)
         if doc is None:
             raise KeyError(document_id)
-        return Path(doc.stored_path)
+        return resolve_stored(doc.stored_path)
 
     views = SheetViews(store, pdf_path_of, cache_dir)
     service = TakeoffService(store, views)
@@ -280,26 +302,43 @@ def create_app(data_dir: Path | str, supplied_pdf: Path | str | None, default_re
 
     def register(data: bytes, file_name: str, source: Literal["supplied", "upload"], actor: str,
                  path: Path | None = None) -> tuple[TM.Document, bool]:
-        """The document for these bytes: the existing one (nothing written), or a new one with its sheets."""
+        """The document for these bytes: the existing one (re-pointed when its file moved, nothing else written),
+        or a new one with its sheets."""
         pages = check_pdf(data)
         sha = hashlib.sha256(data).hexdigest()
+
+        def write_upload() -> Path | None:
+            target = documents_dir / f"{sha}.pdf"
+            if target.exists():
+                return None
+            documents_dir.mkdir(parents=True, exist_ok=True)
+            tmp = target.with_suffix(".pdf.tmp")
+            tmp.write_bytes(data)
+            os.replace(tmp, target)
+            return target
+
         with register_lock:
             existing = store.find("documents", sha)
             if existing is not None:
+                target = None
+                if path is not None:  # the supplied PDF, wherever it is now
+                    target = stored_value(path)
+                elif not resolve_stored(existing.stored_path).exists():  # an upload whose stored copy is gone
+                    write_upload()
+                    target = stored_value(documents_dir / f"{sha}.pdf")
+                if target is not None and target != existing.stored_path:
+                    existing = store.replace("documents", existing.model_copy(update={"stored_path": target}),
+                                             actor, "repoint")
+                    log.warning("document %s re-pointed to %s (same SHA-256)", sha[:12], target)
                 return existing, False
             wrote = None
             if path is None:
                 path = documents_dir / f"{sha}.pdf"
-                if not path.exists():
-                    documents_dir.mkdir(parents=True, exist_ok=True)
-                    tmp = path.with_suffix(".pdf.tmp")
-                    tmp.write_bytes(data)
-                    os.replace(tmp, path)
-                    wrote = path
+                wrote = write_upload()
             try:
                 infos = TS.intake(path, sha)
                 doc = TM.Document(id=sha, file_name=file_name, page_count=pages, source=source,
-                                  stored_path=str(path))
+                                  stored_path=stored_value(path))
                 with store.transaction() as conn:
                     doc = store.insert("documents", doc, actor, "register", conn=conn)
                     for info in infos:

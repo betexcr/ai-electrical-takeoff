@@ -63,3 +63,4 @@ details summary { cursor: pointer; }
 #toast { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 6px 12px; border-radius: 4px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 70%; }
 #toast.show { opacity: .95; }
 #toast.error { background: var(--bad); }
+.notice { margin: 4px 0; padding: 4px 8px; background: #fff7ec; border: 1px solid #f0c890; border-radius: 4px; }

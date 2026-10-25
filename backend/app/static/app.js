@@ -155,7 +155,7 @@ function subtypeOptionsHtml(category, current) {
 // The row name counts.sheet_room_key gives a counted device (two same-named labels are two rows).
 function roomKey(d) {
   const room = d.room;
-  if (!room) return "UNASSIGNED";
+  if (!room) return st.counts?.rooms_unavailable?.[d.sheet_id] ? "room unavailable" : "UNASSIGNED";
   if (room.kind !== "labeled") return room.name;
   const same = new Set(st.meta.rooms.filter((r) => r.kind === "labeled" && r.name === room.name && r.label_bbox_pt)
     .map((r) => JSON.stringify(r.label_bbox_pt.map(Number))));
@@ -471,6 +471,12 @@ function renderTotals() {
   const sheet = k.official[st.sheetId];
   const accepted = st.devices.filter((d) => d.sheet_id === st.sheetId && d.review_state === "accepted" && !d.deleted);
   let html = "";
+  // Rooms of a sheet whose PDF cannot be read now (moved or missing): still counted, under the saved rooms.
+  const noRooms = Object.keys(k.rooms_unavailable || {});
+  if (noRooms.length) {
+    html += `<div id="rooms-unavailable" class="notice">Rooms unavailable on ${esc(noRooms.join(", "))}: ` +
+      `the PDF cannot be read now, so devices are counted under their saved rooms.</div>`;
+  }
   if (!sheet) {
     html += `<div class="muted">No counted devices on sheet ${esc(st.sheetId)}.</div>`;
   } else {

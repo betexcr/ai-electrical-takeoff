@@ -36,7 +36,8 @@ _RUN_ID = re.compile(r"^run-\d{3,}$")
 
 
 class Document(_Model):
-    """A PDF, identified by its SHA-256. Immutable."""
+    """A PDF, identified by its SHA-256. Only ``stored_path`` changes: re-pointed (an event) when the same bytes
+    are found at another path. ``stored_path`` is relative to the data directory for uploads, else absolute."""
 
     id: str = Field(min_length=64, max_length=64)  # sha256 hex
     file_name: str = Field(min_length=1)

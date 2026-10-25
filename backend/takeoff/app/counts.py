@@ -22,6 +22,8 @@ from takeoff.app.models import Device, Flag
 from takeoff.groundtruth.export import room_key
 
 AUTOMATED = ("detector", "ai")
+# The row of a counted device without a saved room on a sheet whose room view is unavailable (final review I3d).
+ROOM_UNAVAILABLE = "room unavailable"
 REPORTED_ORIGIN = {"detector": "detector_accepted", "ai": "ai_accepted", "manual": "manual"}
 
 
@@ -54,14 +56,17 @@ def sheet_room_key(device: Device, sheet_rooms: list[dict]) -> str:
     return f"{room.name} @({x0:.0f},{y0:.0f})"
 
 
-def _official(accepted: list[Device], rooms: Mapping[str, list[dict]] | None) -> dict:
+def _official(accepted: list[Device], rooms: Mapping[str, list[dict]] | None,
+              unavailable: Mapping[str, str]) -> dict:
     out: dict = {}
     for sheet in sorted({d.sheet_id for d in accepted}):
         here = [d for d in accepted if d.sheet_id == sheet]
         sheet_rooms = (rooms or {}).get(sheet)
 
         def key(d: Device) -> str:
-            # without the sheet's rooms, fall back to disambiguating over the counted devices
+            if d.room is None and sheet in unavailable:
+                return ROOM_UNAVAILABLE
+            # without the sheet's rooms, fall back to disambiguating over the counted devices' saved rooms
             return room_key(d, here) if sheet_rooms is None else sheet_room_key(d, sheet_rooms)
 
         by_room: dict = defaultdict(lambda: defaultdict(Counter))
@@ -107,15 +112,18 @@ def _review(live: list[Device], flags_by_device: Mapping[str, list[Flag]]) -> di
 
 
 def derive(devices: Iterable[Device], open_flags: Iterable[Flag],
-           rooms: Mapping[str, list[dict]] | None = None) -> dict:
-    """``{"review": {...}, "review_by_sheet": {sheet_id: {...}}, "official": {sheet_id: {...}}}`` for one
-    document's devices and flags.
+           rooms: Mapping[str, list[dict]] | None = None, *, unavailable: Mapping[str, str] | None = None) -> dict:
+    """``{"review": {...}, "review_by_sheet": {sheet_id: {...}}, "official": {sheet_id: {...}},
+    "rooms_unavailable": {sheet_id: reason}}`` for one document's devices and flags.
 
     ``review`` is document-wide; ``review_by_sheet`` holds the same figures for each sheet that has a non-deleted
     device (every figure is additive, so the sheets sum to ``review``; the page's per-sheet bulk button reads its
     sheet's ``awaiting_unflagged``). ``open_flags`` may contain closed flags; they are ignored. ``rooms`` maps a
     sheet id to that sheet's rooms (``sheet_view(...)["rooms"]``); room rows are disambiguated over them when given.
+    ``unavailable`` maps a sheet whose room view could not be read (for example its PDF is missing) to the reason:
+    its devices are still counted, under their saved room, or :data:`ROOM_UNAVAILABLE` when they have none.
     """
+    unavailable = dict(unavailable or {})
     live = [d for d in devices if not d.deleted]
     flags_by_device: dict[str, list[Flag]] = defaultdict(list)
     for f in open_flags:
@@ -126,5 +134,6 @@ def derive(devices: Iterable[Device], open_flags: Iterable[Flag],
         "review": _review(live, flags_by_device),
         "review_by_sheet": {sid: _review([d for d in live if d.sheet_id == sid], flags_by_device)
                             for sid in sorted({d.sheet_id for d in live})},
-        "official": _official(accepted, rooms),
+        "official": _official(accepted, rooms, unavailable),
+        "rooms_unavailable": unavailable,
     }

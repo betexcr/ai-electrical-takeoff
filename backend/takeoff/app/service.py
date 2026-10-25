@@ -130,14 +130,19 @@ class TakeoffService:
 
     def derive_counts(self, document_id: str, devices: list[Device], flags: list[Flag]) -> dict:
         """:func:`counts.derive` over the given records, with the sheets' rooms (the export derives its totals from
-        the very device list it writes, in the same call, through this)."""
-        rooms = {}
+        the very device list it writes, in the same call, through this).
+
+        Never fails for a sheet whose view cannot be read (its PDF moved or is missing): the devices are still
+        counted under their saved rooms and the sheet is listed in ``rooms_unavailable`` with the reason."""
+        rooms, unavailable = {}, {}
         for sheet_id in sorted({d.sheet_id for d in devices if not d.deleted and d.review_state == "accepted"}):
             try:
                 rooms[sheet_id] = self.views(document_id, sheet_id)["rooms"]
             except LookupError:  # no view for the sheet: rows fall back to the counted devices' rooms
                 pass
-        return COUNTS.derive(devices, flags, rooms)
+            except TakeoffError as e:  # the view cannot be built now: same fallback, and say so
+                unavailable[sheet_id] = e.message
+        return COUNTS.derive(devices, flags, rooms, unavailable=unavailable)
 
     def device_detail(self, device_id: str) -> dict:
         device = self._get_device(device_id)
