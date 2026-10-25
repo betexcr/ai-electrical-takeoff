@@ -311,11 +311,12 @@ def create_app(data_dir: Path | str, supplied_pdf: Path | str | None, default_re
     views = SheetViews(store, pdf_path_of, cache_dir)
     service = TakeoffService(store, views)
 
+    api_client = None  # the client whose host is billed (None: no AI request is ever sent)
     if ai == "off":
         mode, verifier, discoverer = "off", None, None
     elif ai == "claude":
-        client = AC.AIClient()  # builds nothing and calls nothing until a stage needs it
-        mode, verifier, discoverer = "claude", AV.ClaudeVerifier(client), AD.ClaudeDiscoverer(client)
+        api_client = AC.AIClient()  # builds nothing and calls nothing until a stage needs it
+        mode, verifier, discoverer = "claude", AV.ClaudeVerifier(api_client), AD.ClaudeDiscoverer(api_client)
     elif isinstance(ai, tuple) and len(ai) == 2:
         mode, (verifier, discoverer) = "injected", ai
     else:
@@ -503,6 +504,7 @@ def create_app(data_dir: Path | str, supplied_pdf: Path | str | None, default_re
             "taxonomy": T.as_dict(),
             "score_label": SCORE_LABEL,
             "ai": {"mode": mode, "model": model, "max_requests": analyzer.max_requests,
+                   "api_host": api_client.api_host() if api_client is not None else None,
                    "verify": stage_config(verifier, AV), "discover": stage_config(discoverer, AD)},
         }
 

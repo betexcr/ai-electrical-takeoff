@@ -345,6 +345,9 @@ function renderStatus() {
     $("stage-verify").textContent = stageLine("verify");
     $("stage-discover").textContent = stageLine("discover");
   }
+  // The host AI requests go to, so the account they are billed to (the host only, never a key).
+  const host = st.config?.ai?.api_host;
+  $("ai-host").textContent = host ? `AI requests go to ${host} (billed to that account)` : "";
   const ex = $("export-status");
   const r = st.exportResult;
   if (!r) { ex.textContent = ""; ex.className = ""; ex.title = ""; return; }

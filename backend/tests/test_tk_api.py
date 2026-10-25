@@ -759,3 +759,20 @@ def test_a_suffixed_sheet_id_works_in_every_route(make, tmp_path):
     r = c.post(f"/api/devices/{quote(dev['id'], safe='')}/accept", json={})
     assert r.status_code == 200 and r.json()["review_state"] == "accepted"
     assert counts(c, up)["official"]["A1-111#p2"]["total"] == 1
+
+
+def test_config_names_the_api_host_that_bills_and_never_the_key(make, tmp_path, monkeypatch):
+    """M-f: /api/config states the host the AI requests go to (and are billed by); the key is never shown."""
+    monkeypatch.setattr(AC.AIClient, "_check", lambda self: (False, "no network in tests", False))
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test-not-a-real-key")
+    monkeypatch.delenv("ANTHROPIC_BASE_URL", raising=False)
+    r = make(data=tmp_path / "default", ai="claude").get("/api/config")
+    assert r.json()["ai"]["api_host"] == "api.anthropic.com"
+    assert "sk-test-not-a-real-key" not in r.text
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://user:secret@proxy.example:8443/v1?token=abc")
+    r = make(data=tmp_path / "proxy", ai="claude").get("/api/config")
+    assert r.json()["ai"]["api_host"] == "proxy.example:8443"
+    assert "secret" not in r.text and "token=abc" not in r.text and "sk-test" not in r.text
+    assert make(data=tmp_path / "off").get("/api/config").json()["ai"]["api_host"] is None  # no AI requests at all
+    assert make(data=tmp_path / "fakes", ai=(AV.FakeVerifier(), AD.FakeDiscoverer())).get(
+        "/api/config").json()["ai"]["api_host"] is None  # test doubles: nothing is billed

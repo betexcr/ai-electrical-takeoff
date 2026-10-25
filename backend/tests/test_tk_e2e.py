@@ -935,6 +935,28 @@ def test_ai_unavailable_and_fake_labels_are_stated(page, tmp_path, cache_dir):
         off.stop()
 
 
+def test_page_names_the_ai_api_host_and_never_a_key(page, tmp_path, cache_dir, monkeypatch):
+    """M-f: with the Claude stages configured the status bar names the host requests go to (and are billed by)."""
+    from takeoff.ai import common as AC
+
+    monkeypatch.setattr(AC.AIClient, "_check", lambda self: (False, "no network in tests", False))
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "http://127.0.0.1:9/v1")  # a closed local port: nothing can leave
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-test-not-a-real-key")
+    srv = Server(tmp_path, cache_dir, ai="claude")
+    try:
+        open_page(page, srv)
+        assert page.inner_text("#ai-host").strip() == "AI requests go to 127.0.0.1:9 (billed to that account)"
+        assert "sk-test" not in page.content()
+    finally:
+        srv.stop()
+    fakes = Server(tmp_path / "fakes", cache_dir)
+    try:
+        open_page(page, fakes)
+        assert page.inner_text("#ai-host").strip() == ""  # test doubles: no request, nothing billed
+    finally:
+        fakes.stop()
+
+
 # --- review fixes: running stage, null subtype, stale detail ---------------------------------------------------------------
 
 def test_stage_line_says_running_while_a_run_is_in_progress(page, server):

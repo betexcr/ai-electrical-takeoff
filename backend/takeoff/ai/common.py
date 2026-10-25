@@ -31,6 +31,8 @@ from typing import Any, Callable, Iterable, Mapping
 
 DEFAULT_MODEL = "claude-opus-5-5"
 MODEL_ENV = "TAKEOFF_AI_MODEL"
+BASE_URL_ENV = "ANTHROPIC_BASE_URL"  # the SDK's own override of where requests go
+DEFAULT_BASE_URL = "https://api.anthropic.com"
 MAX_CONCURRENCY = 4
 TIMEOUT_S = 60
 DEFAULT_MAX_REQUESTS = 200
@@ -112,6 +114,21 @@ class AIClient:
         self._client = client
         self._available: tuple[bool, str | None] | None = None
         self._lock = threading.Lock()
+
+    def api_host(self) -> str:
+        """The host the requests go to, and so the account that is billed: ``host[:port]`` only, never a key,
+        user info, path or query (final review M-f). Reads the configuration; builds nothing, sends nothing."""
+        from urllib.parse import urlsplit
+
+        base = getattr(self._client, "base_url", None) if self._client is not None else None
+        parts = urlsplit(str(base or os.environ.get(BASE_URL_ENV) or DEFAULT_BASE_URL))
+        host = parts.hostname or "unknown host"
+        try:
+            port = parts.port
+        except ValueError:
+            port = None
+        default = {"https": 443, "http": 80}.get(parts.scheme)
+        return f"{host}:{port}" if port and port != default else host
 
     def _sdk_client(self):
         if self._client is None:
