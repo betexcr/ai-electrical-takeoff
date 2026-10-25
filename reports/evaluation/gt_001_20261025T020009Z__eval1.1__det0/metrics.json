@@ -1,0 +1,4987 @@
+{
+ "candidate_runs": [
+  {
+   "generator": "raster_plain",
+   "generator_version": "gt_candidates/1+symbols/1",
+   "params": {
+    "classes": [
+     "switch_standard.png",
+     "receptacle_gfi_duplex.png",
+     "light_recessed_downlight.png",
+     "light_pendant_high_efficacy.png",
+     "light_wall_mounted_high_efficacy.png",
+     "ceiling_fan_optional_pre_wire.png",
+     "fan_exhaust.png",
+     "detector_smoke.png",
+     "junction_box_electrical.png"
+    ],
+    "dpi": 300,
+    "pages": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "threshold": 0.7
+   },
+   "run_hash": "5769aa2eb5caba46255cf2f6ee799dde8d9ad97c019dbb5f71d0e5db9cc29af0"
+  },
+  {
+   "generator": "raster_thickened",
+   "generator_version": "gt_candidates/1+symbols/1",
+   "params": {
+    "classes": [
+     "switch_standard.png",
+     "receptacle_gfi_duplex.png",
+     "light_recessed_downlight.png",
+     "light_pendant_high_efficacy.png",
+     "light_wall_mounted_high_efficacy.png",
+     "ceiling_fan_optional_pre_wire.png",
+     "fan_exhaust.png",
+     "detector_smoke.png",
+     "junction_box_electrical.png"
+    ],
+    "dpi": 300,
+    "erode_kernel": 5,
+    "pages": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "threshold": 0.6
+   },
+   "run_hash": "c655baca661652e54e4047f8755db982adfb290d1f3cc4f34378cfd658c0b9e0"
+  },
+  {
+   "generator": "vector_signature",
+   "generator_version": "gt_candidates/1+symbols/1",
+   "params": {
+    "classes": [
+     "switch_standard.png",
+     "receptacle_gfi_duplex.png",
+     "light_recessed_downlight.png",
+     "light_pendant_high_efficacy.png",
+     "light_wall_mounted_high_efficacy.png",
+     "ceiling_fan_optional_pre_wire.png",
+     "fan_exhaust.png",
+     "detector_smoke.png",
+     "junction_box_electrical.png"
+    ],
+    "component_eps_pt": 0.3,
+    "dedupe": true,
+    "pages": [
+     1,
+     2,
+     3,
+     4
+    ]
+   },
+   "run_hash": "b7f67ef489370cb185cddd1c01b094478ceda175ff42ae0c1a5decf9c5ca4901"
+  }
+ ],
+ "code": {
+  "git_commit": "444b8eb45ba3dc82300a7d9f0173af74729b45f6",
+  "git_dirty": false
+ },
+ "copied_position_eps_pt": 0.05,
+ "created_at": "2026-10-25T02:52:21.498+00:00",
+ "detectors": {
+  "det0": {
+   "detector_version": "det/0",
+   "input_runs": [
+    {
+     "generator": "raster_thickened",
+     "run_hash": "c655baca661652e54e4047f8755db982adfb290d1f3cc4f34378cfd658c0b9e0"
+    },
+    {
+     "generator": "vector_signature",
+     "run_hash": "b7f67ef489370cb185cddd1c01b094478ceda175ff42ae0c1a5decf9c5ca4901"
+    }
+   ],
+   "params": {
+    "category_priority": [
+     "ceiling_fan",
+     "fan",
+     "detector",
+     "switch",
+     "receptacle",
+     "light",
+     "junction_box"
+    ],
+    "default_subtype": {
+     "detector": "smoke_detector",
+     "fan": "exhaust_fan",
+     "light": "recessed_downlight",
+     "receptacle": "afi_duplex",
+     "switch": "standard"
+    },
+    "junction_box_token": "J",
+    "junction_box_token_radius_pt": 2.0,
+    "proposal_generators": [
+     "raster_thickened",
+     "vector_signature"
+    ],
+    "site_radius_pt": 4.0,
+    "token_radius_pt": 15.0
+   },
+   "primary": {
+    "by_category": {
+     "ceiling_fan": {
+      "count_error": 0,
+      "f1": 1.0,
+      "fn": 0,
+      "fn_kinds": {},
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 0.306,
+        "mean": 0.174,
+        "median": 0.155,
+        "n": 8,
+        "p90": 0.306
+       },
+       "independent": {
+        "max": 0.306,
+        "mean": 0.174,
+        "median": 0.155,
+        "n": 8,
+        "p90": 0.306
+       },
+       "position_copied": 0
+      },
+      "n_gt": 8,
+      "n_pred": 8,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 8
+     },
+     "detector": {
+      "count_error": 0,
+      "f1": 1.0,
+      "fn": 0,
+      "fn_kinds": {},
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 0.216,
+        "mean": 0.136,
+        "median": 0.134,
+        "n": 14,
+        "p90": 0.216
+       },
+       "independent": {
+        "max": 0.216,
+        "mean": 0.136,
+        "median": 0.134,
+        "n": 14,
+        "p90": 0.216
+       },
+       "position_copied": 0
+      },
+      "n_gt": 14,
+      "n_pred": 14,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 14
+     },
+     "fan": {
+      "count_error": 0,
+      "f1": 0.9286,
+      "fn": 1,
+      "fn_kinds": {
+       "not_found": 1
+      },
+      "fp": 1,
+      "fp_kinds": {
+       "wrong_category": 1
+      },
+      "localization": {
+       "all": {
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "n": 13,
+        "p90": 0.0
+       },
+       "independent": null,
+       "position_copied": 13
+      },
+      "n_gt": 14,
+      "n_pred": 14,
+      "precision": 0.9286,
+      "recall": 0.9286,
+      "tp": 13
+     },
+     "light": {
+      "count_error": 1,
+      "f1": 0.9606,
+      "fn": 2,
+      "fn_kinds": {
+       "found_as_other_category": 1,
+       "not_found": 1
+      },
+      "fp": 3,
+      "fp_kinds": {
+       "background": 3
+      },
+      "localization": {
+       "all": {
+        "max": 0.255,
+        "mean": 0.134,
+        "median": 0.134,
+        "n": 61,
+        "p90": 0.19
+       },
+       "independent": {
+        "max": 0.255,
+        "mean": 0.141,
+        "median": 0.157,
+        "n": 58,
+        "p90": 0.19
+       },
+       "position_copied": 3
+      },
+      "n_gt": 63,
+      "n_pred": 64,
+      "precision": 0.9531,
+      "recall": 0.9683,
+      "tp": 61
+     },
+     "receptacle": {
+      "count_error": 4,
+      "f1": 0.9852,
+      "fn": 0,
+      "fn_kinds": {},
+      "fp": 4,
+      "fp_kinds": {
+       "duplicate": 4
+      },
+      "localization": {
+       "all": {
+        "max": 3.437,
+        "mean": 0.693,
+        "median": 0.19,
+        "n": 133,
+        "p90": 2.412
+       },
+       "independent": {
+        "max": 3.437,
+        "mean": 0.795,
+        "median": 0.19,
+        "n": 116,
+        "p90": 2.467
+       },
+       "position_copied": 17
+      },
+      "n_gt": 133,
+      "n_pred": 137,
+      "precision": 0.9708,
+      "recall": 1.0,
+      "tp": 133
+     },
+     "switch": {
+      "count_error": 8,
+      "f1": 0.9444,
+      "fn": 0,
+      "fn_kinds": {},
+      "fp": 8,
+      "fp_kinds": {
+       "background": 8
+      },
+      "localization": {
+       "all": {
+        "max": 1.206,
+        "mean": 0.947,
+        "median": 0.965,
+        "n": 68,
+        "p90": 1.2
+       },
+       "independent": {
+        "max": 1.206,
+        "mean": 0.961,
+        "median": 0.968,
+        "n": 67,
+        "p90": 1.2
+       },
+       "position_copied": 1
+      },
+      "n_gt": 68,
+      "n_pred": 76,
+      "precision": 0.8947,
+      "recall": 1.0,
+      "tp": 68
+     }
+    },
+    "by_sheet_category": {
+     "A1-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.12,
+         "mean": 0.12,
+         "median": 0.12,
+         "n": 1,
+         "p90": 0.12
+        },
+        "independent": {
+         "max": 0.12,
+         "mean": 0.12,
+         "median": 0.12,
+         "n": 1,
+         "p90": 0.12
+        },
+        "position_copied": 0
+       },
+       "n_gt": 1,
+       "n_pred": 1,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 1
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.134,
+         "mean": 0.127,
+         "median": 0.127,
+         "n": 2,
+         "p90": 0.134
+        },
+        "independent": {
+         "max": 0.134,
+         "mean": 0.127,
+         "median": 0.127,
+         "n": 2,
+         "p90": 0.134
+        },
+        "position_copied": 0
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "light": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.19,
+         "mean": 0.142,
+         "median": 0.162,
+         "n": 10,
+         "p90": 0.19
+        },
+        "independent": {
+         "max": 0.19,
+         "mean": 0.142,
+         "median": 0.162,
+         "n": 10,
+         "p90": 0.19
+        },
+        "position_copied": 0
+       },
+       "n_gt": 10,
+       "n_pred": 10,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 10
+      },
+      "receptacle": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 2.581,
+         "mean": 0.716,
+         "median": 0.18,
+         "n": 26,
+         "p90": 2.412
+        },
+        "independent": {
+         "max": 2.581,
+         "mean": 0.809,
+         "median": 0.19,
+         "n": 23,
+         "p90": 2.412
+        },
+        "position_copied": 3
+       },
+       "n_gt": 26,
+       "n_pred": 26,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 26
+      },
+      "switch": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 1.2,
+         "mean": 0.948,
+         "median": 0.968,
+         "n": 13,
+         "p90": 1.106
+        },
+        "independent": {
+         "max": 1.2,
+         "mean": 1.027,
+         "median": 0.972,
+         "n": 12,
+         "p90": 1.106
+        },
+        "position_copied": 1
+       },
+       "n_gt": 13,
+       "n_pred": 13,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 13
+      }
+     },
+     "A2-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.19,
+         "mean": 0.137,
+         "median": 0.137,
+         "n": 2,
+         "p90": 0.19
+        },
+        "independent": {
+         "max": 0.19,
+         "mean": 0.137,
+         "median": 0.137,
+         "n": 2,
+         "p90": 0.19
+        },
+        "position_copied": 0
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.134,
+         "mean": 0.101,
+         "median": 0.085,
+         "n": 3,
+         "p90": 0.134
+        },
+        "independent": {
+         "max": 0.134,
+         "mean": 0.101,
+         "median": 0.085,
+         "n": 3,
+         "p90": 0.134
+        },
+        "position_copied": 0
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "light": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.255,
+         "mean": 0.175,
+         "median": 0.19,
+         "n": 13,
+         "p90": 0.255
+        },
+        "independent": {
+         "max": 0.255,
+         "mean": 0.175,
+         "median": 0.19,
+         "n": 13,
+         "p90": 0.255
+        },
+        "position_copied": 0
+       },
+       "n_gt": 13,
+       "n_pred": 13,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 13
+      },
+      "receptacle": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 2.467,
+         "mean": 0.543,
+         "median": 0.19,
+         "n": 32,
+         "p90": 2.167
+        },
+        "independent": {
+         "max": 2.467,
+         "mean": 0.62,
+         "median": 0.19,
+         "n": 28,
+         "p90": 2.221
+        },
+        "position_copied": 4
+       },
+       "n_gt": 32,
+       "n_pred": 32,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 32
+      },
+      "switch": {
+       "count_error": 1,
+       "f1": 0.963,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 1,
+       "fp_kinds": {
+        "background": 1
+       },
+       "localization": {
+        "all": {
+         "max": 1.206,
+         "mean": 1.009,
+         "median": 0.968,
+         "n": 13,
+         "p90": 1.206
+        },
+        "independent": {
+         "max": 1.206,
+         "mean": 1.009,
+         "median": 0.968,
+         "n": 13,
+         "p90": 1.206
+        },
+        "position_copied": 0
+       },
+       "n_gt": 13,
+       "n_pred": 14,
+       "precision": 0.9286,
+       "recall": 1.0,
+       "tp": 13
+      }
+     },
+     "A3-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.247,
+         "mean": 0.154,
+         "median": 0.154,
+         "n": 2,
+         "p90": 0.247
+        },
+        "independent": {
+         "max": 0.247,
+         "mean": 0.154,
+         "median": 0.154,
+         "n": 2,
+         "p90": 0.247
+        },
+        "position_copied": 0
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.17,
+         "mean": 0.148,
+         "median": 0.152,
+         "n": 4,
+         "p90": 0.17
+        },
+        "independent": {
+         "max": 0.17,
+         "mean": 0.148,
+         "median": 0.152,
+         "n": 4,
+         "p90": 0.17
+        },
+        "position_copied": 0
+       },
+       "n_gt": 4,
+       "n_pred": 4,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 4
+      },
+      "fan": {
+       "count_error": 1,
+       "f1": 0.8889,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 1,
+       "fp_kinds": {
+        "wrong_category": 1
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 4,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 4
+       },
+       "n_gt": 4,
+       "n_pred": 5,
+       "precision": 0.8,
+       "recall": 1.0,
+       "tp": 4
+      },
+      "light": {
+       "count_error": -2,
+       "f1": 0.9412,
+       "fn": 2,
+       "fn_kinds": {
+        "found_as_other_category": 1,
+        "not_found": 1
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.19,
+         "mean": 0.125,
+         "median": 0.085,
+         "n": 16,
+         "p90": 0.19
+        },
+        "independent": {
+         "max": 0.19,
+         "mean": 0.134,
+         "median": 0.085,
+         "n": 15,
+         "p90": 0.19
+        },
+        "position_copied": 1
+       },
+       "n_gt": 18,
+       "n_pred": 16,
+       "precision": 1.0,
+       "recall": 0.8889,
+       "tp": 16
+      },
+      "receptacle": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 2.52,
+         "mean": 0.669,
+         "median": 0.19,
+         "n": 34,
+         "p90": 2.28
+        },
+        "independent": {
+         "max": 2.52,
+         "mean": 0.784,
+         "median": 0.19,
+         "n": 29,
+         "p90": 2.283
+        },
+        "position_copied": 5
+       },
+       "n_gt": 34,
+       "n_pred": 34,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 34
+      },
+      "switch": {
+       "count_error": 1,
+       "f1": 0.9756,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 1,
+       "fp_kinds": {
+        "background": 1
+       },
+       "localization": {
+        "all": {
+         "max": 1.106,
+         "mean": 0.914,
+         "median": 0.961,
+         "n": 20,
+         "p90": 1.087
+        },
+        "independent": {
+         "max": 1.106,
+         "mean": 0.914,
+         "median": 0.961,
+         "n": 20,
+         "p90": 1.087
+        },
+        "position_copied": 0
+       },
+       "n_gt": 20,
+       "n_pred": 21,
+       "precision": 0.9524,
+       "recall": 1.0,
+       "tp": 20
+      }
+     },
+     "A4-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.306,
+         "mean": 0.23,
+         "median": 0.3,
+         "n": 3,
+         "p90": 0.306
+        },
+        "independent": {
+         "max": 0.306,
+         "mean": 0.23,
+         "median": 0.3,
+         "n": 3,
+         "p90": 0.306
+        },
+        "position_copied": 0
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.216,
+         "mean": 0.149,
+         "median": 0.134,
+         "n": 5,
+         "p90": 0.216
+        },
+        "independent": {
+         "max": 0.216,
+         "mean": 0.149,
+         "median": 0.134,
+         "n": 5,
+         "p90": 0.216
+        },
+        "position_copied": 0
+       },
+       "n_gt": 5,
+       "n_pred": 5,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 5
+      },
+      "fan": {
+       "count_error": -1,
+       "f1": 0.8571,
+       "fn": 1,
+       "fn_kinds": {
+        "not_found": 1
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 4,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 0.75,
+       "tp": 3
+      },
+      "light": {
+       "count_error": 3,
+       "f1": 0.9362,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 3,
+       "fp_kinds": {
+        "background": 3
+       },
+       "localization": {
+        "all": {
+         "max": 0.19,
+         "mean": 0.113,
+         "median": 0.085,
+         "n": 22,
+         "p90": 0.19
+        },
+        "independent": {
+         "max": 0.19,
+         "mean": 0.124,
+         "median": 0.085,
+         "n": 20,
+         "p90": 0.19
+        },
+        "position_copied": 2
+       },
+       "n_gt": 22,
+       "n_pred": 25,
+       "precision": 0.88,
+       "recall": 1.0,
+       "tp": 22
+      },
+      "receptacle": {
+       "count_error": 4,
+       "f1": 0.9535,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 4,
+       "fp_kinds": {
+        "duplicate": 4
+       },
+       "localization": {
+        "all": {
+         "max": 3.437,
+         "mean": 0.817,
+         "median": 0.19,
+         "n": 41,
+         "p90": 3.289
+        },
+        "independent": {
+         "max": 3.437,
+         "mean": 0.931,
+         "median": 0.203,
+         "n": 36,
+         "p90": 3.336
+        },
+        "position_copied": 5
+       },
+       "n_gt": 41,
+       "n_pred": 45,
+       "precision": 0.9111,
+       "recall": 1.0,
+       "tp": 41
+      },
+      "switch": {
+       "count_error": 6,
+       "f1": 0.88,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 6,
+       "fp_kinds": {
+        "background": 6
+       },
+       "localization": {
+        "all": {
+         "max": 1.206,
+         "mean": 0.941,
+         "median": 0.917,
+         "n": 22,
+         "p90": 1.202
+        },
+        "independent": {
+         "max": 1.206,
+         "mean": 0.941,
+         "median": 0.917,
+         "n": 22,
+         "p90": 1.202
+        },
+        "position_copied": 0
+       },
+       "n_gt": 22,
+       "n_pred": 28,
+       "precision": 0.7857,
+       "recall": 1.0,
+       "tp": 22
+      }
+     }
+    },
+    "total": {
+     "count_error": 13,
+     "f1": 0.969,
+     "fn": 3,
+     "fn_kinds": {
+      "found_as_other_category": 1,
+      "not_found": 2
+     },
+     "fp": 16,
+     "fp_kinds": {
+      "background": 11,
+      "duplicate": 4,
+      "wrong_category": 1
+     },
+     "localization": {
+      "all": {
+       "max": 3.437,
+       "mean": 0.566,
+       "median": 0.19,
+       "n": 297,
+       "p90": 2.048
+      },
+      "independent": {
+       "max": 3.437,
+       "mean": 0.639,
+       "median": 0.19,
+       "n": 263,
+       "p90": 2.101
+      },
+      "position_copied": 34
+     },
+     "n_gt": 300,
+     "n_pred": 313,
+     "precision": 0.9489,
+     "recall": 0.99,
+     "tp": 297
+    }
+   },
+   "scope": {
+    "generated": 313,
+    "in_scope": 313,
+    "outside_region": 0
+   },
+   "sensitivity": {
+    "12": {
+     "by_category": {
+      "ceiling_fan": {
+       "f1": 1.0,
+       "fn": 0,
+       "fp": 0,
+       "n_gt": 8,
+       "n_pred": 8,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 8
+      },
+      "detector": {
+       "f1": 1.0,
+       "fn": 0,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 14,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 14
+      },
+      "fan": {
+       "f1": 0.9286,
+       "fn": 1,
+       "fp": 1,
+       "n_gt": 14,
+       "n_pred": 14,
+       "precision": 0.9286,
+       "recall": 0.9286,
+       "tp": 13
+      },
+      "light": {
+       "f1": 0.9606,
+       "fn": 2,
+       "fp": 3,
+       "n_gt": 63,
+       "n_pred": 64,
+       "precision": 0.9531,
+       "recall": 0.9683,
+       "tp": 61
+      },
+      "receptacle": {
+       "f1": 0.9852,
+       "fn": 0,
+       "fp": 4,
+       "n_gt": 133,
+       "n_pred": 137,
+       "precision": 0.9708,
+       "recall": 1.0,
+       "tp": 133
+      },
+      "switch": {
+       "f1": 0.9444,
+       "fn": 0,
+       "fp": 8,
+       "n_gt": 68,
+       "n_pred": 76,
+       "precision": 0.8947,
+       "recall": 1.0,
+       "tp": 68
+      }
+     },
+     "total": {
+      "f1": 0.969,
+      "fn": 3,
+      "fp": 16,
+      "n_gt": 300,
+      "n_pred": 313,
+      "precision": 0.9489,
+      "recall": 0.99,
+      "tp": 297
+     }
+    },
+    "3": {
+     "by_category": {
+      "ceiling_fan": {
+       "f1": 1.0,
+       "fn": 0,
+       "fp": 0,
+       "n_gt": 8,
+       "n_pred": 8,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 8
+      },
+      "detector": {
+       "f1": 1.0,
+       "fn": 0,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 14,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 14
+      },
+      "fan": {
+       "f1": 0.9286,
+       "fn": 1,
+       "fp": 1,
+       "n_gt": 14,
+       "n_pred": 14,
+       "precision": 0.9286,
+       "recall": 0.9286,
+       "tp": 13
+      },
+      "light": {
+       "f1": 0.9606,
+       "fn": 2,
+       "fp": 3,
+       "n_gt": 63,
+       "n_pred": 64,
+       "precision": 0.9531,
+       "recall": 0.9683,
+       "tp": 61
+      },
+      "receptacle": {
+       "f1": 0.9259,
+       "fn": 8,
+       "fp": 12,
+       "n_gt": 133,
+       "n_pred": 137,
+       "precision": 0.9124,
+       "recall": 0.9398,
+       "tp": 125
+      },
+      "switch": {
+       "f1": 0.9444,
+       "fn": 0,
+       "fp": 8,
+       "n_gt": 68,
+       "n_pred": 76,
+       "precision": 0.8947,
+       "recall": 1.0,
+       "tp": 68
+      }
+     },
+     "total": {
+      "f1": 0.9429,
+      "fn": 11,
+      "fp": 24,
+      "n_gt": 300,
+      "n_pred": 313,
+      "precision": 0.9233,
+      "recall": 0.9633,
+      "tp": 289
+     }
+    }
+   },
+   "subtype": {
+    "accuracy": 0.9663,
+    "by_category": {
+     "ceiling_fan": {
+      "accuracy": 1.0,
+      "correct": 8,
+      "n": 8
+     },
+     "detector": {
+      "accuracy": 1.0,
+      "correct": 14,
+      "n": 14
+     },
+     "fan": {
+      "accuracy": 1.0,
+      "correct": 13,
+      "n": 13
+     },
+     "light": {
+      "accuracy": 0.918,
+      "correct": 56,
+      "n": 61
+     },
+     "receptacle": {
+      "accuracy": 0.9624,
+      "correct": 128,
+      "n": 133
+     },
+     "switch": {
+      "accuracy": 1.0,
+      "correct": 68,
+      "n": 68
+     }
+    },
+    "confusions": [
+     {
+      "category": "light",
+      "gt": "wall_mounted",
+      "n": 3,
+      "pred": "recessed_downlight"
+     },
+     {
+      "category": "receptacle",
+      "gt": "afci_half_hot",
+      "n": 3,
+      "pred": "afi_duplex"
+     },
+     {
+      "category": "light",
+      "gt": "recessed_downlight",
+      "n": 1,
+      "pred": "pendant"
+     },
+     {
+      "category": "light",
+      "gt": "wall_mounted",
+      "n": 1,
+      "pred": "pendant"
+     },
+     {
+      "category": "receptacle",
+      "gt": "fan_coil_dedicated",
+      "n": 1,
+      "pred": "afi_duplex"
+     },
+     {
+      "category": "receptacle",
+      "gt": "gfi",
+      "n": 1,
+      "pred": "afi_duplex"
+     }
+    ],
+    "correct": 287,
+    "evaluated_on": 297
+   }
+  }
+ },
+ "evaluator_version": "eval/1.1",
+ "examples": {
+  "det0_fn.png": {
+   "generator": "det0",
+   "ids": [
+    "b89373063d044917b1c5b3d98ec3df6f",
+    "2c95d0972fb14f7d8a9c62f5d49b1fe2",
+    "36392d393e4c440dbb22892a312ec932"
+   ],
+   "kinds": {
+    "found_as_other_category": 1,
+    "not_found": 2
+   },
+   "outcome": "fn"
+  },
+  "det0_fp.png": {
+   "generator": "det0",
+   "ids": [
+    "A3-111:det0-0081",
+    "A4-111:det0-0107",
+    "A4-111:det0-0008",
+    "A4-111:det0-0065",
+    "A4-111:det0-0108",
+    "A4-111:det0-0009",
+    "A4-111:det0-0011",
+    "A4-111:det0-0104"
+   ],
+   "kinds": {
+    "background": 5,
+    "duplicate": 2,
+    "wrong_category": 1
+   },
+   "outcome": "fp"
+  },
+  "raster_plain_fn.png": {
+   "generator": "raster_plain",
+   "ids": [
+    "3563d0e6ee15458abde9b74a5be11246",
+    "c714c5415afc470ca6a0167743749aad",
+    "00dbe1de1ce34a4cadbf5399a4b140c8",
+    "2c95d0972fb14f7d8a9c62f5d49b1fe2",
+    "02ca0bb0052d4097af0aeb7bceb6b457",
+    "260dc2fd18f3472cb1fea88f031002c0",
+    "85e0f6fb8cc04addbc27f495a59fb0cd",
+    "443b0f0db5ef407d9f1da7dc75c8db83"
+   ],
+   "kinds": {
+    "not_found": 8
+   },
+   "outcome": "fn"
+  },
+  "raster_plain_fp.png": {
+   "generator": "raster_plain",
+   "ids": [
+    "5769aa2eb5ca-00205",
+    "5769aa2eb5ca-00209",
+    "5769aa2eb5ca-00135",
+    "5769aa2eb5ca-00036",
+    "5769aa2eb5ca-00136",
+    "5769aa2eb5ca-00091",
+    "5769aa2eb5ca-00037",
+    "5769aa2eb5ca-00190"
+   ],
+   "kinds": {
+    "duplicate": 6,
+    "wrong_category": 2
+   },
+   "outcome": "fp"
+  },
+  "raster_thickened_fn.png": {
+   "generator": "raster_thickened",
+   "ids": [
+    "b89373063d044917b1c5b3d98ec3df6f",
+    "2c95d0972fb14f7d8a9c62f5d49b1fe2",
+    "183c72a5ef854f11b7cd761514a8ce88",
+    "3001a218b44442579ea435921b0f9743",
+    "2e6f1230ac0b49d1a8109b3336b5076f",
+    "46adbb4ba7e94967bca70eb6c1aabdb9",
+    "69af51559721424a84a4c9f9d2770190",
+    "bf46ccab25034a29a48a00ae1466da5b"
+   ],
+   "kinds": {
+    "found_as_other_category": 2,
+    "not_found": 6
+   },
+   "outcome": "fn"
+  },
+  "raster_thickened_fp.png": {
+   "generator": "raster_thickened",
+   "ids": [
+    "c655baca6616-00500",
+    "c655baca6616-00186",
+    "c655baca6616-00048",
+    "c655baca6616-00445",
+    "c655baca6616-00372",
+    "c655baca6616-00471",
+    "c655baca6616-00398",
+    "c655baca6616-00181"
+   ],
+   "kinds": {
+    "background": 2,
+    "duplicate": 2,
+    "wrong_category": 4
+   },
+   "outcome": "fp"
+  },
+  "vector_signature_fn.png": {
+   "generator": "vector_signature",
+   "ids": [
+    "85e0f6fb8cc04addbc27f495a59fb0cd",
+    "00dbe1de1ce34a4cadbf5399a4b140c8",
+    "2c95d0972fb14f7d8a9c62f5d49b1fe2",
+    "34bfbd94661f45c1b8d90062cbc6915b",
+    "0e277c66b39c407489b5e909e6bdefeb",
+    "14f0234e338c4a96adcb632e95229e48",
+    "0672b8a5e98343b6be7074223f86e37d",
+    "5633adccfdca4fb39ff5bdcbb2031856"
+   ],
+   "kinds": {
+    "found_as_other_category": 1,
+    "not_found": 7
+   },
+   "outcome": "fn"
+  },
+  "vector_signature_fp.png": {
+   "generator": "vector_signature",
+   "ids": [
+    "b7f67ef48937-00052",
+    "b7f67ef48937-00044",
+    "b7f67ef48937-00053",
+    "b7f67ef48937-00045",
+    "b7f67ef48937-00054",
+    "b7f67ef48937-00046",
+    "b7f67ef48937-00065",
+    "b7f67ef48937-00049"
+   ],
+   "kinds": {
+    "duplicate": 4,
+    "wrong_category": 4
+   },
+   "outcome": "fp"
+  }
+ },
+ "export": {
+  "export_format": "gt-export/1",
+  "id": "gt_001_20261025T020009Z",
+  "input_pdf_sha256": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
+  "level": "verified",
+  "manifest_sha256": "f03b11a38264a348e700b618f3342fed64eb30589a922dee715ae07852b14a1f",
+  "protocol_version": "protocol/1",
+  "schema_version": "gt-schema/1",
+  "taxonomy_version": "taxonomy/1"
+ },
+ "generators": {
+  "raster_plain": {
+   "duplicate_template_pairs": [
+    {
+     "duplicate_template": "light_pendant_high_efficacy",
+     "matched_template": "light_recessed_downlight",
+     "n": 28
+    },
+    {
+     "duplicate_template": "light_wall_mounted_high_efficacy",
+     "matched_template": "light_pendant_high_efficacy",
+     "n": 6
+    },
+    {
+     "duplicate_template": "light_recessed_downlight",
+     "matched_template": "light_pendant_high_efficacy",
+     "n": 4
+    }
+   ],
+   "primary": {
+    "by_category": {
+     "ceiling_fan": {
+      "count_error": -3,
+      "f1": 0.7692,
+      "fn": 3,
+      "fn_kinds": {
+       "not_found": 3
+      },
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 0.24,
+        "mean": 0.048,
+        "median": 0.0,
+        "n": 5,
+        "p90": 0.24
+       },
+       "independent": {
+        "max": 0.24,
+        "mean": 0.24,
+        "median": 0.24,
+        "n": 1,
+        "p90": 0.24
+       },
+       "position_copied": 4
+      },
+      "n_gt": 8,
+      "n_pred": 5,
+      "precision": 1.0,
+      "recall": 0.625,
+      "tp": 5
+     },
+     "detector": {
+      "count_error": -1,
+      "f1": 0.963,
+      "fn": 1,
+      "fn_kinds": {
+       "not_found": 1
+      },
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 0.24,
+        "mean": 0.018,
+        "median": 0.0,
+        "n": 13,
+        "p90": 0.0
+       },
+       "independent": {
+        "max": 0.24,
+        "mean": 0.24,
+        "median": 0.24,
+        "n": 1,
+        "p90": 0.24
+       },
+       "position_copied": 12
+      },
+      "n_gt": 14,
+      "n_pred": 13,
+      "precision": 1.0,
+      "recall": 0.9286,
+      "tp": 13
+     },
+     "fan": {
+      "count_error": -7,
+      "f1": 0.6667,
+      "fn": 7,
+      "fn_kinds": {
+       "not_found": 7
+      },
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "n": 7,
+        "p90": 0.0
+       },
+       "independent": null,
+       "position_copied": 7
+      },
+      "n_gt": 14,
+      "n_pred": 7,
+      "precision": 1.0,
+      "recall": 0.5,
+      "tp": 7
+     },
+     "light": {
+      "count_error": 34,
+      "f1": 0.7125,
+      "fn": 6,
+      "fn_kinds": {
+       "not_found": 6
+      },
+      "fp": 40,
+      "fp_kinds": {
+       "duplicate": 38,
+       "wrong_category": 2
+      },
+      "localization": {
+       "all": {
+        "max": 0.17,
+        "mean": 0.006,
+        "median": 0.0,
+        "n": 57,
+        "p90": 0.0
+       },
+       "independent": {
+        "max": 0.17,
+        "mean": 0.17,
+        "median": 0.17,
+        "n": 2,
+        "p90": 0.17
+       },
+       "position_copied": 55
+      },
+      "n_gt": 63,
+      "n_pred": 97,
+      "precision": 0.5876,
+      "recall": 0.9048,
+      "tp": 57
+     },
+     "receptacle": {
+      "count_error": -72,
+      "f1": 0.6289,
+      "fn": 72,
+      "fn_kinds": {
+       "not_found": 72
+      },
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 3.242,
+        "mean": 0.089,
+        "median": 0.0,
+        "n": 61,
+        "p90": 0.24
+       },
+       "independent": {
+        "max": 3.242,
+        "mean": 0.54,
+        "median": 0.24,
+        "n": 10,
+        "p90": 0.24
+       },
+       "position_copied": 51
+      },
+      "n_gt": 133,
+      "n_pred": 61,
+      "precision": 1.0,
+      "recall": 0.4586,
+      "tp": 61
+     },
+     "switch": {
+      "count_error": -33,
+      "f1": 0.6796,
+      "fn": 33,
+      "fn_kinds": {
+       "not_found": 33
+      },
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 0.24,
+        "mean": 0.014,
+        "median": 0.0,
+        "n": 35,
+        "p90": 0.0
+       },
+       "independent": {
+        "max": 0.24,
+        "mean": 0.24,
+        "median": 0.24,
+        "n": 2,
+        "p90": 0.24
+       },
+       "position_copied": 33
+      },
+      "n_gt": 68,
+      "n_pred": 35,
+      "precision": 1.0,
+      "recall": 0.5147,
+      "tp": 35
+     }
+    },
+    "by_sheet_category": {
+     "A1-111": {
+      "ceiling_fan": {
+       "count_error": -1,
+       "f1": null,
+       "fn": 1,
+       "fn_kinds": {
+        "not_found": 1
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 1,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 2,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 2
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "light": {
+       "count_error": 6,
+       "f1": 0.7692,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 6,
+       "fp_kinds": {
+        "duplicate": 6
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 10,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 10
+       },
+       "n_gt": 10,
+       "n_pred": 16,
+       "precision": 0.625,
+       "recall": 1.0,
+       "tp": 10
+      },
+      "receptacle": {
+       "count_error": -15,
+       "f1": 0.5946,
+       "fn": 15,
+       "fn_kinds": {
+        "not_found": 15
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 11,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 11
+       },
+       "n_gt": 26,
+       "n_pred": 11,
+       "precision": 1.0,
+       "recall": 0.4231,
+       "tp": 11
+      },
+      "switch": {
+       "count_error": -2,
+       "f1": 0.9167,
+       "fn": 2,
+       "fn_kinds": {
+        "not_found": 2
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.24,
+         "mean": 0.044,
+         "median": 0.0,
+         "n": 11,
+         "p90": 0.24
+        },
+        "independent": {
+         "max": 0.24,
+         "mean": 0.24,
+         "median": 0.24,
+         "n": 2,
+         "p90": 0.24
+        },
+        "position_copied": 9
+       },
+       "n_gt": 13,
+       "n_pred": 11,
+       "precision": 1.0,
+       "recall": 0.8462,
+       "tp": 11
+      }
+     },
+     "A2-111": {
+      "ceiling_fan": {
+       "count_error": -2,
+       "f1": null,
+       "fn": 2,
+       "fn_kinds": {
+        "not_found": 2
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 2,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "fan": {
+       "count_error": -3,
+       "f1": null,
+       "fn": 3,
+       "fn_kinds": {
+        "not_found": 3
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 3,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "light": {
+       "count_error": 13,
+       "f1": 0.6667,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 13,
+       "fp_kinds": {
+        "duplicate": 13
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 13,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 13
+       },
+       "n_gt": 13,
+       "n_pred": 26,
+       "precision": 0.5,
+       "recall": 1.0,
+       "tp": 13
+      },
+      "receptacle": {
+       "count_error": -15,
+       "f1": 0.6939,
+       "fn": 15,
+       "fn_kinds": {
+        "not_found": 15
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.24,
+         "mean": 0.042,
+         "median": 0.0,
+         "n": 17,
+         "p90": 0.24
+        },
+        "independent": {
+         "max": 0.24,
+         "mean": 0.24,
+         "median": 0.24,
+         "n": 3,
+         "p90": 0.24
+        },
+        "position_copied": 14
+       },
+       "n_gt": 32,
+       "n_pred": 17,
+       "precision": 1.0,
+       "recall": 0.5312,
+       "tp": 17
+      },
+      "switch": {
+       "count_error": -6,
+       "f1": 0.7,
+       "fn": 6,
+       "fn_kinds": {
+        "not_found": 6
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 7,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 7
+       },
+       "n_gt": 13,
+       "n_pred": 7,
+       "precision": 1.0,
+       "recall": 0.5385,
+       "tp": 7
+      }
+     },
+     "A3-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 2,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 2
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "detector": {
+       "count_error": -1,
+       "f1": 0.8571,
+       "fn": 1,
+       "fn_kinds": {
+        "not_found": 1
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 4,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 0.75,
+       "tp": 3
+      },
+      "fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 4,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 4
+       },
+       "n_gt": 4,
+       "n_pred": 4,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 4
+      },
+      "light": {
+       "count_error": 0,
+       "f1": 0.7778,
+       "fn": 4,
+       "fn_kinds": {
+        "not_found": 4
+       },
+       "fp": 4,
+       "fp_kinds": {
+        "duplicate": 3,
+        "wrong_category": 1
+       },
+       "localization": {
+        "all": {
+         "max": 0.17,
+         "mean": 0.024,
+         "median": 0.0,
+         "n": 14,
+         "p90": 0.17
+        },
+        "independent": {
+         "max": 0.17,
+         "mean": 0.17,
+         "median": 0.17,
+         "n": 2,
+         "p90": 0.17
+        },
+        "position_copied": 12
+       },
+       "n_gt": 18,
+       "n_pred": 18,
+       "precision": 0.7778,
+       "recall": 0.7778,
+       "tp": 14
+      },
+      "receptacle": {
+       "count_error": -21,
+       "f1": 0.5532,
+       "fn": 21,
+       "fn_kinds": {
+        "not_found": 21
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.24,
+         "mean": 0.055,
+         "median": 0.0,
+         "n": 13,
+         "p90": 0.24
+        },
+        "independent": {
+         "max": 0.24,
+         "mean": 0.24,
+         "median": 0.24,
+         "n": 3,
+         "p90": 0.24
+        },
+        "position_copied": 10
+       },
+       "n_gt": 34,
+       "n_pred": 13,
+       "precision": 1.0,
+       "recall": 0.3824,
+       "tp": 13
+      },
+      "switch": {
+       "count_error": -10,
+       "f1": 0.6667,
+       "fn": 10,
+       "fn_kinds": {
+        "not_found": 10
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 10,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 10
+       },
+       "n_gt": 20,
+       "n_pred": 10,
+       "precision": 1.0,
+       "recall": 0.5,
+       "tp": 10
+      }
+     },
+     "A4-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.24,
+         "mean": 0.08,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.24
+        },
+        "independent": {
+         "max": 0.24,
+         "mean": 0.24,
+         "median": 0.24,
+         "n": 1,
+         "p90": 0.24
+        },
+        "position_copied": 2
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.24,
+         "mean": 0.048,
+         "median": 0.0,
+         "n": 5,
+         "p90": 0.24
+        },
+        "independent": {
+         "max": 0.24,
+         "mean": 0.24,
+         "median": 0.24,
+         "n": 1,
+         "p90": 0.24
+        },
+        "position_copied": 4
+       },
+       "n_gt": 5,
+       "n_pred": 5,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 5
+      },
+      "fan": {
+       "count_error": -4,
+       "f1": null,
+       "fn": 4,
+       "fn_kinds": {
+        "not_found": 4
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 4,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "light": {
+       "count_error": 15,
+       "f1": 0.678,
+       "fn": 2,
+       "fn_kinds": {
+        "not_found": 2
+       },
+       "fp": 17,
+       "fp_kinds": {
+        "duplicate": 16,
+        "wrong_category": 1
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 20,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 20
+       },
+       "n_gt": 22,
+       "n_pred": 37,
+       "precision": 0.5405,
+       "recall": 0.9091,
+       "tp": 20
+      },
+      "receptacle": {
+       "count_error": -21,
+       "f1": 0.6557,
+       "fn": 21,
+       "fn_kinds": {
+        "not_found": 21
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 3.242,
+         "mean": 0.198,
+         "median": 0.0,
+         "n": 20,
+         "p90": 0.24
+        },
+        "independent": {
+         "max": 3.242,
+         "mean": 0.991,
+         "median": 0.24,
+         "n": 4,
+         "p90": 3.242
+        },
+        "position_copied": 16
+       },
+       "n_gt": 41,
+       "n_pred": 20,
+       "precision": 1.0,
+       "recall": 0.4878,
+       "tp": 20
+      },
+      "switch": {
+       "count_error": -15,
+       "f1": 0.4828,
+       "fn": 15,
+       "fn_kinds": {
+        "not_found": 15
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 7,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 7
+       },
+       "n_gt": 22,
+       "n_pred": 7,
+       "precision": 1.0,
+       "recall": 0.3182,
+       "tp": 7
+      }
+     }
+    },
+    "total": {
+     "count_error": -82,
+     "f1": 0.6873,
+     "fn": 122,
+     "fn_kinds": {
+      "not_found": 122
+     },
+     "fp": 40,
+     "fp_kinds": {
+      "duplicate": 38,
+      "wrong_category": 2
+     },
+     "localization": {
+      "all": {
+       "max": 3.242,
+       "mean": 0.038,
+       "median": 0.0,
+       "n": 178,
+       "p90": 0.0
+      },
+      "independent": {
+       "max": 3.242,
+       "mean": 0.419,
+       "median": 0.24,
+       "n": 16,
+       "p90": 0.24
+      },
+      "position_copied": 162
+     },
+     "n_gt": 300,
+     "n_pred": 218,
+     "precision": 0.8165,
+     "recall": 0.5933,
+     "tp": 178
+    }
+   },
+   "scope": {
+    "generated": 218,
+    "in_scope": 218,
+    "outside_region": 0,
+    "unmapped_class": 0
+   },
+   "sensitivity": {
+    "12": {
+     "by_category": {
+      "ceiling_fan": {
+       "f1": 0.7692,
+       "fn": 3,
+       "fp": 0,
+       "n_gt": 8,
+       "n_pred": 5,
+       "precision": 1.0,
+       "recall": 0.625,
+       "tp": 5
+      },
+      "detector": {
+       "f1": 0.963,
+       "fn": 1,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 13,
+       "precision": 1.0,
+       "recall": 0.9286,
+       "tp": 13
+      },
+      "fan": {
+       "f1": 0.6667,
+       "fn": 7,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 7,
+       "precision": 1.0,
+       "recall": 0.5,
+       "tp": 7
+      },
+      "light": {
+       "f1": 0.7125,
+       "fn": 6,
+       "fp": 40,
+       "n_gt": 63,
+       "n_pred": 97,
+       "precision": 0.5876,
+       "recall": 0.9048,
+       "tp": 57
+      },
+      "receptacle": {
+       "f1": 0.6289,
+       "fn": 72,
+       "fp": 0,
+       "n_gt": 133,
+       "n_pred": 61,
+       "precision": 1.0,
+       "recall": 0.4586,
+       "tp": 61
+      },
+      "switch": {
+       "f1": 0.6796,
+       "fn": 33,
+       "fp": 0,
+       "n_gt": 68,
+       "n_pred": 35,
+       "precision": 1.0,
+       "recall": 0.5147,
+       "tp": 35
+      }
+     },
+     "total": {
+      "f1": 0.6873,
+      "fn": 122,
+      "fp": 40,
+      "n_gt": 300,
+      "n_pred": 218,
+      "precision": 0.8165,
+      "recall": 0.5933,
+      "tp": 178
+     }
+    },
+    "3": {
+     "by_category": {
+      "ceiling_fan": {
+       "f1": 0.7692,
+       "fn": 3,
+       "fp": 0,
+       "n_gt": 8,
+       "n_pred": 5,
+       "precision": 1.0,
+       "recall": 0.625,
+       "tp": 5
+      },
+      "detector": {
+       "f1": 0.963,
+       "fn": 1,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 13,
+       "precision": 1.0,
+       "recall": 0.9286,
+       "tp": 13
+      },
+      "fan": {
+       "f1": 0.6667,
+       "fn": 7,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 7,
+       "precision": 1.0,
+       "recall": 0.5,
+       "tp": 7
+      },
+      "light": {
+       "f1": 0.7125,
+       "fn": 6,
+       "fp": 40,
+       "n_gt": 63,
+       "n_pred": 97,
+       "precision": 0.5876,
+       "recall": 0.9048,
+       "tp": 57
+      },
+      "receptacle": {
+       "f1": 0.6186,
+       "fn": 73,
+       "fp": 1,
+       "n_gt": 133,
+       "n_pred": 61,
+       "precision": 0.9836,
+       "recall": 0.4511,
+       "tp": 60
+      },
+      "switch": {
+       "f1": 0.6796,
+       "fn": 33,
+       "fp": 0,
+       "n_gt": 68,
+       "n_pred": 35,
+       "precision": 1.0,
+       "recall": 0.5147,
+       "tp": 35
+      }
+     },
+     "total": {
+      "f1": 0.6834,
+      "fn": 123,
+      "fp": 41,
+      "n_gt": 300,
+      "n_pred": 218,
+      "precision": 0.8119,
+      "recall": 0.59,
+      "tp": 177
+     }
+    }
+   }
+  },
+  "raster_thickened": {
+   "duplicate_template_pairs": [
+    {
+     "duplicate_template": "light_pendant_high_efficacy",
+     "matched_template": "light_recessed_downlight",
+     "n": 41
+    },
+    {
+     "duplicate_template": "light_wall_mounted_high_efficacy",
+     "matched_template": "light_recessed_downlight",
+     "n": 38
+    },
+    {
+     "duplicate_template": "light_wall_mounted_high_efficacy",
+     "matched_template": "light_pendant_high_efficacy",
+     "n": 13
+    },
+    {
+     "duplicate_template": "light_recessed_downlight",
+     "matched_template": "light_pendant_high_efficacy",
+     "n": 11
+    },
+    {
+     "duplicate_template": "receptacle_gfi_duplex",
+     "matched_template": "receptacle_gfi_duplex",
+     "n": 11
+    }
+   ],
+   "primary": {
+    "by_category": {
+     "ceiling_fan": {
+      "count_error": 0,
+      "f1": 1.0,
+      "fn": 0,
+      "fn_kinds": {},
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 0.12,
+        "mean": 0.015,
+        "median": 0.0,
+        "n": 8,
+        "p90": 0.12
+       },
+       "independent": {
+        "max": 0.12,
+        "mean": 0.12,
+        "median": 0.12,
+        "n": 1,
+        "p90": 0.12
+       },
+       "position_copied": 7
+      },
+      "n_gt": 8,
+      "n_pred": 8,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 8
+     },
+     "detector": {
+      "count_error": 0,
+      "f1": 1.0,
+      "fn": 0,
+      "fn_kinds": {},
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "n": 14,
+        "p90": 0.0
+       },
+       "independent": null,
+       "position_copied": 14
+      },
+      "n_gt": 14,
+      "n_pred": 14,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 14
+     },
+     "fan": {
+      "count_error": 7,
+      "f1": 0.7429,
+      "fn": 1,
+      "fn_kinds": {
+       "not_found": 1
+      },
+      "fp": 8,
+      "fp_kinds": {
+       "wrong_category": 8
+      },
+      "localization": {
+       "all": {
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "n": 13,
+        "p90": 0.0
+       },
+       "independent": null,
+       "position_copied": 13
+      },
+      "n_gt": 14,
+      "n_pred": 21,
+      "precision": 0.619,
+      "recall": 0.9286,
+      "tp": 13
+     },
+     "junction_box": {
+      "count_error": 106,
+      "f1": null,
+      "fn": 0,
+      "fn_kinds": {},
+      "fp": 106,
+      "fp_kinds": {
+       "wrong_category": 106
+      },
+      "localization": {
+       "all": null,
+       "independent": null,
+       "position_copied": 0
+      },
+      "n_gt": 0,
+      "n_pred": 106,
+      "precision": 0.0,
+      "recall": null,
+      "tp": 0
+     },
+     "light": {
+      "count_error": 126,
+      "f1": 0.4683,
+      "fn": 4,
+      "fn_kinds": {
+       "not_found": 4
+      },
+      "fp": 130,
+      "fp_kinds": {
+       "background": 3,
+       "duplicate": 103,
+       "wrong_category": 24
+      },
+      "localization": {
+       "all": {
+        "max": 0.268,
+        "mean": 0.015,
+        "median": 0.0,
+        "n": 59,
+        "p90": 0.12
+       },
+       "independent": {
+        "max": 0.268,
+        "mean": 0.145,
+        "median": 0.12,
+        "n": 6,
+        "p90": 0.268
+       },
+       "position_copied": 53
+      },
+      "n_gt": 63,
+      "n_pred": 189,
+      "precision": 0.3122,
+      "recall": 0.9365,
+      "tp": 59
+     },
+     "receptacle": {
+      "count_error": -8,
+      "f1": 0.8837,
+      "fn": 19,
+      "fn_kinds": {
+       "found_as_other_category": 5,
+       "not_found": 14
+      },
+      "fp": 11,
+      "fp_kinds": {
+       "duplicate": 11
+      },
+      "localization": {
+       "all": {
+        "max": 2.293,
+        "mean": 0.357,
+        "median": 0.0,
+        "n": 114,
+        "p90": 2.283
+       },
+       "independent": {
+        "max": 2.293,
+        "mean": 2.034,
+        "median": 2.283,
+        "n": 20,
+        "p90": 2.293
+       },
+       "position_copied": 94
+      },
+      "n_gt": 133,
+      "n_pred": 125,
+      "precision": 0.912,
+      "recall": 0.8571,
+      "tp": 114
+     },
+     "switch": {
+      "count_error": 8,
+      "f1": 0.9444,
+      "fn": 0,
+      "fn_kinds": {},
+      "fp": 8,
+      "fp_kinds": {
+       "background": 8
+      },
+      "localization": {
+       "all": {
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "n": 68,
+        "p90": 0.0
+       },
+       "independent": null,
+       "position_copied": 68
+      },
+      "n_gt": 68,
+      "n_pred": 76,
+      "precision": 0.8947,
+      "recall": 1.0,
+      "tp": 68
+     }
+    },
+    "by_sheet_category": {
+     "A1-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.12,
+         "mean": 0.12,
+         "median": 0.12,
+         "n": 1,
+         "p90": 0.12
+        },
+        "independent": {
+         "max": 0.12,
+         "mean": 0.12,
+         "median": 0.12,
+         "n": 1,
+         "p90": 0.12
+        },
+        "position_copied": 0
+       },
+       "n_gt": 1,
+       "n_pred": 1,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 1
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 2,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 2
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "fan": {
+       "count_error": 1,
+       "f1": 0.8571,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 1,
+       "fp_kinds": {
+        "wrong_category": 1
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 3,
+       "n_pred": 4,
+       "precision": 0.75,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "junction_box": {
+       "count_error": 22,
+       "f1": null,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 22,
+       "fp_kinds": {
+        "wrong_category": 22
+       },
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 0,
+       "n_pred": 22,
+       "precision": 0.0,
+       "recall": null,
+       "tp": 0
+      },
+      "light": {
+       "count_error": 19,
+       "f1": 0.5128,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 19,
+       "fp_kinds": {
+        "duplicate": 17,
+        "wrong_category": 2
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 10,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 10
+       },
+       "n_gt": 10,
+       "n_pred": 29,
+       "precision": 0.3448,
+       "recall": 1.0,
+       "tp": 10
+      },
+      "receptacle": {
+       "count_error": -4,
+       "f1": 0.9167,
+       "fn": 4,
+       "fn_kinds": {
+        "found_as_other_category": 2,
+        "not_found": 2
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 2.293,
+         "mean": 0.498,
+         "median": 0.0,
+         "n": 22,
+         "p90": 2.293
+        },
+        "independent": {
+         "max": 2.293,
+         "mean": 2.192,
+         "median": 2.293,
+         "n": 5,
+         "p90": 2.293
+        },
+        "position_copied": 17
+       },
+       "n_gt": 26,
+       "n_pred": 22,
+       "precision": 1.0,
+       "recall": 0.8462,
+       "tp": 22
+      },
+      "switch": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 13,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 13
+       },
+       "n_gt": 13,
+       "n_pred": 13,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 13
+      }
+     },
+     "A2-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 2,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 2
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "fan": {
+       "count_error": 1,
+       "f1": 0.8571,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 1,
+       "fp_kinds": {
+        "wrong_category": 1
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 3,
+       "n_pred": 4,
+       "precision": 0.75,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "junction_box": {
+       "count_error": 25,
+       "f1": null,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 25,
+       "fp_kinds": {
+        "wrong_category": 25
+       },
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 0,
+       "n_pred": 25,
+       "precision": 0.0,
+       "recall": null,
+       "tp": 0
+      },
+      "light": {
+       "count_error": 30,
+       "f1": 0.4643,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 30,
+       "fp_kinds": {
+        "duplicate": 26,
+        "wrong_category": 4
+       },
+       "localization": {
+        "all": {
+         "max": 0.12,
+         "mean": 0.009,
+         "median": 0.0,
+         "n": 13,
+         "p90": 0.0
+        },
+        "independent": {
+         "max": 0.12,
+         "mean": 0.12,
+         "median": 0.12,
+         "n": 1,
+         "p90": 0.12
+        },
+        "position_copied": 12
+       },
+       "n_gt": 13,
+       "n_pred": 43,
+       "precision": 0.3023,
+       "recall": 1.0,
+       "tp": 13
+      },
+      "receptacle": {
+       "count_error": -5,
+       "f1": 0.9153,
+       "fn": 5,
+       "fn_kinds": {
+        "found_as_other_category": 1,
+        "not_found": 4
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 2.293,
+         "mean": 0.406,
+         "median": 0.0,
+         "n": 27,
+         "p90": 2.293
+        },
+        "independent": {
+         "max": 2.293,
+         "mean": 2.194,
+         "median": 2.293,
+         "n": 5,
+         "p90": 2.293
+        },
+        "position_copied": 22
+       },
+       "n_gt": 32,
+       "n_pred": 27,
+       "precision": 1.0,
+       "recall": 0.8438,
+       "tp": 27
+      },
+      "switch": {
+       "count_error": 1,
+       "f1": 0.963,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 1,
+       "fp_kinds": {
+        "background": 1
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 13,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 13
+       },
+       "n_gt": 13,
+       "n_pred": 14,
+       "precision": 0.9286,
+       "recall": 1.0,
+       "tp": 13
+      }
+     },
+     "A3-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 2,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 2
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 4,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 4
+       },
+       "n_gt": 4,
+       "n_pred": 4,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 4
+      },
+      "fan": {
+       "count_error": 3,
+       "f1": 0.7273,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 3,
+       "fp_kinds": {
+        "wrong_category": 3
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 4,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 4
+       },
+       "n_gt": 4,
+       "n_pred": 7,
+       "precision": 0.5714,
+       "recall": 1.0,
+       "tp": 4
+      },
+      "junction_box": {
+       "count_error": 28,
+       "f1": null,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 28,
+       "fp_kinds": {
+        "wrong_category": 28
+       },
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 0,
+       "n_pred": 28,
+       "precision": 0.0,
+       "recall": null,
+       "tp": 0
+      },
+      "light": {
+       "count_error": 31,
+       "f1": 0.4776,
+       "fn": 2,
+       "fn_kinds": {
+        "not_found": 2
+       },
+       "fp": 33,
+       "fp_kinds": {
+        "duplicate": 25,
+        "wrong_category": 8
+       },
+       "localization": {
+        "all": {
+         "max": 0.268,
+         "mean": 0.047,
+         "median": 0.0,
+         "n": 16,
+         "p90": 0.12
+        },
+        "independent": {
+         "max": 0.268,
+         "mean": 0.15,
+         "median": 0.12,
+         "n": 5,
+         "p90": 0.268
+        },
+        "position_copied": 11
+       },
+       "n_gt": 18,
+       "n_pred": 49,
+       "precision": 0.3265,
+       "recall": 0.8889,
+       "tp": 16
+      },
+      "receptacle": {
+       "count_error": -6,
+       "f1": 0.9032,
+       "fn": 6,
+       "fn_kinds": {
+        "found_as_other_category": 2,
+        "not_found": 4
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 2.283,
+         "mean": 0.579,
+         "median": 0.0,
+         "n": 28,
+         "p90": 2.283
+        },
+        "independent": {
+         "max": 2.283,
+         "mean": 2.028,
+         "median": 2.283,
+         "n": 8,
+         "p90": 2.283
+        },
+        "position_copied": 20
+       },
+       "n_gt": 34,
+       "n_pred": 28,
+       "precision": 1.0,
+       "recall": 0.8235,
+       "tp": 28
+      },
+      "switch": {
+       "count_error": 1,
+       "f1": 0.9756,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 1,
+       "fp_kinds": {
+        "background": 1
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 20,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 20
+       },
+       "n_gt": 20,
+       "n_pred": 21,
+       "precision": 0.9524,
+       "recall": 1.0,
+       "tp": 20
+      }
+     },
+     "A4-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 5,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 5
+       },
+       "n_gt": 5,
+       "n_pred": 5,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 5
+      },
+      "fan": {
+       "count_error": 2,
+       "f1": 0.6,
+       "fn": 1,
+       "fn_kinds": {
+        "not_found": 1
+       },
+       "fp": 3,
+       "fp_kinds": {
+        "wrong_category": 3
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 3,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 3
+       },
+       "n_gt": 4,
+       "n_pred": 6,
+       "precision": 0.5,
+       "recall": 0.75,
+       "tp": 3
+      },
+      "junction_box": {
+       "count_error": 31,
+       "f1": null,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 31,
+       "fp_kinds": {
+        "wrong_category": 31
+       },
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 0,
+       "n_pred": 31,
+       "precision": 0.0,
+       "recall": null,
+       "tp": 0
+      },
+      "light": {
+       "count_error": 46,
+       "f1": 0.4444,
+       "fn": 2,
+       "fn_kinds": {
+        "not_found": 2
+       },
+       "fp": 48,
+       "fp_kinds": {
+        "background": 3,
+        "duplicate": 35,
+        "wrong_category": 10
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 20,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 20
+       },
+       "n_gt": 22,
+       "n_pred": 68,
+       "precision": 0.2941,
+       "recall": 0.9091,
+       "tp": 20
+      },
+      "receptacle": {
+       "count_error": 7,
+       "f1": 0.8315,
+       "fn": 4,
+       "fn_kinds": {
+        "not_found": 4
+       },
+       "fp": 11,
+       "fp_kinds": {
+        "duplicate": 11
+       },
+       "localization": {
+        "all": {
+         "max": 2.293,
+         "mean": 0.068,
+         "median": 0.0,
+         "n": 37,
+         "p90": 0.0
+        },
+        "independent": {
+         "max": 2.293,
+         "mean": 1.266,
+         "median": 1.266,
+         "n": 2,
+         "p90": 2.293
+        },
+        "position_copied": 35
+       },
+       "n_gt": 41,
+       "n_pred": 48,
+       "precision": 0.7708,
+       "recall": 0.9024,
+       "tp": 37
+      },
+      "switch": {
+       "count_error": 6,
+       "f1": 0.88,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 6,
+       "fp_kinds": {
+        "background": 6
+       },
+       "localization": {
+        "all": {
+         "max": 0.0,
+         "mean": 0.0,
+         "median": 0.0,
+         "n": 22,
+         "p90": 0.0
+        },
+        "independent": null,
+        "position_copied": 22
+       },
+       "n_gt": 22,
+       "n_pred": 28,
+       "precision": 0.7857,
+       "recall": 1.0,
+       "tp": 22
+      }
+     }
+    },
+    "total": {
+     "count_error": 239,
+     "f1": 0.6579,
+     "fn": 24,
+     "fn_kinds": {
+      "found_as_other_category": 5,
+      "not_found": 19
+     },
+     "fp": 263,
+     "fp_kinds": {
+      "background": 11,
+      "duplicate": 114,
+      "wrong_category": 138
+     },
+     "localization": {
+      "all": {
+       "max": 2.293,
+       "mean": 0.151,
+       "median": 0.0,
+       "n": 276,
+       "p90": 0.0
+      },
+      "independent": {
+       "max": 2.293,
+       "mean": 1.543,
+       "median": 2.283,
+       "n": 27,
+       "p90": 2.293
+      },
+      "position_copied": 249
+     },
+     "n_gt": 300,
+     "n_pred": 539,
+     "precision": 0.5121,
+     "recall": 0.92,
+     "tp": 276
+    }
+   },
+   "scope": {
+    "generated": 539,
+    "in_scope": 539,
+    "outside_region": 0,
+    "unmapped_class": 0
+   },
+   "sensitivity": {
+    "12": {
+     "by_category": {
+      "ceiling_fan": {
+       "f1": 1.0,
+       "fn": 0,
+       "fp": 0,
+       "n_gt": 8,
+       "n_pred": 8,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 8
+      },
+      "detector": {
+       "f1": 1.0,
+       "fn": 0,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 14,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 14
+      },
+      "fan": {
+       "f1": 0.7429,
+       "fn": 1,
+       "fp": 8,
+       "n_gt": 14,
+       "n_pred": 21,
+       "precision": 0.619,
+       "recall": 0.9286,
+       "tp": 13
+      },
+      "junction_box": {
+       "f1": null,
+       "fn": 0,
+       "fp": 106,
+       "n_gt": 0,
+       "n_pred": 106,
+       "precision": 0.0,
+       "recall": null,
+       "tp": 0
+      },
+      "light": {
+       "f1": 0.4683,
+       "fn": 4,
+       "fp": 130,
+       "n_gt": 63,
+       "n_pred": 189,
+       "precision": 0.3122,
+       "recall": 0.9365,
+       "tp": 59
+      },
+      "receptacle": {
+       "f1": 0.8837,
+       "fn": 19,
+       "fp": 11,
+       "n_gt": 133,
+       "n_pred": 125,
+       "precision": 0.912,
+       "recall": 0.8571,
+       "tp": 114
+      },
+      "switch": {
+       "f1": 0.9444,
+       "fn": 0,
+       "fp": 8,
+       "n_gt": 68,
+       "n_pred": 76,
+       "precision": 0.8947,
+       "recall": 1.0,
+       "tp": 68
+      }
+     },
+     "total": {
+      "f1": 0.6579,
+      "fn": 24,
+      "fp": 263,
+      "n_gt": 300,
+      "n_pred": 539,
+      "precision": 0.5121,
+      "recall": 0.92,
+      "tp": 276
+     }
+    },
+    "3": {
+     "by_category": {
+      "ceiling_fan": {
+       "f1": 1.0,
+       "fn": 0,
+       "fp": 0,
+       "n_gt": 8,
+       "n_pred": 8,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 8
+      },
+      "detector": {
+       "f1": 1.0,
+       "fn": 0,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 14,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 14
+      },
+      "fan": {
+       "f1": 0.7429,
+       "fn": 1,
+       "fp": 8,
+       "n_gt": 14,
+       "n_pred": 21,
+       "precision": 0.619,
+       "recall": 0.9286,
+       "tp": 13
+      },
+      "junction_box": {
+       "f1": null,
+       "fn": 0,
+       "fp": 106,
+       "n_gt": 0,
+       "n_pred": 106,
+       "precision": 0.0,
+       "recall": null,
+       "tp": 0
+      },
+      "light": {
+       "f1": 0.4683,
+       "fn": 4,
+       "fp": 130,
+       "n_gt": 63,
+       "n_pred": 189,
+       "precision": 0.3122,
+       "recall": 0.9365,
+       "tp": 59
+      },
+      "receptacle": {
+       "f1": 0.8837,
+       "fn": 19,
+       "fp": 11,
+       "n_gt": 133,
+       "n_pred": 125,
+       "precision": 0.912,
+       "recall": 0.8571,
+       "tp": 114
+      },
+      "switch": {
+       "f1": 0.9444,
+       "fn": 0,
+       "fp": 8,
+       "n_gt": 68,
+       "n_pred": 76,
+       "precision": 0.8947,
+       "recall": 1.0,
+       "tp": 68
+      }
+     },
+     "total": {
+      "f1": 0.6579,
+      "fn": 24,
+      "fp": 263,
+      "n_gt": 300,
+      "n_pred": 539,
+      "precision": 0.5121,
+      "recall": 0.92,
+      "tp": 276
+     }
+    }
+   }
+  },
+  "vector_signature": {
+   "duplicate_template_pairs": [
+    {
+     "duplicate_template": "light_pendant_high_efficacy",
+     "matched_template": "light_recessed_downlight",
+     "n": 46
+    },
+    {
+     "duplicate_template": "light_wall_mounted_high_efficacy",
+     "matched_template": "light_recessed_downlight",
+     "n": 46
+    },
+    {
+     "duplicate_template": "light_wall_mounted_high_efficacy",
+     "matched_template": "light_pendant_high_efficacy",
+     "n": 13
+    }
+   ],
+   "primary": {
+    "by_category": {
+     "ceiling_fan": {
+      "count_error": -1,
+      "f1": 0.9333,
+      "fn": 1,
+      "fn_kinds": {
+       "not_found": 1
+      },
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 0.306,
+        "mean": 0.182,
+        "median": 0.19,
+        "n": 7,
+        "p90": 0.306
+       },
+       "independent": {
+        "max": 0.306,
+        "mean": 0.182,
+        "median": 0.19,
+        "n": 7,
+        "p90": 0.306
+       },
+       "position_copied": 0
+      },
+      "n_gt": 8,
+      "n_pred": 7,
+      "precision": 1.0,
+      "recall": 0.875,
+      "tp": 7
+     },
+     "detector": {
+      "count_error": 0,
+      "f1": 1.0,
+      "fn": 0,
+      "fn_kinds": {},
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 0.216,
+        "mean": 0.136,
+        "median": 0.134,
+        "n": 14,
+        "p90": 0.216
+       },
+       "independent": {
+        "max": 0.216,
+        "mean": 0.136,
+        "median": 0.134,
+        "n": 14,
+        "p90": 0.216
+       },
+       "position_copied": 0
+      },
+      "n_gt": 14,
+      "n_pred": 14,
+      "precision": 1.0,
+      "recall": 1.0,
+      "tp": 14
+     },
+     "fan": {
+      "count_error": -14,
+      "f1": null,
+      "fn": 14,
+      "fn_kinds": {
+       "found_as_other_category": 8,
+       "not_found": 6
+      },
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": null,
+       "independent": null,
+       "position_copied": 0
+      },
+      "n_gt": 14,
+      "n_pred": 0,
+      "precision": null,
+      "recall": 0.0,
+      "tp": 0
+     },
+     "light": {
+      "count_error": 120,
+      "f1": 0.5041,
+      "fn": 1,
+      "fn_kinds": {
+       "not_found": 1
+      },
+      "fp": 121,
+      "fp_kinds": {
+       "duplicate": 105,
+       "wrong_category": 16
+      },
+      "localization": {
+       "all": {
+        "max": 0.255,
+        "mean": 0.135,
+        "median": 0.134,
+        "n": 62,
+        "p90": 0.19
+       },
+       "independent": {
+        "max": 0.255,
+        "mean": 0.142,
+        "median": 0.18,
+        "n": 59,
+        "p90": 0.19
+       },
+       "position_copied": 3
+      },
+      "n_gt": 63,
+      "n_pred": 183,
+      "precision": 0.3388,
+      "recall": 0.9841,
+      "tp": 62
+     },
+     "receptacle": {
+      "count_error": -3,
+      "f1": 0.9886,
+      "fn": 3,
+      "fn_kinds": {
+       "not_found": 3
+      },
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 3.437,
+        "mean": 0.709,
+        "median": 0.19,
+        "n": 130,
+        "p90": 2.412
+       },
+       "independent": {
+        "max": 3.437,
+        "mean": 0.795,
+        "median": 0.19,
+        "n": 116,
+        "p90": 2.467
+       },
+       "position_copied": 14
+      },
+      "n_gt": 133,
+      "n_pred": 130,
+      "precision": 1.0,
+      "recall": 0.9774,
+      "tp": 130
+     },
+     "switch": {
+      "count_error": -1,
+      "f1": 0.9926,
+      "fn": 1,
+      "fn_kinds": {
+       "not_found": 1
+      },
+      "fp": 0,
+      "fp_kinds": {},
+      "localization": {
+       "all": {
+        "max": 1.206,
+        "mean": 0.961,
+        "median": 0.968,
+        "n": 67,
+        "p90": 1.2
+       },
+       "independent": {
+        "max": 1.206,
+        "mean": 0.961,
+        "median": 0.968,
+        "n": 67,
+        "p90": 1.2
+       },
+       "position_copied": 0
+      },
+      "n_gt": 68,
+      "n_pred": 67,
+      "precision": 1.0,
+      "recall": 0.9853,
+      "tp": 67
+     }
+    },
+    "by_sheet_category": {
+     "A1-111": {
+      "ceiling_fan": {
+       "count_error": -1,
+       "f1": null,
+       "fn": 1,
+       "fn_kinds": {
+        "not_found": 1
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 1,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.134,
+         "mean": 0.127,
+         "median": 0.127,
+         "n": 2,
+         "p90": 0.134
+        },
+        "independent": {
+         "max": 0.134,
+         "mean": 0.127,
+         "median": 0.127,
+         "n": 2,
+         "p90": 0.134
+        },
+        "position_copied": 0
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "fan": {
+       "count_error": -3,
+       "f1": null,
+       "fn": 3,
+       "fn_kinds": {
+        "found_as_other_category": 3
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 3,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "light": {
+       "count_error": 23,
+       "f1": 0.4651,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 23,
+       "fp_kinds": {
+        "duplicate": 17,
+        "wrong_category": 6
+       },
+       "localization": {
+        "all": {
+         "max": 0.19,
+         "mean": 0.142,
+         "median": 0.162,
+         "n": 10,
+         "p90": 0.19
+        },
+        "independent": {
+         "max": 0.19,
+         "mean": 0.142,
+         "median": 0.162,
+         "n": 10,
+         "p90": 0.19
+        },
+        "position_copied": 0
+       },
+       "n_gt": 10,
+       "n_pred": 33,
+       "precision": 0.303,
+       "recall": 1.0,
+       "tp": 10
+      },
+      "receptacle": {
+       "count_error": -1,
+       "f1": 0.9804,
+       "fn": 1,
+       "fn_kinds": {
+        "not_found": 1
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 2.581,
+         "mean": 0.745,
+         "median": 0.18,
+         "n": 25,
+         "p90": 2.412
+        },
+        "independent": {
+         "max": 2.581,
+         "mean": 0.809,
+         "median": 0.19,
+         "n": 23,
+         "p90": 2.412
+        },
+        "position_copied": 2
+       },
+       "n_gt": 26,
+       "n_pred": 25,
+       "precision": 1.0,
+       "recall": 0.9615,
+       "tp": 25
+      },
+      "switch": {
+       "count_error": -1,
+       "f1": 0.96,
+       "fn": 1,
+       "fn_kinds": {
+        "not_found": 1
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 1.2,
+         "mean": 1.027,
+         "median": 0.972,
+         "n": 12,
+         "p90": 1.106
+        },
+        "independent": {
+         "max": 1.2,
+         "mean": 1.027,
+         "median": 0.972,
+         "n": 12,
+         "p90": 1.106
+        },
+        "position_copied": 0
+       },
+       "n_gt": 13,
+       "n_pred": 12,
+       "precision": 1.0,
+       "recall": 0.9231,
+       "tp": 12
+      }
+     },
+     "A2-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.19,
+         "mean": 0.137,
+         "median": 0.137,
+         "n": 2,
+         "p90": 0.19
+        },
+        "independent": {
+         "max": 0.19,
+         "mean": 0.137,
+         "median": 0.137,
+         "n": 2,
+         "p90": 0.19
+        },
+        "position_copied": 0
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.134,
+         "mean": 0.101,
+         "median": 0.085,
+         "n": 3,
+         "p90": 0.134
+        },
+        "independent": {
+         "max": 0.134,
+         "mean": 0.101,
+         "median": 0.085,
+         "n": 3,
+         "p90": 0.134
+        },
+        "position_copied": 0
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "fan": {
+       "count_error": -3,
+       "f1": null,
+       "fn": 3,
+       "fn_kinds": {
+        "found_as_other_category": 1,
+        "not_found": 2
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 3,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "light": {
+       "count_error": 22,
+       "f1": 0.5417,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 22,
+       "fp_kinds": {
+        "duplicate": 20,
+        "wrong_category": 2
+       },
+       "localization": {
+        "all": {
+         "max": 0.255,
+         "mean": 0.175,
+         "median": 0.19,
+         "n": 13,
+         "p90": 0.255
+        },
+        "independent": {
+         "max": 0.255,
+         "mean": 0.175,
+         "median": 0.19,
+         "n": 13,
+         "p90": 0.255
+        },
+        "position_copied": 0
+       },
+       "n_gt": 13,
+       "n_pred": 35,
+       "precision": 0.3714,
+       "recall": 1.0,
+       "tp": 13
+      },
+      "receptacle": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 2.467,
+         "mean": 0.543,
+         "median": 0.19,
+         "n": 32,
+         "p90": 2.167
+        },
+        "independent": {
+         "max": 2.467,
+         "mean": 0.62,
+         "median": 0.19,
+         "n": 28,
+         "p90": 2.221
+        },
+        "position_copied": 4
+       },
+       "n_gt": 32,
+       "n_pred": 32,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 32
+      },
+      "switch": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 1.206,
+         "mean": 1.009,
+         "median": 0.968,
+         "n": 13,
+         "p90": 1.206
+        },
+        "independent": {
+         "max": 1.206,
+         "mean": 1.009,
+         "median": 0.968,
+         "n": 13,
+         "p90": 1.206
+        },
+        "position_copied": 0
+       },
+       "n_gt": 13,
+       "n_pred": 13,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 13
+      }
+     },
+     "A3-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.247,
+         "mean": 0.154,
+         "median": 0.154,
+         "n": 2,
+         "p90": 0.247
+        },
+        "independent": {
+         "max": 0.247,
+         "mean": 0.154,
+         "median": 0.154,
+         "n": 2,
+         "p90": 0.247
+        },
+        "position_copied": 0
+       },
+       "n_gt": 2,
+       "n_pred": 2,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 2
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.17,
+         "mean": 0.148,
+         "median": 0.152,
+         "n": 4,
+         "p90": 0.17
+        },
+        "independent": {
+         "max": 0.17,
+         "mean": 0.148,
+         "median": 0.152,
+         "n": 4,
+         "p90": 0.17
+        },
+        "position_copied": 0
+       },
+       "n_gt": 4,
+       "n_pred": 4,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 4
+      },
+      "fan": {
+       "count_error": -4,
+       "f1": null,
+       "fn": 4,
+       "fn_kinds": {
+        "found_as_other_category": 2,
+        "not_found": 2
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 4,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "light": {
+       "count_error": 31,
+       "f1": 0.5075,
+       "fn": 1,
+       "fn_kinds": {
+        "not_found": 1
+       },
+       "fp": 32,
+       "fp_kinds": {
+        "duplicate": 28,
+        "wrong_category": 4
+       },
+       "localization": {
+        "all": {
+         "max": 0.19,
+         "mean": 0.129,
+         "median": 0.085,
+         "n": 17,
+         "p90": 0.19
+        },
+        "independent": {
+         "max": 0.19,
+         "mean": 0.137,
+         "median": 0.137,
+         "n": 16,
+         "p90": 0.19
+        },
+        "position_copied": 1
+       },
+       "n_gt": 18,
+       "n_pred": 49,
+       "precision": 0.3469,
+       "recall": 0.9444,
+       "tp": 17
+      },
+      "receptacle": {
+       "count_error": -1,
+       "f1": 0.9851,
+       "fn": 1,
+       "fn_kinds": {
+        "not_found": 1
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 2.52,
+         "mean": 0.689,
+         "median": 0.19,
+         "n": 33,
+         "p90": 2.28
+        },
+        "independent": {
+         "max": 2.52,
+         "mean": 0.784,
+         "median": 0.19,
+         "n": 29,
+         "p90": 2.283
+        },
+        "position_copied": 4
+       },
+       "n_gt": 34,
+       "n_pred": 33,
+       "precision": 1.0,
+       "recall": 0.9706,
+       "tp": 33
+      },
+      "switch": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 1.106,
+         "mean": 0.914,
+         "median": 0.961,
+         "n": 20,
+         "p90": 1.087
+        },
+        "independent": {
+         "max": 1.106,
+         "mean": 0.914,
+         "median": 0.961,
+         "n": 20,
+         "p90": 1.087
+        },
+        "position_copied": 0
+       },
+       "n_gt": 20,
+       "n_pred": 20,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 20
+      }
+     },
+     "A4-111": {
+      "ceiling_fan": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.306,
+         "mean": 0.23,
+         "median": 0.3,
+         "n": 3,
+         "p90": 0.306
+        },
+        "independent": {
+         "max": 0.306,
+         "mean": 0.23,
+         "median": 0.3,
+         "n": 3,
+         "p90": 0.306
+        },
+        "position_copied": 0
+       },
+       "n_gt": 3,
+       "n_pred": 3,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 3
+      },
+      "detector": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 0.216,
+         "mean": 0.149,
+         "median": 0.134,
+         "n": 5,
+         "p90": 0.216
+        },
+        "independent": {
+         "max": 0.216,
+         "mean": 0.149,
+         "median": 0.134,
+         "n": 5,
+         "p90": 0.216
+        },
+        "position_copied": 0
+       },
+       "n_gt": 5,
+       "n_pred": 5,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 5
+      },
+      "fan": {
+       "count_error": -4,
+       "f1": null,
+       "fn": 4,
+       "fn_kinds": {
+        "found_as_other_category": 2,
+        "not_found": 2
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": null,
+        "independent": null,
+        "position_copied": 0
+       },
+       "n_gt": 4,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "light": {
+       "count_error": 44,
+       "f1": 0.5,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 44,
+       "fp_kinds": {
+        "duplicate": 40,
+        "wrong_category": 4
+       },
+       "localization": {
+        "all": {
+         "max": 0.19,
+         "mean": 0.113,
+         "median": 0.085,
+         "n": 22,
+         "p90": 0.19
+        },
+        "independent": {
+         "max": 0.19,
+         "mean": 0.124,
+         "median": 0.085,
+         "n": 20,
+         "p90": 0.19
+        },
+        "position_copied": 2
+       },
+       "n_gt": 22,
+       "n_pred": 66,
+       "precision": 0.3333,
+       "recall": 1.0,
+       "tp": 22
+      },
+      "receptacle": {
+       "count_error": -1,
+       "f1": 0.9877,
+       "fn": 1,
+       "fn_kinds": {
+        "not_found": 1
+       },
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 3.437,
+         "mean": 0.838,
+         "median": 0.19,
+         "n": 40,
+         "p90": 3.289
+        },
+        "independent": {
+         "max": 3.437,
+         "mean": 0.931,
+         "median": 0.203,
+         "n": 36,
+         "p90": 3.336
+        },
+        "position_copied": 4
+       },
+       "n_gt": 41,
+       "n_pred": 40,
+       "precision": 1.0,
+       "recall": 0.9756,
+       "tp": 40
+      },
+      "switch": {
+       "count_error": 0,
+       "f1": 1.0,
+       "fn": 0,
+       "fn_kinds": {},
+       "fp": 0,
+       "fp_kinds": {},
+       "localization": {
+        "all": {
+         "max": 1.206,
+         "mean": 0.941,
+         "median": 0.917,
+         "n": 22,
+         "p90": 1.202
+        },
+        "independent": {
+         "max": 1.206,
+         "mean": 0.941,
+         "median": 0.917,
+         "n": 22,
+         "p90": 1.202
+        },
+        "position_copied": 0
+       },
+       "n_gt": 22,
+       "n_pred": 22,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 22
+      }
+     }
+    },
+    "total": {
+     "count_error": 101,
+     "f1": 0.7989,
+     "fn": 20,
+     "fn_kinds": {
+      "found_as_other_category": 8,
+      "not_found": 12
+     },
+     "fp": 121,
+     "fp_kinds": {
+      "duplicate": 105,
+      "wrong_category": 16
+     },
+     "localization": {
+      "all": {
+       "max": 3.437,
+       "mean": 0.601,
+       "median": 0.19,
+       "n": 280,
+       "p90": 2.101
+      },
+      "independent": {
+       "max": 3.437,
+       "mean": 0.639,
+       "median": 0.19,
+       "n": 263,
+       "p90": 2.101
+      },
+      "position_copied": 17
+     },
+     "n_gt": 300,
+     "n_pred": 401,
+     "precision": 0.6983,
+     "recall": 0.9333,
+     "tp": 280
+    }
+   },
+   "scope": {
+    "generated": 401,
+    "in_scope": 401,
+    "outside_region": 0,
+    "unmapped_class": 0
+   },
+   "sensitivity": {
+    "12": {
+     "by_category": {
+      "ceiling_fan": {
+       "f1": 0.9333,
+       "fn": 1,
+       "fp": 0,
+       "n_gt": 8,
+       "n_pred": 7,
+       "precision": 1.0,
+       "recall": 0.875,
+       "tp": 7
+      },
+      "detector": {
+       "f1": 1.0,
+       "fn": 0,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 14,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 14
+      },
+      "fan": {
+       "f1": null,
+       "fn": 14,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "light": {
+       "f1": 0.5041,
+       "fn": 1,
+       "fp": 121,
+       "n_gt": 63,
+       "n_pred": 183,
+       "precision": 0.3388,
+       "recall": 0.9841,
+       "tp": 62
+      },
+      "receptacle": {
+       "f1": 0.9886,
+       "fn": 3,
+       "fp": 0,
+       "n_gt": 133,
+       "n_pred": 130,
+       "precision": 1.0,
+       "recall": 0.9774,
+       "tp": 130
+      },
+      "switch": {
+       "f1": 0.9926,
+       "fn": 1,
+       "fp": 0,
+       "n_gt": 68,
+       "n_pred": 67,
+       "precision": 1.0,
+       "recall": 0.9853,
+       "tp": 67
+      }
+     },
+     "total": {
+      "f1": 0.7989,
+      "fn": 20,
+      "fp": 121,
+      "n_gt": 300,
+      "n_pred": 401,
+      "precision": 0.6983,
+      "recall": 0.9333,
+      "tp": 280
+     }
+    },
+    "3": {
+     "by_category": {
+      "ceiling_fan": {
+       "f1": 0.9333,
+       "fn": 1,
+       "fp": 0,
+       "n_gt": 8,
+       "n_pred": 7,
+       "precision": 1.0,
+       "recall": 0.875,
+       "tp": 7
+      },
+      "detector": {
+       "f1": 1.0,
+       "fn": 0,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 14,
+       "precision": 1.0,
+       "recall": 1.0,
+       "tp": 14
+      },
+      "fan": {
+       "f1": null,
+       "fn": 14,
+       "fp": 0,
+       "n_gt": 14,
+       "n_pred": 0,
+       "precision": null,
+       "recall": 0.0,
+       "tp": 0
+      },
+      "light": {
+       "f1": 0.5041,
+       "fn": 1,
+       "fp": 121,
+       "n_gt": 63,
+       "n_pred": 183,
+       "precision": 0.3388,
+       "recall": 0.9841,
+       "tp": 62
+      },
+      "receptacle": {
+       "f1": 0.9278,
+       "fn": 11,
+       "fp": 8,
+       "n_gt": 133,
+       "n_pred": 130,
+       "precision": 0.9385,
+       "recall": 0.9173,
+       "tp": 122
+      },
+      "switch": {
+       "f1": 0.9926,
+       "fn": 1,
+       "fp": 0,
+       "n_gt": 68,
+       "n_pred": 67,
+       "precision": 1.0,
+       "recall": 0.9853,
+       "tp": 67
+      }
+     },
+     "total": {
+      "f1": 0.776,
+      "fn": 28,
+      "fp": 129,
+      "n_gt": 300,
+      "n_pred": 401,
+      "precision": 0.6783,
+      "recall": 0.9067,
+      "tp": 272
+     }
+    }
+   }
+  }
+ },
+ "ground_truth": {
+  "annotations": 300,
+  "by_category": {
+   "ceiling_fan": 8,
+   "detector": 14,
+   "fan": 14,
+   "light": 63,
+   "receptacle": 133,
+   "switch": 68
+  },
+  "candidate_review_outcomes": {
+   "accepted": 604,
+   "corrected": 543,
+   "rejected": 11
+  },
+  "provenance": {
+   "candidate": 298,
+   "manual": 2
+  }
+ },
+ "groups": {
+  "definition": {
+   "dev": [
+    "A1-111",
+    "A2-111"
+   ],
+   "held_out": [
+    "A3-111",
+    "A4-111"
+   ]
+  },
+  "systems": {
+   "det0": {
+    "dev": {
+     "f1": 0.9959,
+     "fn": 0,
+     "fp": 1,
+     "n_gt": 121,
+     "n_pred": 122,
+     "precision": 0.9918,
+     "recall": 1.0,
+     "subtype_accuracy": 0.9835,
+     "tp": 121
+    },
+    "held_out": {
+     "f1": 0.9514,
+     "fn": 3,
+     "fp": 15,
+     "n_gt": 179,
+     "n_pred": 191,
+     "precision": 0.9215,
+     "recall": 0.9832,
+     "subtype_accuracy": 0.9545,
+     "tp": 176
+    }
+   },
+   "raster_plain": {
+    "dev": {
+     "f1": 0.7097,
+     "fn": 44,
+     "fp": 19,
+     "n_gt": 121,
+     "n_pred": 96,
+     "precision": 0.8021,
+     "recall": 0.6364,
+     "tp": 77
+    },
+    "held_out": {
+     "f1": 0.6711,
+     "fn": 78,
+     "fp": 21,
+     "n_gt": 179,
+     "n_pred": 122,
+     "precision": 0.8279,
+     "recall": 0.5642,
+     "tp": 101
+    }
+   },
+   "raster_thickened": {
+    "dev": {
+     "f1": 0.6747,
+     "fn": 9,
+     "fp": 99,
+     "n_gt": 121,
+     "n_pred": 211,
+     "precision": 0.5308,
+     "recall": 0.9256,
+     "tp": 112
+    },
+    "held_out": {
+     "f1": 0.6469,
+     "fn": 15,
+     "fp": 164,
+     "n_gt": 179,
+     "n_pred": 328,
+     "precision": 0.5,
+     "recall": 0.9162,
+     "tp": 164
+    }
+   },
+   "vector_signature": {
+    "dev": {
+     "f1": 0.8058,
+     "fn": 9,
+     "fp": 45,
+     "n_gt": 121,
+     "n_pred": 157,
+     "precision": 0.7134,
+     "recall": 0.9256,
+     "tp": 112
+    },
+    "held_out": {
+     "f1": 0.7943,
+     "fn": 11,
+     "fp": 76,
+     "n_gt": 179,
+     "n_pred": 244,
+     "precision": 0.6885,
+     "recall": 0.9385,
+     "tp": 168
+    }
+   }
+  }
+ },
+ "not_evaluated": {
+  "room": "Generators assign no room; room extraction (B-06) is not built yet.",
+  "status": "Status follows from category (ceiling fans are optional_pre_wire); not predicted separately.",
+  "subtype": "Not scored for generators: each template implies one fixed subtype, while real subtypes come from adjacent text tokens. Scored for detectors."
+ },
+ "sensitivity_tolerances_pt": [
+  3.0,
+  12.0
+ ],
+ "tolerance_pt": 6.0,
+ "union_recall": {
+  "by_category": {
+   "ceiling_fan": {
+    "found": 8,
+    "n_gt": 8,
+    "recall": 1.0
+   },
+   "detector": {
+    "found": 14,
+    "n_gt": 14,
+    "recall": 1.0
+   },
+   "fan": {
+    "found": 13,
+    "n_gt": 14,
+    "recall": 0.9286
+   },
+   "light": {
+    "found": 62,
+    "n_gt": 63,
+    "recall": 0.9841
+   },
+   "receptacle": {
+    "found": 133,
+    "n_gt": 133,
+    "recall": 1.0
+   },
+   "switch": {
+    "found": 68,
+    "n_gt": 68,
+    "recall": 1.0
+   }
+  },
+  "total": {
+   "found": 298,
+   "n_gt": 300,
+   "recall": 0.9933
+  }
+ }
+}

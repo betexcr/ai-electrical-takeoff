@@ -2,7 +2,7 @@
 
 Assessment project: read the supplied electrical plans, find every electrical component, count it per room and let a user correct the result on the plan. The working record of status, evidence and decisions is [PROJECT_TRACKING.md](PROJECT_TRACKING.md).
 
-> **Status (2026-10-25):** PDF feasibility (Milestone 1) is complete. The four sheets have hand-verified ground truth (`gt_001`, 300 devices), and the evaluator (`eval/1`) has measured the Milestone 1 candidate generators against it ([report](reports/evaluation/gt_001_20261025T020009Z__eval1/report.md)). That baseline is biased upward, because the ground truth was built from those candidates. **No detector has been chosen yet.**
+> **Status (2026-10-25):** The four sheets have hand-verified ground truth (`gt_001`, 300 devices). The evaluator (`eval/1.1`) has scored the Milestone 1 candidate generators and a first rule-based detector, `det/0`, which reaches F1 0.95 on the held-out sheets A3/A4 ([report](reports/evaluation/gt_001_20261025T020009Z__eval1.1__det0/report.md)). Those numbers are biased upward: the ground truth was built from the same candidates, and all 4 sheets come from one plan set. **No detector is final, and the takeoff app workflow is not built yet.**
 
 ## Layout
 | Path | Contents |
@@ -10,7 +10,8 @@ Assessment project: read the supplied electrical plans, find every electrical co
 | `plans/`, `docs/Stage 3 …docx`, `electrical_takeoff_symbols/` | Original assessment material. Never modified. |
 | `backend/takeoff/pdf/` | Coordinate spaces (`coords.py`), sheet layout (`layout.py`), symbol-matching primitives (`symbols.py`) |
 | `backend/takeoff/groundtruth/` | Ground-truth schema, store, review workflow, checks, export, API |
-| `backend/takeoff/evaluation/` | Matching and metrics against a verified export (`eval/1`) |
+| `backend/takeoff/evaluation/` | Matching and metrics against a verified export (`eval/1.1`) |
+| `backend/takeoff/detection/` | Detectors (`det0.py`: rule-based fusion of the candidate generators) |
 | `backend/reviewer/static/` | Reviewer page (vanilla JS) |
 | `backend/tools/` | `pdf_diagnostics.py`, `symbol_probe.py`, `gt_review.py`, `evaluate.py` |
 | `docs/` | `pdf_feasibility_findings.md`, `ground_truth_protocol.md` |
@@ -52,7 +53,9 @@ An export is `verified` only when all four sheets are verified. Any evaluation m
 ```bash
 cd backend
 uv run python tools/evaluate.py --export ../data/ground_truth/exports/gt_001_20261025T020009Z
+uv run python tools/evaluate.py --export ../data/ground_truth/exports/gt_001_20261025T020009Z --detector det0 --groups "dev=A1-111,A2-111;held_out=A3-111,A4-111"
 ```
+- The second command also scores `det/0`, built from the same checked candidates, and reports the development and held-out sheets separately.
 - The evaluator refuses an export that isn't verified or has been altered.
 - It regenerates the candidates and refuses to continue if they differ from the ones the reviewer saw (run hashes in the manifest).
 - It writes `metrics.json`, `matches.jsonl`, `report.md` and example images to a new folder under `reports/evaluation/`, and never overwrites an existing one.
