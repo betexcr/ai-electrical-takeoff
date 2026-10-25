@@ -74,6 +74,15 @@ class NotFound(StoreError):
 
 
 class Store:
+    """SQLite row/event store. Subclasses swap the class attributes to host another record family."""
+
+    TABLES = TABLES
+    KEY = KEY
+    ENTITY = ENTITY
+    IMMUTABLE: tuple[str, ...] = ("candidates", "candidate_runs")
+    STORE_VERSION = STORE_VERSION
+    SCHEMA_VERSION = M.SCHEMA_VERSION
+
     def __init__(self, path: Path | str):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -84,17 +93,17 @@ class Store:
         # executescript() commits implicitly, so the idempotent DDL runs outside
         # the explicit transaction used for the version check below.
         self._conn.executescript(_SCHEMA)
-        for t in TABLES:
+        for t in self.TABLES:
             self._conn.executescript(_TABLE.format(t=t))
-        for t in ("candidates", "candidate_runs"):
+        for t in self.IMMUTABLE:
             self._conn.executescript(_IMMUTABLE.format(t=t))
         with self.transaction():
             row = self._conn.execute("SELECT value FROM meta WHERE key='store_version'").fetchone()
             if row is None:
-                self._conn.execute("INSERT INTO meta VALUES ('store_version', ?)", (STORE_VERSION,))
-                self._conn.execute("INSERT INTO meta VALUES ('schema_version', ?)", (M.SCHEMA_VERSION,))
-            elif row[0] != STORE_VERSION:
-                raise StoreError(f"store version {row[0]} != {STORE_VERSION}")
+                self._conn.execute("INSERT INTO meta VALUES ('store_version', ?)", (self.STORE_VERSION,))
+                self._conn.execute("INSERT INTO meta VALUES ('schema_version', ?)", (self.SCHEMA_VERSION,))
+            elif row[0] != self.STORE_VERSION:
+                raise StoreError(f"store version {row[0]} != {self.STORE_VERSION}")
 
     def close(self) -> None:
         self._conn.close()
@@ -113,12 +122,13 @@ class Store:
 
     # --- generic rows ----------------------------------------------------------------
 
-    @staticmethod
-    def _key(table: str, model: BaseModel) -> str:
-        return getattr(model, KEY.get(table, "id"))
+    @classmethod
+    def _key(cls, table: str, model: BaseModel) -> str:
+        return getattr(model, cls.KEY.get(table, "id"))
 
     def _event(self, conn, table, entity_id, action, before, after, actor) -> None:
-        ev = M.Event(entity=ENTITY[table], entity_id=entity_id, action=action, before=before, after=after, actor=actor)
+        ev = M.Event(entity=self.ENTITY[table], entity_id=entity_id, action=action, before=before, after=after,
+                     actor=actor, schema_version=self.SCHEMA_VERSION)
         conn.execute(
             "INSERT INTO events (entity, entity_id, action, before, after, actor, timestamp, schema_version) "
             "VALUES (?,?,?,?,?,?,?,?)",
@@ -126,7 +136,7 @@ class Store:
              json.dumps(after) if after is not None else None, ev.actor, ev.timestamp, ev.schema_version))
 
     def insert(self, table: str, model: BaseModel, actor: str, action: str = "create", conn=None) -> BaseModel:
-        model = TABLES[table].model_validate(model.model_dump())
+        model = self.TABLES[table].model_validate(model.model_dump())
         key = self._key(table, model)
         data = model.model_dump(mode="json")
 
@@ -146,7 +156,7 @@ class Store:
 
     def replace(self, table: str, model: BaseModel, actor: str, action: str, conn=None) -> BaseModel:
         """Replace the current state of an existing row (validated) and log before/after."""
-        model = TABLES[table].model_validate(model.model_dump())
+        model = self.TABLES[table].model_validate(model.model_dump())
         key = self._key(table, model)
         data = model.model_dump(mode="json")
 
@@ -170,7 +180,7 @@ class Store:
         row = self._conn.execute(f"SELECT data FROM {table} WHERE id=?", (key,)).fetchone()
         if row is None:
             raise NotFound(f"{table} {key} not found")
-        return TABLES[table].model_validate(json.loads(row[0]))
+        return self.TABLES[table].model_validate(json.loads(row[0]))
 
     def find(self, table: str, key: str) -> BaseModel | None:
         try:
@@ -189,7 +199,7 @@ class Store:
         if clauses:
             sql += " WHERE " + " AND ".join(clauses)
         sql += " ORDER BY rowid"
-        return [TABLES[table].model_validate(json.loads(r[0])) for r in self._conn.execute(sql, params)]
+        return [self.TABLES[table].model_validate(json.loads(r[0])) for r in self._conn.execute(sql, params)]
 
     def events(self, entity: str | None = None, entity_id: str | None = None) -> list[M.Event]:
         sql, params = "SELECT id, entity, entity_id, action, before, after, actor, timestamp, schema_version FROM events", []
