@@ -75,6 +75,24 @@ def test_rejected_device_never_counts_as_duplicate_partner():
     assert "duplicate_warning" not in got.get("b", {})  # a rejected device is already decided
 
 
+def test_duplicate_distance_is_euclidean_not_per_axis():
+    diagonal_far = run_conditions([dev("a", (100.0, 5.0)), dev("b", (102.5, 7.5))])  # ~3.54 pt, within 3 per axis
+    assert "duplicate_warning" not in diagonal_far.get("a", {})
+    diagonal_near = run_conditions([dev("a", (100.0, 5.0)), dev("b", (102.12, 7.12))])  # ~3.0 pt
+    assert "duplicate_warning" in diagonal_near["a"] and "duplicate_warning" in diagonal_near["b"]
+
+
+def test_rejected_device_carries_no_condition_flags():
+    ambiguous_rooms = [label("Kitchen", 120), label("Hall", 124)]
+    rejected = [dev("a", (100.0, 5.0), state="rejected"), dev("b", (101.0, 5.0), state="rejected"),
+                dev("c", (500.0, 5.0), state="rejected", room=None)]
+    assert run_conditions(rejected, ambiguous_rooms) == {}
+    # the same devices while still proposed do carry them
+    proposed = [dev("a", (100.0, 5.0)), dev("b", (101.0, 5.0)), dev("c", (500.0, 5.0), room=None)]
+    got = run_conditions(proposed, ambiguous_rooms)
+    assert {"duplicate_warning", "room_ambiguous"} <= set(got["a"]) and "no_room" in got["c"]
+
+
 def test_reviewer_room_clears_room_ambiguous():
     ambiguous_rooms = [label("Kitchen", 120), label("Hall", 124)]
     d = dev("a", (100.0, 5.0), source="proposed_nearest_label")
@@ -150,9 +168,16 @@ def test_bulk_excludes_every_open_review_flag_including_model_disagrees_and_ai_o
 def test_info_flags_do_not_block_bulk():
     d = dev("a")
     assert F.bulk_eligible(d, [flag("a", "not_redetected", severity="info")])
-    assert F.bulk_eligible(d, [flag("a", "ai_only_candidate", severity="info"),
+    assert F.bulk_eligible(d, [flag("a", "not_redetected", severity="info"),
                                flag("a", "duplicate_warning", severity="info")])
     assert not F.bulk_eligible(d, [flag("a", "not_redetected", severity="info"), flag("a", "no_room")])
+
+
+def test_info_ai_only_and_model_disagrees_still_block_bulk():
+    d = dev("a")
+    for t in ("ai_only_candidate", "model_disagrees"):
+        assert not F.bulk_eligible(d, [flag("a", t, severity="info")]), t
+        assert F.bulk_eligible(d, [flag("a", t, severity="info", open=False)]), t  # closed no longer blocks
 
 
 def test_model_disagrees_blocks_acceptance_without_reason_only():

@@ -25,6 +25,9 @@ VALIDATION_TYPES = ("duplicate_warning", "room_ambiguous", "no_room")
 DECISION_TYPES = ("classification_conflict", "ambiguous_match", "not_redetected", "model_disagrees",
                   "ai_only_candidate")
 
+# Never bulk-accepted while open, whatever the flag's severity.
+BULK_NEVER_TYPES = ("ai_only_candidate", "model_disagrees")
+
 CONDITION_CLEARED = "condition cleared"
 SYSTEM_ACTOR = "system"
 
@@ -59,9 +62,10 @@ def conditions(devices: Iterable[Device], rooms: list[dict], params: dict = ROOM
       reviewer sets the room (``room_source == "reviewer"``) this clears.
     * ``no_room``: the device has no room.
 
+    Deleted and rejected devices are skipped entirely: they never carry a condition flag.
     Devices with no condition are absent from the result.
     """
-    live = [d for d in devices if not d.deleted]
+    live = [d for d in devices if not d.deleted and d.review_state != "rejected"]
     out: dict[str, dict[str, dict]] = {}
     for did, details in _duplicates(live).items():
         out.setdefault(did, {})["duplicate_warning"] = details
@@ -100,6 +104,9 @@ def sync_validation(open_flags: Iterable[Flag], current: dict[str, dict[str, dic
     New ids are ``cond:{device_id}:{type}``, with ``:2``, ``:3``... appended when that id is in ``taken_ids``
     (the service passes the ids of closed flags it already stores). ``devices`` supplies ``document_id`` and
     ``sheet_id`` for new flags and must cover every device in ``current`` that needs a flag opened.
+
+    Callers must pass ``devices`` and **every stored flag id (open and closed) as ``taken_ids``**, so a re-opened
+    condition never collides with an earlier flag's id.
     """
     now = now or utcnow()
     existing = {(f.device_id, f.type) for f in open_flags if f.open and f.type in VALIDATION_TYPES}
@@ -128,10 +135,14 @@ def sync_validation(open_flags: Iterable[Flag], current: dict[str, dict[str, dic
 
 
 def bulk_eligible(device: Device, open_flags: Iterable[Flag]) -> bool:
-    """A bulk accept may take only a proposed, live device with no open ``review`` flag of any type."""
+    """A bulk accept may take only a proposed, live device with no open ``review`` flag of any type.
+
+    ``ai_only_candidate`` and ``model_disagrees`` also block whatever their severity: those need a reviewer.
+    """
     if device.deleted or device.review_state != "proposed":
         return False
-    return not any(f.open and f.severity == "review" and f.device_id == device.id for f in open_flags)
+    return not any(f.open and f.device_id == device.id
+                   and (f.severity == "review" or f.type in BULK_NEVER_TYPES) for f in open_flags)
 
 
 def acceptance_blockers(device_id: str, open_flags: Iterable[Flag], reason: str | None) -> list[Flag]:
