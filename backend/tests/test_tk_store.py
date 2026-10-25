@@ -198,3 +198,53 @@ def test_ai_origin_flag_types_and_verdict_fields_validate():
         TM.SheetRunStatus(status="skipped")
     with pytest.raises(ValidationError):
         TM.Run(id="run-1x", document_id=DOC, detector="det/0", detector_version="1", params={}, created_by="r")
+
+
+@pytest.mark.parametrize("outcome", ["rollback", "commit"])
+def test_reads_wait_for_another_threads_open_transaction(store, outcome):
+    """The connection is shared across threads: a read must not see another thread's uncommitted insert. It waits
+    for the commit (then sees the row) or the rollback (then never sees it)."""
+    import threading
+
+    d = make_device()
+    inserted, finish, done = threading.Event(), threading.Event(), threading.Event()
+
+    class Rollback(Exception):
+        pass
+
+    def writer():
+        try:
+            with store.transaction() as conn:
+                store.insert("devices", d, "w", conn=conn)
+                inserted.set()
+                assert finish.wait(10)
+                if outcome == "rollback":
+                    raise Rollback
+        except Rollback:
+            pass
+
+    seen = {}
+
+    def reader():
+        seen["find"] = store.find("devices", d.id)
+        seen["list"] = store.list("devices")
+        seen["events"] = store.events("device", d.id)
+        done.set()
+
+    w = threading.Thread(target=writer)
+    w.start()
+    assert inserted.wait(10)
+    r = threading.Thread(target=reader)
+    r.start()
+    try:
+        assert not done.wait(0.3)  # blocked while the transaction is open
+        assert seen == {}
+    finally:
+        finish.set()  # never leave the writer holding the transaction
+    w.join(10)
+    r.join(10)
+    assert done.is_set()
+    if outcome == "rollback":
+        assert seen == {"find": None, "list": [], "events": []}
+    else:
+        assert seen["find"] == d and seen["list"] == [d] and len(seen["events"]) == 1

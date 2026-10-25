@@ -9,10 +9,12 @@ with ``status`` one of ``pass``, ``fail`` or ``not_run``, in this order; a faile
 recorded as ``not_run`` with the reason:
 
 1. ``credential_source``: which of ``ANTHROPIC_API_KEY``, ``ANTHROPIC_AUTH_TOKEN`` or an ``ant`` profile is present
-   (presence only: values are never read into the report or printed) and the API host (the host of
-   ``ANTHROPIC_BASE_URL``, else ``api.anthropic.com``). A non-default host sets ``needs_confirmation``: the check then
-   fails, and no request is sent, until it is re-run with ``--confirm-host <that host>`` after the user confirmed it
-   is their own API account (another tool's session variables may be present in the shell).
+   (presence only: values are never read into the report or printed) and the API host: the host the SDK client
+   resolves (``client.base_url``: keyword, then ``ANTHROPIC_BASE_URL``, then an ``ant`` profile's own ``base_url``),
+   compared with the host of ``ANTHROPIC_BASE_URL`` (else ``api.anthropic.com``). A non-default resolved host, or a
+   mismatch between the two, sets ``needs_confirmation``: the check then fails, and no request is sent, until it is
+   re-run with ``--confirm-host <the resolved host>`` after the user confirmed it is their own API account (another
+   tool's session variables may be present in the shell). Building the client sends nothing.
 2. ``model_available``: ``client.models.retrieve(model)``, with image input where the field is reported.
 3. ``vision_request``: one ``ai-verify/1`` request on one A1 crop (det/0's first detection in reading order), with
    its stop reason, usage and latency.
@@ -98,25 +100,54 @@ def api_host(env: Mapping[str, str]) -> tuple[str, str]:
     return (host or "unparseable"), "ANTHROPIC_BASE_URL"
 
 
-def check_credentials(env: Mapping[str, str], profile_present: Callable[[], bool],
-                      confirm_host: str | None) -> dict:
+def resolved_host(client) -> str | None:
+    """The host the SDK client will actually send to: ``client.base_url`` as the SDK resolved it (keyword, then
+    ``ANTHROPIC_BASE_URL``, then an ``ant`` profile's own ``base_url``). Building the client sends nothing."""
+    base = getattr(client, "base_url", None)
+    if base is None:
+        return None
+    try:
+        return urlsplit(str(base)).hostname or None
+    except ValueError:
+        return None
+
+
+def check_credentials(env: Mapping[str, str], profile_present: Callable[[], bool], confirm_host: str | None,
+                      make_client: Callable[[], Any]) -> tuple[dict, Any]:
+    """``(check, client)``. The client is built only when a credential is present, and is returned only when the
+    check passes, so no request can be made before it does."""
     present = {"ANTHROPIC_API_KEY": bool(env.get("ANTHROPIC_API_KEY")),
                "ANTHROPIC_AUTH_TOKEN": bool(env.get("ANTHROPIC_AUTH_TOKEN")),
                "ant_profile": bool(profile_present())}
     order = [k for k in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ant_profile") if present[k]]
-    host, source = api_host(env)
-    needs = host != DEFAULT_HOST
-    confirmed = needs and confirm_host is not None and confirm_host.strip().lower() == host.lower()
+    env_host, source = api_host(env)
     details = dict(present=present, mechanism=order[0] if order else None, also_present=order[1:],
-                   api_host=host, host_source=source, needs_confirmation=needs, confirmed=confirmed)
+                   api_host=None, env_host=env_host, resolved_host=None, host_source=source,
+                   needs_confirmation=None, confirmed=False)
     if not order:
         return _check("credential_source", "fail",
-                      "no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)", **details)
-    if needs and not confirmed:
+                      "no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)", **details), None
+    try:
+        client = make_client()
+    except Exception as e:
+        return _check("credential_source", "fail", f"the SDK client could not be built: {_short(e)}", **details), None
+    host = resolved_host(client)
+    details.update(api_host=host, resolved_host=host)
+    if host is None:
+        details["needs_confirmation"] = True
         return _check("credential_source", "fail",
-                      f"needs confirmation: the API host is {host}, not {DEFAULT_HOST}; confirm it is your own API "
-                      f"account, then re-run with --confirm-host {host}", **details)
-    return _check("credential_source", "pass", None, **details)
+                      "could not determine the API host the SDK client will use", **details), None
+    mismatch = host != env_host
+    needs = host != DEFAULT_HOST or mismatch
+    confirmed = needs and confirm_host is not None and confirm_host.strip().lower() == host.lower()
+    details.update(host_mismatch=mismatch, needs_confirmation=needs, confirmed=confirmed)
+    if needs and not confirmed:
+        why = (f"the SDK resolves the API host {host}, but ANTHROPIC_BASE_URL gives {env_host} (an ant profile's "
+               f"base_url?)" if mismatch else f"the API host is {host}, not {DEFAULT_HOST}")
+        return _check("credential_source", "fail",
+                      f"needs confirmation: {why}; confirm it is your own API account, then re-run with "
+                      f"--confirm-host {host}", **details), None
+    return _check("credential_source", "pass", None, **details), client
 
 
 # --- 2. model ---------------------------------------------------------------------------------------------------
@@ -291,23 +322,23 @@ def preflight(model: str | None = None, sheet: str = DEFAULT_SHEET, sheet_run: b
         for name in CHECKS[len(checks):]:
             checks.append(_check(name, "not_run", f"not run: {failed} failed"))
 
-    checks.append(check_credentials(env, profile_present or sdk_profile_present, confirm_host))
-    if checks[-1]["status"] == "fail":
+    def make_client():
+        if client is not None:
+            return client
+        import anthropic
+
+        return anthropic.Anthropic()  # resolves credentials and the host as the app does; sends nothing
+
+    check, resolved = check_credentials(env, profile_present or sdk_profile_present, confirm_host, make_client)
+    checks.append(check)
+    if check["status"] == "fail":
         stop("credential_source")
     else:
-        if client is None:
-            try:
-                import anthropic
-
-                client = anthropic.Anthropic()  # resolves credentials and the host as the app does
-            except Exception as e:
-                checks.append(_check("model_available", "fail", f"the SDK client could not be built: {_short(e)}"))
-        if len(checks) == 1:
-            checks.append(check_model(client, model))
+        checks.append(check_model(resolved, model))
         if checks[-1]["status"] == "fail":
             stop("model_available")
         else:
-            ai = AC.AIClient(model=model, client=client)
+            ai = AC.AIClient(model=model, client=resolved)
             checks.append(check_vision(ai, vision_inputs or (lambda: the_sheet().vision_inputs())))
             if checks[-1]["status"] == "fail":
                 stop("vision_request")

@@ -176,8 +176,12 @@ class Store:
                 _do(c)
         return model
 
+    # Reads take the same lock as transaction(): the connection is shared across threads
+    # (check_same_thread=False), so an unlocked read could see another thread's uncommitted writes.
+
     def get(self, table: str, key: str) -> BaseModel:
-        row = self._conn.execute(f"SELECT data FROM {table} WHERE id=?", (key,)).fetchone()
+        with self._lock:
+            row = self._conn.execute(f"SELECT data FROM {table} WHERE id=?", (key,)).fetchone()
         if row is None:
             raise NotFound(f"{table} {key} not found")
         return self.TABLES[table].model_validate(json.loads(row[0]))
@@ -199,7 +203,9 @@ class Store:
         if clauses:
             sql += " WHERE " + " AND ".join(clauses)
         sql += " ORDER BY rowid"
-        return [self.TABLES[table].model_validate(json.loads(r[0])) for r in self._conn.execute(sql, params)]
+        with self._lock:
+            rows = self._conn.execute(sql, params).fetchall()
+        return [self.TABLES[table].model_validate(json.loads(r[0])) for r in rows]
 
     def events(self, entity: str | None = None, entity_id: str | None = None) -> list[M.Event]:
         sql, params = "SELECT id, entity, entity_id, action, before, after, actor, timestamp, schema_version FROM events", []
@@ -213,8 +219,10 @@ class Store:
         if clauses:
             sql += " WHERE " + " AND ".join(clauses)
         sql += " ORDER BY id"
+        with self._lock:
+            rows = self._conn.execute(sql, params).fetchall()
         out = []
-        for r in self._conn.execute(sql, params):
+        for r in rows:
             out.append(M.Event(id=r[0], entity=r[1], entity_id=r[2], action=r[3],
                                before=json.loads(r[4]) if r[4] else None, after=json.loads(r[5]) if r[5] else None,
                                actor=r[6], timestamp=r[7], schema_version=r[8]))
@@ -249,7 +257,9 @@ class Store:
     # --- candidates (immutable) ----------------------------------------------------------------
 
     def find_run_by_hash(self, run_hash: str) -> M.CandidateRun | None:
-        for r in self._conn.execute("SELECT data FROM candidate_runs"):
+        with self._lock:
+            rows = self._conn.execute("SELECT data FROM candidate_runs").fetchall()
+        for r in rows:
             run = M.CandidateRun.model_validate(json.loads(r[0]))
             if run.run_hash == run_hash:
                 return run

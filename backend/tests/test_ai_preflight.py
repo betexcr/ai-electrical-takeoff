@@ -61,8 +61,15 @@ class Runner:
         return self.status, {"verify": {"requests": 7}, "discover": {"requests": 20}}, "run-001"
 
 
+def with_host(client, env):
+    """A stub client resolves the host as the SDK would without a profile: ANTHROPIC_BASE_URL, else the default."""
+    if not hasattr(client, "base_url"):
+        client.base_url = env.get("ANTHROPIC_BASE_URL") or "https://api.anthropic.com"
+    return client
+
+
 def run(pf, env, client=None, profile=False, runner=None, **kw):
-    client = client or StubClient(default=agreeing)
+    client = with_host(client or StubClient(default=agreeing), env)
     runner = runner or Runner()
     report = pf.preflight("claude-test", env=env, client=client, profile_present=lambda: profile,
                           vision_inputs=vision_inputs, sheet_runner=runner, **kw)
@@ -76,7 +83,8 @@ def statuses(report):
 def test_report_never_contains_secret_values(pf, tmp_path):
     env = {"ANTHROPIC_API_KEY": KEY, "ANTHROPIC_AUTH_TOKEN": TOKEN}
     out = tmp_path / "ai_preflight.json"
-    assert pf.main(["--model", "claude-test", "--out", str(out)], env=env, client=StubClient(default=agreeing),
+    assert pf.main(["--model", "claude-test", "--out", str(out)], env=env,
+                   client=with_host(StubClient(default=agreeing), env),
                    profile_present=lambda: True, vision_inputs=vision_inputs, sheet_runner=Runner()) == 0
     text = out.read_text(encoding="utf-8")
     report = json.loads(text)
@@ -93,7 +101,7 @@ def test_report_never_contains_secret_values(pf, tmp_path):
 
     # an error whose message carries the secret (and a base URL with user info) is scrubbed too
     env = {"ANTHROPIC_API_KEY": KEY, "ANTHROPIC_BASE_URL": f"https://user:{TOKEN}@api.anthropic.com/"}
-    leaky = StubClient(model_error=status_error(anthropic.InternalServerError, 500, f"bad key {KEY}"))
+    leaky = with_host(StubClient(model_error=status_error(anthropic.InternalServerError, 500, f"bad key {KEY}")), env)
     assert pf.main(["--out", str(out)], env=env, client=leaky, profile_present=lambda: False,
                    vision_inputs=vision_inputs, sheet_runner=Runner()) == 1
     text = out.read_text(encoding="utf-8")
@@ -163,8 +171,8 @@ def test_no_sheet_run_and_report_schema(pf, tmp_path):
     out = tmp_path / "r.json"
     runner = Runner()
     assert pf.main(["--no-sheet-run", "--out", str(out)], env={"ANTHROPIC_API_KEY": KEY},
-                   client=StubClient(default=agreeing), profile_present=lambda: False, vision_inputs=vision_inputs,
-                   sheet_runner=runner) == 0
+                   client=with_host(StubClient(default=agreeing), {}), profile_present=lambda: False,
+                   vision_inputs=vision_inputs, sheet_runner=runner) == 0
     report = json.loads(out.read_text(encoding="utf-8"))
     assert runner.calls == 0
     assert report["checks"][3] == {"name": "stages_on_sheet", "status": "not_run",
@@ -180,3 +188,64 @@ def test_no_sheet_run_and_report_schema(pf, tmp_path):
         image_input=SimpleNamespace(supported=False))), default=agreeing)
     report, _, _ = run(pf, {"ANTHROPIC_API_KEY": KEY}, client=unsupported)
     assert report["checks"][1]["status"] == "fail" and "no image input" in report["checks"][1]["reason"]
+
+
+def test_profile_resolved_host_needs_confirmation_and_sends_nothing(pf):
+    """An ant profile can carry its own base_url: the SDK-resolved host is what counts, checked before any request."""
+    env = {"ANTHROPIC_API_KEY": KEY}  # no ANTHROPIC_BASE_URL: the environment alone says the default host
+    stub = StubClient(default=agreeing)
+    stub.base_url = "https://profile-host.example.com/"  # as the SDK resolves a profile's base_url
+    report, client, runner = run(pf, env, client=stub)
+    cred = report["checks"][0]
+    assert cred["status"] == "fail" and "needs confirmation" in cred["reason"]
+    d = cred["details"]
+    assert (d["env_host"], d["resolved_host"], d["api_host"]) == ("api.anthropic.com", "profile-host.example.com",
+                                                                  "profile-host.example.com")
+    assert d["host_mismatch"] is True and d["needs_confirmation"] is True and d["confirmed"] is False
+    assert statuses(report)[1:] == [(n, "not_run") for n in pf.CHECKS[1:]]
+    assert client.retrieved == [] and client.calls == [] and runner.calls == 0
+
+    # a mismatch needs confirmation even when the resolved host is the default one
+    env2 = {"ANTHROPIC_API_KEY": KEY, "ANTHROPIC_BASE_URL": "https://proxy.example.com"}
+    stub2 = StubClient(default=agreeing)
+    stub2.base_url = "https://api.anthropic.com/"
+    report, client, _ = run(pf, env2, client=stub2)
+    assert report["checks"][0]["status"] == "fail" and report["checks"][0]["details"]["host_mismatch"] is True
+    assert client.retrieved == []
+
+    # confirming the resolved host (not the environment's) lets the checks run
+    stub3 = StubClient(default=agreeing)
+    stub3.base_url = "https://profile-host.example.com/"
+    report, client, _ = run(pf, env, client=stub3, confirm_host="api.anthropic.com")
+    assert report["checks"][0]["status"] == "fail" and client.retrieved == []
+    report, client, _ = run(pf, env, client=stub3, confirm_host="profile-host.example.com")
+    assert report["checks"][0]["status"] == "pass" and client.retrieved == ["claude-test"]
+
+    # a client without a resolvable host is refused too
+    bare = StubClient(default=agreeing)
+    bare.base_url = None
+    report, client, _ = run(pf, env, client=bare)
+    assert report["checks"][0]["status"] == "fail" and "could not determine" in report["checks"][0]["reason"]
+    assert client.retrieved == []
+
+
+def test_real_sdk_client_with_other_base_url_sends_no_request(pf):
+    """A real anthropic client (no network: a recording transport) whose base_url differs is stopped before any
+    request; building it sends nothing."""
+    import httpx2
+
+    sent = []
+
+    def handler(request):
+        sent.append(str(request.url))
+        return httpx2.Response(500, json={})
+
+    client = anthropic.Anthropic(api_key=KEY, base_url="https://other-gateway.example.com",
+                                 http_client=httpx2.Client(transport=httpx2.MockTransport(handler)))
+    report = pf.preflight("claude-test", env={"ANTHROPIC_API_KEY": KEY}, client=client,
+                          profile_present=lambda: False, vision_inputs=vision_inputs, sheet_runner=Runner())
+    cred = report["checks"][0]
+    assert cred["status"] == "fail" and cred["details"]["resolved_host"] == "other-gateway.example.com"
+    assert cred["details"]["needs_confirmation"] is True
+    assert statuses(report)[1:] == [(n, "not_run") for n in pf.CHECKS[1:]]
+    assert sent == []

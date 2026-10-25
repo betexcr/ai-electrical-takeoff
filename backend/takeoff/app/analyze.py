@@ -27,6 +27,7 @@ progress at a time: ``start`` refuses with ``run_in_progress`` while any sheet o
 from __future__ import annotations
 
 import copy
+import logging
 import queue
 import threading
 import time
@@ -58,8 +59,11 @@ NO_LEGEND = "no legend"
 NOT_CONFIGURED = "not configured"
 DETECTION_FAILED = "detection failed"
 INTERRUPTED = "interrupted: the analyzer stopped before this sheet finished"
+INTERNAL_ERROR = "analysis failed: internal error (see the server log)"
 IN_PROGRESS = ("queued", "running")
 _REASON_CHARS = 300
+
+log = logging.getLogger("takeoff.analyzer")
 
 
 def _actor(run: Run) -> str:
@@ -261,8 +265,8 @@ class Analyzer:
                 if run_id is None:
                     return
                 self._process(run_id)
-            except Exception:  # _process records every failure itself; never let the worker die
-                pass
+            except Exception:  # _process settles the run itself; this only keeps the worker alive
+                log.exception("analyzer worker: run %s raised past its own handling", run_id)
             finally:
                 self._queue.task_done()
 
@@ -307,16 +311,44 @@ class Analyzer:
     # --- one run -------------------------------------------------------------------------------------------------
 
     def _process(self, run_id: str) -> None:
-        run = self.run(run_id)
-        ai = bool(run.params.get("ai", {}).get("enabled"))
-        budget = AC.RequestBudget(self.max_requests)  # shared by both stages and every sheet of the run
-        for sid in run.sheets:
-            try:
-                self._process_sheet(run, sid, budget, ai)
-            except Exception as e:  # a bug outside the per-step handling: still fail only this sheet
-                self._set_sheet(run, sid, status="failed", message=f"analysis failed: {_why(e)}",
-                                finished_at=utcnow())
-        self._finish(run)
+        """Every sheet, then :meth:`_settle`, which always runs: no sheet of the run is left ``queued`` or
+        ``running`` (that would refuse every later run of the document with ``run_in_progress``)."""
+        try:
+            run = self.run(run_id)
+            ai = bool(run.params.get("ai", {}).get("enabled"))
+            budget = AC.RequestBudget(self.max_requests)  # shared by both stages and every sheet of the run
+            for sid in run.sheets:
+                try:
+                    self._process_sheet(run, sid, budget, ai)
+                except Exception as e:  # a bug outside the per-step handling: still fail only this sheet
+                    log.exception("analyzer: sheet %s of run %s failed unexpectedly", sid, run_id)
+                    try:
+                        self._set_sheet(run, sid, status="failed", message=f"analysis failed: {_why(e)}",
+                                        finished_at=utcnow())
+                    except Exception:
+                        log.exception("analyzer: could not record the failure of sheet %s of run %s", sid, run_id)
+        except Exception:
+            log.exception("analyzer: run %s failed unexpectedly", run_id)
+        self._settle(run_id)
+
+    def _settle(self, run_id: str) -> None:
+        """Best effort, each step on its own: fail any sheet still ``queued`` or ``running``, then set
+        ``finished_at``. Failures are logged, never raised."""
+        try:
+            run = self.run(run_id)
+        except Exception:
+            log.exception("analyzer: run %s could not be read to settle it", run_id)
+            return
+        for sid, s in run.sheets.items():
+            if s.status in IN_PROGRESS:
+                try:
+                    self._set_sheet(run, sid, status="failed", message=INTERNAL_ERROR, finished_at=utcnow())
+                except Exception:
+                    log.exception("analyzer: could not mark sheet %s of run %s failed", sid, run_id)
+        try:
+            self._finish(run)
+        except Exception:
+            log.exception("analyzer: could not set finished_at on run %s", run_id)
 
     def _set_sheet(self, run: Run, sheet_id: str, conn=None, **changes) -> Run:
         def do(c):

@@ -574,3 +574,60 @@ def test_det0_reads_only_the_requested_page(monkeypatch):
     seen.clear()
     det0.detect(PDF, [])
     assert seen == [1, 2, 3, 4]
+
+
+def test_worker_survives_a_failing_status_write_and_the_document_is_not_blocked(env, monkeypatch, caplog):
+    detector = FakeDetector({A1: points(env, A1, 2)})
+    an = env.analyzer(None, None, detector, background=True)
+    real_process, real_set = AN.Analyzer._process_sheet, AN.Analyzer._set_sheet
+    state = {"bug": True, "write_fails": 1}
+
+    def buggy_process(self, run, sheet_id, budget, ai):
+        if state.pop("bug", False):
+            self._set_sheet(run, sheet_id, status="running", started_at="2026-10-25T00:00:00Z")
+            raise RuntimeError("an analyzer bug")
+        return real_process(self, run, sheet_id, budget, ai)
+
+    def flaky_set(self, run, sheet_id, conn=None, **changes):
+        if changes.get("status") == "failed" and state["write_fails"]:
+            state["write_fails"] -= 1
+            raise RuntimeError("store hiccup")
+        return real_set(self, run, sheet_id, conn=conn, **changes)
+
+    monkeypatch.setattr(AN.Analyzer, "_process_sheet", buggy_process)
+    monkeypatch.setattr(AN.Analyzer, "_set_sheet", flaky_set)
+    with caplog.at_level("ERROR", logger="takeoff.analyzer"):
+        first = an.start(env.sha, ACTOR, sheet_ids=[A1], ai=False)
+        assert an.wait_idle(timeout=60)
+    s = an.run(first.id).sheets[A1]
+    assert (s.status, s.message) == ("failed", AN.INTERNAL_ERROR) and s.finished_at is not None
+    assert an.run(first.id).finished_at is not None
+    logged = " ".join(r.getMessage() for r in caplog.records)
+    assert "failed unexpectedly" in logged and "could not record the failure" in logged
+    assert state["write_fails"] == 0
+
+    second = an.start(env.sha, ACTOR, sheet_ids=[A1], ai=False)  # not refused with run_in_progress
+    assert an.wait_idle(timeout=60)
+    assert an.run(second.id).sheets[A1].status == "done"  # the same worker thread is still alive
+    an.close()
+
+
+def test_failing_finish_is_logged_and_does_not_block_the_document(env, monkeypatch, caplog):
+    detector = FakeDetector({A1: points(env, A1, 1)})
+    an = env.analyzer(None, None, detector)
+    real_finish = AN.Analyzer._finish
+    calls = []
+
+    def flaky_finish(self, run):
+        calls.append(run.id)
+        if len(calls) == 1:
+            raise RuntimeError("finish hiccup")
+        return real_finish(self, run)
+
+    monkeypatch.setattr(AN.Analyzer, "_finish", flaky_finish)
+    with caplog.at_level("ERROR", logger="takeoff.analyzer"):
+        first = an.start(env.sha, ACTOR, sheet_ids=[A1], ai=False)
+    assert first.sheets[A1].status == "done" and first.finished_at is None
+    assert any("finished_at" in r.getMessage() for r in caplog.records)
+    second = an.start(env.sha, ACTOR, sheet_ids=[A1], ai=False)
+    assert second.sheets[A1].status == "done" and second.finished_at is not None
