@@ -6,20 +6,24 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import threading
+import time
 from collections import Counter
+from pathlib import Path
 
 import pytest
-from tk_helpers import (ACTOR, DOC, HALL, NEAR_HALL, NEAR_KITCHEN, RUN_ID, SHEET, make, seed_detection,
-                        seed_device, seed_flag)
+from tk_helpers import (ACTOR, CL_EAST, CL_WEST, DOC, HALL, NEAR_HALL, NEAR_KITCHEN, RUN_ID, SHEET, make,
+                        seed_detection, seed_device, seed_flag)
 
 from takeoff.app import export as X
 from takeoff.app import models as TM
 
-OFFICIAL_COLUMNS = ["id", "sheet_id", "category", "subtype", "subtype_label", "status", "room_kind", "room_name",
-                    "u", "v", "x_pt", "y_pt", "review_state", "origin_reported", "accept_kind", "created_by_run",
-                    "detector_version", "match_score", "subtype_source", "ai_summary", "ai_implementation",
-                    "ai_model"]
-REVIEW_COLUMNS = OFFICIAL_COLUMNS + ["deleted", "delete_reason", "open_flags"]
+BRIEF_COLUMNS = ["id", "sheet_id", "category", "subtype", "subtype_label", "status", "room_kind", "room_name",
+                 "u", "v", "x_pt", "y_pt", "review_state", "origin_reported", "accept_kind", "created_by_run",
+                 "detector_version", "match_score", "subtype_source", "ai_summary", "ai_implementation",
+                 "ai_model"]
+OFFICIAL_COLUMNS = BRIEF_COLUMNS + ["room_key"]
+REVIEW_COLUMNS = BRIEF_COLUMNS + ["deleted", "delete_reason", "open_flags", "room_key"]
 AI_NOTE = "AI verdicts and AI-only candidates are suggestions; totals come from accepted and manual device records"
 FAKE_LABEL = "(test double, not a model)"
 
@@ -88,6 +92,11 @@ def test_official_csv_holds_only_accepted_and_manual(env):
     assert review["prop-1"]["review_state"] == "proposed" and review["prop-1"]["deleted"] == "false"
     assert review["prop-1"]["open_flags"] == "duplicate_warning"
     assert review["rej-1"]["review_state"] == "rejected"
+    # review rows carry the internal origin; only accepted official rows use the reported vocabulary
+    assert {r["origin_reported"] for r in review.values()} == {"detector"}
+    vocab = load(d, "manifest.json")["origin_vocabulary"]
+    assert "detector_accepted | ai_accepted | manual" in vocab["devices_official.csv"]
+    assert "detector | ai | manual" in vocab["devices_review.csv"]
     assert review["del-1"]["deleted"] == "true" and review["del-1"]["delete_reason"] == "not a device"
     # nothing in both files, nothing lost
     assert len(official) + len(review) == len(svc.devices(DOC, include_deleted=True))
@@ -96,24 +105,33 @@ def test_official_csv_holds_only_accepted_and_manual(env):
 def test_totals_reconcile_with_csv_and_service(env):
     store, svc, out = env
     seed_mixed(store)
+    # two same-named "CL" labels on one sheet are two separate rows keyed by label position
+    seed_device(store, "cl-w1", state="accepted", pt=(300.0, 880.0), room=CL_WEST)
+    seed_device(store, "cl-w2", state="accepted", pt=(310.0, 860.0), room=CL_WEST)
+    seed_device(store, "cl-e1", state="accepted", pt=(700.0, 880.0), room=CL_EAST)
+    seed_device(store, "cl-r", state="rejected", pt=(720.0, 860.0), room=CL_EAST)
     d = X.export_takeoff(svc, DOC, out, ACTOR)
 
-    # recompute from the CSV alone
+    # recompute from the CSV alone, rooms by its room_key column
     recomputed: dict = {}
     for r in rows(d / "devices_official.csv"):
         s = recomputed.setdefault(r["sheet_id"], {"by_room": {}, "by_category": {}, "total": 0,
                                                   "by_origin": {"detector_accepted": 0, "ai_accepted": 0,
                                                                 "manual": 0}})
-        room = s["by_room"].setdefault(r["room_name"] or "UNASSIGNED", {}).setdefault(r["category"], Counter())
+        room = s["by_room"].setdefault(r["room_key"], {}).setdefault(r["category"], Counter())
         room[r["subtype"]] += 1
         s["by_category"].setdefault(r["category"], Counter())[r["subtype"]] += 1
         s["total"] += 1
         s["by_origin"][r["origin_reported"]] += 1
     plain = json.loads(json.dumps(recomputed))  # Counters -> dicts
     totals = load(d, "totals.json")
-    assert plain[SHEET]["total"] == totals[SHEET]["total"] == 4
+    assert plain[SHEET]["total"] == totals[SHEET]["total"] == 7
     assert plain[SHEET]["by_origin"] == totals[SHEET]["by_origin"] == {
-        "detector_accepted": 2, "ai_accepted": 1, "manual": 1}
+        "detector_accepted": 5, "ai_accepted": 1, "manual": 1}
+    assert totals[SHEET]["by_room"]["CL @(300,900)"] == {"switch": {"standard": 2}}
+    assert totals[SHEET]["by_room"]["CL @(700,900)"] == {"switch": {"standard": 1}}
+    review = {r["id"]: r for r in rows(d / "devices_review.csv")}
+    assert review["cl-r"]["room_key"] == "CL @(700,900)"  # the review file carries the same key
     assert plain[SHEET]["by_category"] == totals[SHEET]["by_category"]
     assert plain[SHEET]["by_room"] == totals[SHEET]["by_room"]
     assert totals == svc.counts(DOC)["official"]
@@ -274,3 +292,86 @@ def test_manifest_states_ai_status_usage_and_fake_label(env):
     assert m2["ai_note"] == AI_NOTE and m2["ai_test_double"] is False
     assert m2["runs"][0]["ai"]["verify"]["implementation"] == "claude"
     assert m2["runs"][0]["ai"]["verify"]["tokens"]["input"] == 900
+
+
+def test_complete_is_false_for_an_open_review_flag_on_an_accepted_device(env):
+    store, svc, out = env
+    seed_mixed(store)
+    svc.reject("prop-1", ACTOR)
+    seed_flag(store, store.find("devices", "acc-1"), "duplicate_warning")  # accepted, flag open, none awaiting
+    m = load(X.export_takeoff(svc, DOC, out, ACTOR), "manifest.json")
+    assert m["review"]["awaiting"] == 0 and m["review"]["accepted_with_open_flags"] == 1
+    assert m["complete"] is False
+    assert m["incomplete_reasons"] == ["1 open duplicate_warning flag"]
+
+
+def test_open_flags_by_type_excludes_flags_on_deleted_devices(env):
+    store, svc, out = env
+    seed_mixed(store)
+    svc.reject("prop-1", ACTOR)
+    seed_flag(store, store.find("devices", "del-1"), "duplicate_warning")  # a deleted device's stale flag
+    seed_flag(store, store.find("devices", "acc-1"), "no_room", severity="info")
+    m = load(X.export_takeoff(svc, DOC, out, ACTOR), "manifest.json")
+    assert m["open_flags_by_type"] == {"no_room": 1}
+    assert m["complete"] is True and m["incomplete_reasons"] == []
+
+
+def test_failed_write_removes_only_this_calls_directory(env, monkeypatch):
+    store, svc, out = env
+    seed_mixed(store)
+    first = X.export_takeoff(svc, DOC, out, ACTOR)
+    before = {p.name: p.read_bytes() for p in first.iterdir()}
+    real = Path.write_bytes
+
+    def failing(self, data):
+        if self.name == "manifest.json":
+            raise OSError("disk full")
+        return real(self, data)
+
+    monkeypatch.setattr(Path, "write_bytes", failing)
+    with pytest.raises(OSError, match="disk full"):
+        X.export_takeoff(svc, DOC, out, ACTOR)
+    monkeypatch.undo()
+    assert [p.name for p in out.iterdir()] == [first.name]  # the failed attempt left nothing behind
+    assert {p.name: p.read_bytes() for p in first.iterdir()} == before  # the earlier export is untouched
+    assert X.export_takeoff(svc, DOC, out, ACTOR).name.startswith("tk_002_")
+
+
+def test_export_reads_one_snapshot_while_a_writer_waits(env):
+    """A write from another thread cannot land between the export's reads: it waits for the read phase."""
+    store, svc, out = env
+    seed_mixed(store)
+    seed_device(store, "late", state="proposed", pt=(130.0, 185.0))
+    real_list = store.list
+    state = {"fired": False, "writer": None, "done_at": None}
+
+    def writer():
+        svc.accept("late", ACTOR)  # a reviewer acting mid-export
+        state["done_at"] = time.monotonic()
+
+    def spying_list(*args, **kwargs):
+        if not state["fired"]:  # the export's first read: another thread tries to write right now
+            state["fired"] = True
+            state["writer"] = threading.Thread(target=writer)
+            state["writer"].start()
+            time.sleep(0.3)  # long enough for an unlocked writer to commit before the later reads
+        return real_list(*args, **kwargs)
+
+    store.list = spying_list
+    try:
+        d = X.export_takeoff(svc, DOC, out, ACTOR)
+    finally:
+        del store.list  # back to the class method
+    state["writer"].join(timeout=10)
+    assert state["fired"] and state["done_at"] is not None
+
+    official = {r["id"] for r in rows(d / "devices_official.csv")}
+    review = {r["id"] for r in rows(d / "devices_review.csv")}
+    assert "late" in review and "late" not in official  # the snapshot predates the accept
+    m = load(d, "manifest.json")
+    assert m["review"]["awaiting"] == 2  # prop-1 and late, all from the same snapshot
+    assert load(d, "totals.json")[SHEET]["total"] == len(official) == m["review"]["official_total"]
+    assert m["complete"] is False
+    # the write landed once the read phase was over
+    assert store.find("devices", "late").review_state == "accepted"
+    assert svc.counts(DOC)["review"]["awaiting"] == 1

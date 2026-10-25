@@ -639,13 +639,18 @@ class TakeoffService:
 
     # --- internals: the AI second opinion ----------------------------------------------------------------
 
-    def _linked_verdicts(self, device: Device, rows: list[dict], flags: list[Flag]) -> list[ModelVerdict]:
-        """Verdicts linked through the device's evidence (and its flags), in store order."""
+    def _linked_verdicts(self, device: Device, rows: list[dict], flags: list[Flag],
+                         pool: list[ModelVerdict] | None = None) -> list[ModelVerdict]:
+        """Verdicts linked through the device's evidence (and its flags), in store order.
+
+        ``pool`` is a prefetched list of the sheet's verdicts (the export reads once, under the store lock).
+        """
         det_ids = {r["evidence"].detection_id for r in rows}
         run_ids = {r["evidence"].run_id for r in rows}
         wanted = {r["detection"].verdict_id for r in rows if r["detection"] is not None and r["detection"].verdict_id}
         wanted |= {f.details["verdict_id"] for f in flags if f.details.get("verdict_id")}
-        return [v for v in self.store.list("verdicts", device.sheet_id)
+        pool = self.store.list("verdicts", device.sheet_id) if pool is None else pool
+        return [v for v in pool
                 if v.id in wanted or (v.run_id in run_ids and det_ids & set(v.detection_ids))]
 
     @staticmethod

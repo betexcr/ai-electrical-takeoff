@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from contextlib import contextmanager
+
 from pydantic import BaseModel
 
 from takeoff.app import models as TM
@@ -33,3 +36,10 @@ class TakeoffStore(Store):
     IMMUTABLE = IMMUTABLE
     STORE_VERSION = STORE_VERSION
     SCHEMA_VERSION = TM.SCHEMA_VERSION
+
+    @contextmanager
+    def snapshot(self) -> Iterator[TakeoffStore]:
+        """Hold the store lock for a multi-table read: no transaction (this process's writers all go through
+        ``transaction()``, which takes the same lock) can commit between the reads, so they form one snapshot."""
+        with self._lock:
+            yield self
