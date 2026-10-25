@@ -376,6 +376,7 @@ def test_saved_correction_accepts_and_totals_update_without_reload(page, server)
     rows = page.locator("#totals tr.total-row")
     assert rows.count() == 1 and rows.first.get_attribute("data-ids") == d0["id"]
     assert "ELECTRICAL SWITCH-VACANCY SENSOR" in rows.first.inner_text()
+    assert page.inner_text("#sheet-total").startswith("Home total (this sheet): 1")
 
     page.reload()
     page.wait_for_selector("body[data-ready='1']")
@@ -512,6 +513,7 @@ def test_every_counted_device_has_a_marker(page, server):
         want = k["official"].get(sid, {}).get("total", 0)
         assert counted.count() == len(official) == want, sid
         assert int(page.get_attribute("#sheet-total", "data-total")) == want
+        assert page.inner_text("#sheet-total").startswith(f"Home total (this sheet): {want}")
         # every totals row is traceable: its count equals the markers it names
         ids_in_rows = []
         for row in page.locator("#totals tr.total-row").all():
@@ -531,6 +533,7 @@ def test_every_counted_device_has_a_marker(page, server):
         seen_total += counted.count()
         assert page.locator(".device[data-id]").count() == len(server.devices(sid))
     assert seen_total == k["review"]["official_total"] == official_total(page) == 4
+    assert page.inner_text("#official-total").startswith("All sheets total (4 homes): 4")
     assert page.locator(marker(gone["id"])).count() == 0
 
 
@@ -665,9 +668,11 @@ def test_ai_second_opinion_and_disagreement_reason_prompt_flow(page, server):
     # a correction that still conflicts: saved, the prompt asks for a reason; cancelled -> stays proposed
     page.select_option("#ed-subtype", "vacancy_sensor")
     dialogs.answers.append(None)
+    n_dialogs = len(dialogs.messages)
     page.click("#save")
     page.wait_for_function("tk.state.detail && tk.state.detail.device.subtype === 'vacancy_sensor'")
-    assert dialogs.messages[-1] == prompt_for("vacancy_sensor")
+    page.wait_for_timeout(200)
+    assert dialogs.messages[n_dialogs:] == [prompt_for("vacancy_sensor")]  # asked once, before the save
     dev = server.device(d0["id"])["device"]
     assert (dev["subtype"], dev["review_state"]) == ("vacancy_sensor", "proposed") and md_flag(d0["id"])["open"]
     assert "model_disagrees" in page.inner_text("#blocking")
@@ -682,18 +687,26 @@ def test_ai_second_opinion_and_disagreement_reason_prompt_flow(page, server):
     assert (f["open"], f["resolution"]) == (False, "kept_over_ai: e2e: the legend tag says VS")
     assert server.device(d0["id"])["device"]["review_state"] == "accepted"
 
-    # Save with a conflicting correction, reason given in the prompt -> kept over the AI and accepted
+    # Save with a conflicting correction, reason given in the prompt -> ONE PATCH {changes, reason}: kept over the AI
+    # and accepted as a correction (ruling R23)
     d1 = devs[1]
     select_device(page, d1["id"])
     page.select_option("#ed-subtype", "three_way_dimmer")
     dialogs.answers.append("e2e: dimmer per legend")
+    writes = []
+    page.on("request", lambda r: writes.append((r.method, r.url, r.post_data)) if r.method in ("POST", "PATCH") else None)
     page.click("#save")
     wait_total(page, 2)
     assert dialogs.messages[-1] == prompt_for("three_way_dimmer")
     f = md_flag(d1["id"])
     assert (f["open"], f["resolution"]) == (False, "kept_over_ai: e2e: dimmer per legend")
     dev = server.device(d1["id"])["device"]
-    assert (dev["subtype"], dev["review_state"]) == ("three_way_dimmer", "accepted")
+    assert (dev["subtype"], dev["review_state"], dev["accept_kind"]) == ("three_way_dimmer", "accepted",
+                                                                         "corrected_and_accepted")
+    actions = [e["action"] for e in server.device(d1["id"])["history"] if e["entity"] == "device"]
+    assert actions.count("correct_and_accept") == 1 and "accept" not in actions, actions
+    assert [(m, u.rsplit("/api/", 1)[1]) for m, u, _ in writes] == [("PATCH", f"devices/{d1['id']}")]
+    assert '"reason": "e2e: dimmer per legend"' in writes[0][2].replace('":"', '": "')
 
     # acknowledge with a reason: the flag closes, the device stays proposed
     d2 = devs[2]
@@ -809,6 +822,68 @@ def test_ai_unavailable_and_fake_labels_are_stated(page, tmp_path, cache_dir):
         assert page.inner_text("#stage-verify").strip() == "AI verification: partial (1 errors)" + FAKE
     finally:
         off.stop()
+
+
+# --- review fixes: running stage, null subtype, stale detail ---------------------------------------------------------------
+
+def test_stage_line_says_running_while_a_run_is_in_progress(page, server):
+    store = server.app.state.store
+    pending = TM.AIStageStatus(status="pending", implementation="fake")
+    store.insert("runs", TM.Run(id="run-001", document_id=server.doc, detector="fake-detector", detector_version="fake/1",
+                                created_by="e2e", sheets={A1: TM.SheetRunStatus(status="running", ai_verify=pending,
+                                                                                ai_discover=pending)}), "test")
+    open_page(page, server)
+    assert page.inner_text("#stage-verify").strip() == "AI verification: running" + FAKE
+    assert page.inner_text("#stage-discover").strip() == "AI discovery: running" + FAKE
+    assert "A1-111: running" in page.inner_text("#analyze-progress")
+    assert page.evaluate("tk.state.polling") is True  # the page follows the run (GET /api/runs/{id} every 1 s)
+    assert page.locator("#analyze").is_disabled()
+    # before any run on a sheet, the stage is "not run on this sheet yet"
+    choose_sheet(page, "A2-111")
+    assert page.inner_text("#stage-verify").strip() == "AI verification: not run on this sheet yet" + FAKE
+
+
+def test_room_only_save_on_a_null_subtype_device_writes_no_subtype(page, server):
+    m = server.meta()
+    (p,) = clear_points(m, 1)
+    (dev,) = server.analyze_a1([("switch", None, p)])
+    assert dev["subtype"] is None
+    open_page(page, server)
+    select_device(page, dev["id"])
+    other = next(i for i, r in enumerate(m["rooms"]) if r["kind"] == "labeled" and r["name"] != dev["room"]["name"])
+    patches = []
+    page.on("request", lambda r: patches.append(r.post_data) if r.method == "PATCH" else None)
+    page.select_option("#ed-room", str(other))
+    page.click("#save")
+    page.wait_for_function("tk.state.detail && tk.state.detail.device.room_source === 'reviewer'")
+    saved = server.device(dev["id"])["device"]
+    assert saved["subtype"] is None and saved["category"] == "switch"
+    assert saved["room"]["name"] == m["rooms"][other]["name"]
+    assert len(patches) == 1 and "subtype" not in patches[0] and "category" not in patches[0], patches
+
+
+def test_refresh_never_applies_a_stale_detail_over_a_newer_selection(page, server):
+    p, q = clear_points(server.meta(), 2)
+    a, b = server.analyze_a1([("switch", "standard", p), ("light", "pendant", q)])
+    open_page(page, server)
+    select_device(page, a["id"])
+    got = page.evaluate("""async ([a, b]) => {
+        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+        const real = window.fetch;
+        window.__slowStarted = false;
+        window.fetch = async (url, opts) => {  // the refresh's detail request for A is slow
+            if (String(url).endsWith('/api/devices/' + a)) { window.__slowStarted = true; await sleep(700); }
+            return real(url, opts);
+        };
+        const pending = tk.refresh();
+        while (!window.__slowStarted) await sleep(5);
+        await tk.select(b);  // the reviewer selects B while A's detail is still loading
+        await pending;
+        window.fetch = real;
+        return [tk.state.selectedId, tk.state.detail && tk.state.detail.device.id];
+    }""", [a["id"], b["id"]])
+    assert got == [b["id"], b["id"]]
+    assert page.locator(f"#ed-form[data-id='{b['id']}']").count() == 1
 
 
 def test_originals_untouched_by_e2e_session():

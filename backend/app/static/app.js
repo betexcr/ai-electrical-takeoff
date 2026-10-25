@@ -194,6 +194,7 @@ async function loadDocuments() {
 async function refreshData() {
   const doc = st.docId;
   if (!doc) return;
+  const tok = st.selTok; // the selection this refresh started with (select() bumps it)
   const [devs, counts, eligible, bulk, runs] = await Promise.all([
     api("GET", `/api/documents/${doc}/devices`),
     api("GET", `/api/documents/${doc}/counts`),
@@ -202,13 +203,12 @@ async function refreshData() {
     api("GET", `/api/documents/${doc}/runs`),
   ]);
   Object.assign(st, { devices: devs.devices, openFlags: devs.open_flags, counts, eligible, bulk, runs });
-  if (st.selectedId) {
-    if (!st.devices.some((d) => d.id === st.selectedId)) { st.selectedId = null; st.detail = null; }
-    else {
-      try { st.detail = await api("GET", `/api/devices/${st.selectedId}`, undefined, { quiet: true }); }
-      catch (e) { st.detail = null; }
-    }
-  }
+  if (tok !== st.selTok || !st.selectedId) return; // the selection changed meanwhile: select() loads its own detail
+  if (!st.devices.some((d) => d.id === st.selectedId)) { clearSelection(); return; }
+  const id = st.selectedId;
+  let det = null;
+  try { det = await api("GET", `/api/devices/${id}`, undefined, { quiet: true }); } catch (e) { det = null; }
+  if (tok === st.selTok && st.selectedId === id) st.detail = det; // never a stale detail over a newer selection
 }
 
 async function refresh() { await refreshData(); renderAll(); }
@@ -287,7 +287,7 @@ function stageLine(kind) {
     else if (s.status === "partial") text = `partial (${Object.values(s.errors_by_code || {}).reduce((a, b) => a + b, 0)} errors)`;
     else if (s.status === "unavailable") text = `unavailable: ${s.reason || "no reason recorded"}`;
     else if (s.status === "off") text = "off";
-    else text = s.status; // pending, while the run is in progress
+    else text = "running"; // pending: the run is still in progress
   } else {
     const cfg = st.config.ai[kind];
     impl = cfg.implementation;
@@ -485,11 +485,12 @@ function renderTotals() {
     html += `</tbody></table>`;
   }
   const o = sheet?.by_origin || { detector_accepted: 0, ai_accepted: 0, manual: 0 };
-  html += `<div id="sheet-total" data-total="${sheet ? sheet.total : 0}">Sheet ${esc(st.sheetId)} total: ${sheet ? sheet.total : 0} ` +
+  // Each sheet is one home (spec 5.5, 5.6): the sheet's figure is the home total.
+  html += `<div id="sheet-total" class="home-total" data-total="${sheet ? sheet.total : 0}">Home total (this sheet): ${sheet ? sheet.total : 0} ` +
     `<span class="muted">(detector_accepted ${o.detector_accepted} · ai_accepted ${o.ai_accepted} · manual ${o.manual})</span></div>`;
   const home = { detector_accepted: 0, ai_accepted: 0, manual: 0 };
   Object.values(k.official).forEach((s) => { for (const key of Object.keys(home)) home[key] += s.by_origin[key] || 0; });
-  html += `<div id="official-total" class="home-total" data-total="${k.review.official_total}">Home total (all sheets): ` +
+  html += `<div id="official-total" data-total="${k.review.official_total}">All sheets total (${plural(st.sheets.length, "home")}): ` +
     `${k.review.official_total} <span class="muted">(detector_accepted ${home.detector_accepted} · ai_accepted ${home.ai_accepted} · manual ${home.manual})</span></div>`;
   el.innerHTML = html;
   el.querySelectorAll("tr.total-row").forEach((tr) => tr.addEventListener("click", () => {
@@ -603,6 +604,7 @@ function renderDevice({ keepForm = false } = {}) {
   const det = st.detail;
   if (!det || det.device.id !== st.selectedId) { el.innerHTML = '<span class="muted">Loading…</span>'; return; }
   const kept = keepForm ? captureForm() : null;
+  // what the selectors show before any edit: a change is a difference from these, never from a placeholder
   const dv = det.device;
   const rows = [...det.evidence].sort((a, b) => (a.evidence.run_id < b.evidence.run_id ? -1 : 1));
   const latest = rows[rows.length - 1];
@@ -649,7 +651,7 @@ function renderDevice({ keepForm = false } = {}) {
     `<div id="blocking" class="blocking">${blocking}</div>` +
     `<div class="form" id="ed-form" data-id="${esc(dv.id)}">
       <label>Category <select id="ed-category">${categoryOptionsHtml(dv.category)}</select></label>
-      <label>Subtype <select id="ed-subtype">${subtypeOptionsHtml(dv.category, dv.subtype)}</select></label>
+      <label>Subtype <select id="ed-subtype">${subtypeOptionsHtml(dv.category, dv.subtype)}${dv.subtype === null || dv.subtype === undefined ? '<option value="" selected>— no subtype —</option>' : ""}</select></label>
       <label>Room <select id="ed-room" data-initial="${ri >= 0 ? ri : ""}">${roomOptionsHtml(ri, firstRoom)}</select></label>
       <label>Notes <textarea id="ed-notes" rows="2">${esc(dv.notes || "")}</textarea></label>
       <div id="move-note" class="muted">${st.pendingPoint ? "New position set: Save to apply it (Esc to cancel)." : ""}</div>
@@ -659,9 +661,11 @@ function renderDevice({ keepForm = false } = {}) {
       <span class="muted">Save is a correction: a proposed device is accepted unless a flag still blocks it.</span>
     </div>` +
     `<div id="history">${historyHtml(det)}</div>`;
+  $("ed-category").dataset.initial = $("ed-category").value;
+  $("ed-subtype").dataset.initial = $("ed-subtype").value;
   if (kept && kept.id === dv.id) {
     $("ed-category").value = kept.category;
-    $("ed-subtype").innerHTML = subtypeOptionsHtml(kept.category, kept.subtype);
+    if (kept.category !== $("ed-category").dataset.initial) $("ed-subtype").innerHTML = subtypeOptionsHtml(kept.category, kept.subtype);
     $("ed-subtype").value = kept.subtype;
     $("ed-room").value = kept.room;
     $("ed-notes").value = kept.notes;
@@ -740,8 +744,10 @@ async function guarded(fn) {
 
 function readChanges(dv) {
   const changes = {};
-  const cat = $("ed-category").value, sub = $("ed-subtype").value;
-  if (cat !== dv.category || sub !== dv.subtype) { changes.category = cat; changes.subtype = sub; }
+  const cat = $("ed-category"), sub = $("ed-subtype");
+  if (cat.value !== cat.dataset.initial || sub.value !== sub.dataset.initial) {
+    changes.category = cat.value; changes.subtype = sub.value;
+  }
   const room = $("ed-room");
   if (room.value !== "" && room.value !== room.dataset.initial) changes.room = roomRef(st.meta.rooms[+room.value]);
   const notes = $("ed-notes").value.trim() || null;
@@ -755,13 +761,33 @@ async function saveSelected() {
   if (!dv || dv.id !== st.selectedId) return;
   const changes = readChanges(dv);
   if (!Object.keys(changes).length) { toast("Nothing changed to save"); return; }
+  // Keeping a classification an open model_disagrees conflicts with needs a reason (spec 5.9.3): ask first, so the
+  // correction and its reason are one PATCH (corrected_and_accepted). The rule is the service's: a correction
+  // resolves the flag only if it changes the classification to the AI's category (and subtype, unless the AI gave
+  // none). A notes-only save takes no decision, so it needs no reason.
+  const openMd = (st.detail.flags || []).find((f) => f.type === "model_disagrees" && f.open);
+  const correction = ["category", "subtype", "room", "point"].some((k) => k in changes);
+  let asked = false, reason = null;
+  if (openMd && correction) {
+    const cat = changes.category ?? dv.category, sub = "subtype" in changes ? changes.subtype : dv.subtype;
+    const ai = openMd.details || {};
+    const classChanged = cat !== dv.category || sub !== dv.subtype;
+    const resolves = classChanged && cat === ai.ai_category &&
+      (ai.ai_subtype === null || ai.ai_subtype === undefined || sub === ai.ai_subtype);
+    if (!resolves) {
+      asked = true;
+      const r = prompt(disagreementPrompt(openMd, { category: cat, subtype: sub }));
+      reason = r && r.trim() ? r.trim() : null; // cancel: saved without a reason, the device stays proposed
+    }
+  }
   let res;
-  try { res = await api("PATCH", `/api/devices/${dv.id}`, { changes }); } catch (e) { return; }
+  try { res = await api("PATCH", `/api/devices/${dv.id}`, reason ? { changes, reason } : { changes }); }
+  catch (e) { return; }
   st.pendingPoint = null; st.moving = false;
   let blocking = res.blocking_flags || [];
   const md = blocking.find((f) => f.type === "model_disagrees");
-  if (md) {
-    // The correction is saved; keeping a classification the AI disagrees with needs a reason (spec 5.9.3).
+  if (md && !asked) {
+    // Only a race (the flag opened after this panel loaded): the correction is saved; ask now and accept.
     const reason = prompt(disagreementPrompt(md, res.device));
     if (reason && reason.trim()) {
       try {
