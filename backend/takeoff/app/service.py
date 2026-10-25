@@ -305,6 +305,20 @@ class TakeoffService:
             self._sync(conn, sheet, actor, now)
             return new
 
+    def resync_flags(self, document_id: str, sheet_id: str, conn=None, *, actor: str = F.SYSTEM_ACTOR) -> list[Flag]:
+        """Recompute one sheet's condition flags from its saved devices (after a run's merge, spec §5.3.3).
+
+        Runs inside ``conn`` (the caller's open transaction, e.g. the analyzer's merge) or in a transaction of its
+        own. Every stored flag id is passed as ``taken_ids`` and the sheet's devices as ``devices`` (ruling R8).
+        Returns the sheet's open flags afterwards (document-scoped).
+        """
+        sheet = self._sheet(document_id, sheet_id)
+        now = utcnow()
+        if conn is not None:
+            return self._sync(conn, sheet, actor, now)
+        with self.store.transaction() as c:
+            return self._sync(c, sheet, actor, now)
+
     # --- bulk accept and undo (spec 4.9) ---------------------------------------------------------------
 
     def bulk_eligible_ids(self, document_id: str, sheet_id: str | None = None) -> list[str]:

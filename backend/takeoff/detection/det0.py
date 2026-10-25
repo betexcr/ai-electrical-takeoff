@@ -186,10 +186,15 @@ def _sheet_tokens(page: pymupdf.Page) -> tuple[str, list[Token]]:
     return sid, toks
 
 
-def detect(pdf_path: Path, results: list[tuple[M.CandidateRun, list[M.Candidate]]], params: dict = PARAMS) -> dict:
-    """Run det/0 over every sheet. ``results`` are candidate runs (``candidates.generate``)."""
+def detect(pdf_path: Path, results: list[tuple[M.CandidateRun, list[M.Candidate]]], params: dict = PARAMS,
+           pages: list[int] | None = None) -> dict:
+    """Run det/0 over every sheet, or only the given pages (1-based). ``results`` are candidate runs
+    (``candidates.generate``). ``pages`` only limits which pages are read; the rules are unchanged, so a sheet's
+    detections are the same either way (the analyzer reads one page, so another page it cannot read does not fail
+    it)."""
     doc = pymupdf.open(stream=Path(pdf_path).read_bytes(), filetype="pdf")  # never writes the file
-    tokens = dict(_sheet_tokens(doc[n]) for n in range(doc.page_count))
+    numbers = range(doc.page_count) if pages is None else [n - 1 for n in pages]
+    tokens = dict(_sheet_tokens(doc[n]) for n in numbers)
     doc.close()
     used = [(run, cands) for run, cands in results if run.generator in params["proposal_generators"]]
     props = [Proposal(c.id, run.generator, c.sheet_id, c.class_hypothesis, c.category_hint, c.subtype_hint, c.score, *c.point_pt)

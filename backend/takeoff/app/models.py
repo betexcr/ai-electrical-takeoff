@@ -74,6 +74,7 @@ class AIStageStatus(_Model):
     """Per-sheet summary of one AI stage (verify or discover) within a run."""
 
     status: AIStatus = "off"
+    reason: str | None = None  # why the stage is unavailable (the UI's "unavailable: {reason}")
     implementation: str | None = None  # "claude" | "fake"
     requests: int = Field(default=0, ge=0)
     errors_by_code: dict[str, int] = Field(default_factory=dict)
@@ -86,6 +87,7 @@ class SheetRunStatus(_Model):
     status: SheetStatus = "queued"
     message: str | None = None
     n_detections: int = Field(default=0, ge=0)
+    input_runs: list[str] = Field(default_factory=list)  # the candidate run hashes det/0 used on this sheet
     started_at: str | None = None
     finished_at: str | None = None
     ai_verify: AIStageStatus = Field(default_factory=AIStageStatus)
