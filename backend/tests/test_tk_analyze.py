@@ -3,11 +3,13 @@
 Detectors propose, reviewers decide: a run only adds detections, verdicts, evidence, flags and new proposed devices.
 Every test uses a temporary store and cache. The fast tests run on the supplied PDF's real sheet views with a fake
 detector (no candidate generation) and the AI fakes; ``test_two_runs_on_a1_preserve_corrections`` runs the real
-candidates and det/0 on A1 (about a minute). No test makes a network request.
+candidates and det/0 on A1 (about a minute). The re-analysis tests over all four sheets replay det/0's real output,
+computed once per module by ``det0_pages`` (about 80 s). No test makes a network request.
 """
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import math
 import threading
@@ -27,6 +29,7 @@ from takeoff.app.service import TakeoffError, TakeoffService
 from takeoff.app.store import TakeoffStore
 from takeoff.detection import det0
 from takeoff.groundtruth import candidates as CA
+from takeoff.groundtruth import taxonomy as T
 from takeoff.pdf import coords as C
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -242,7 +245,7 @@ def test_run_records_versions_and_detections(env):
     run = env.analyzer(AV.FakeVerifier(), AD.FakeDiscoverer(), detector).start(env.sha, ACTOR, sheet_ids=[A1])
     assert run.id == "run-001" and run.created_by == ACTOR
     assert (run.detector, run.detector_version, run.params["detector"]) == ("fake-detector", "fake/1", {"fake": True})
-    assert run.merge_version == "takeoff-merge/1"
+    assert run.merge_version == "takeoff-merge/2" == TM.MERGE_VERSION
     assert run.ai_model == "fake-verifier"
     assert run.ai_versions == {"verify": "ai-verify/1", "verify_prompt": "ai-verify-prompt/1",
                                "verify_implementation": "fake", "verify_model": "fake-verifier",
@@ -631,3 +634,119 @@ def test_failing_finish_is_logged_and_does_not_block_the_document(env, monkeypat
     assert any("finished_at" in r.getMessage() for r in caplog.records)
     second = an.start(env.sha, ACTOR, sheet_ids=[A1], ai=False)
     assert second.sheets[A1].status == "done" and second.finished_at is not None
+
+
+# --- re-analysis over det/0's real output on every sheet (final review I2, I4) -------------------------------
+
+SHEETS4 = ("A1-111", "A2-111", "A3-111", "A4-111")
+A4 = "A4-111"
+
+
+@pytest.fixture(scope="module")
+def det0_pages():
+    """det/0's real output for each page (candidates, then det/0 on that page), computed once."""
+    return {p: det0.detect(PDF, CA.generate(PDF, pages=[p]), pages=[p]) for p in (1, 2, 3, 4)}
+
+
+class RecordedDet0:
+    """The real det/0 output of each page, replayed: what ``Det0Detector`` returns, without recomputing it."""
+
+    name = "det0"
+    version = det0.DETECTOR_VERSION
+    params = det0.PARAMS
+
+    def __init__(self, pages: dict):
+        self.pages = pages
+
+    def __call__(self, pdf_path, sheet: TM.SheetInfo) -> dict:
+        return copy.deepcopy(self.pages[sheet.page_number])
+
+
+def _state(env, sheet_ids):
+    """What a re-analysis must not change: the devices, the review figures and the open flags."""
+    counts = env.svc.counts(env.sha)
+    devices = sorted((d.id, d.revision) for s in sheet_ids for d in env.devices(s))
+    flags = sorted((f.device_id, f.type) for f in env.store.list("flags")
+                   if f.open and f.sheet_id in sheet_ids)
+    by_sheet = {s: {k: counts["review_by_sheet"][s][k] for k in ("detected", "awaiting", "accepted_with_open_flags")}
+                for s in sheet_ids}
+    return devices, by_sheet, flags
+
+
+def test_three_identical_analyses_of_a4_change_nothing_after_the_first(env, sha, det0_pages):
+    """I2: A4 has four same-category pairs about 4.5 pt apart; merge/1 added 8 ambiguous devices per re-run."""
+    an = env.analyzer(AV.FakeVerifier(), AD.FakeDiscoverer(), RecordedDet0(det0_pages))
+    n = sum(1 for d in det0_pages[4]["detections"] if d["sheet_id"] == A4)
+    run1 = an.start(sha, ACTOR, sheet_ids=[A4])
+    assert run1.sheets[A4].status == "done" and len(env.devices(A4)) == n == 109
+    env.svc.bulk_accept(sha, ACTOR, len(env.svc.bulk_eligible_ids(sha, A4)), sheet_id=A4)  # K is measured too
+    after1 = _state(env, [A4])
+    assert after1[1][A4]["detected"] == n
+    for _ in (2, 3):
+        run = an.start(sha, ACTOR, sheet_ids=[A4])
+        assert run.sheets[A4].status == "done"
+        assert _state(env, [A4]) == after1
+        new = [f for f in env.store.list("flags", A4) if f.run_id == run.id]
+        assert new == []  # no ambiguous_match, no not_redetected, nothing
+        assert {e.outcome for e in env.store.list("evidence") if e.run_id == run.id} == {"confirmed"}
+
+
+def test_two_runs_on_all_sheets_preserve_corrections_and_add_nothing(env, sha, det0_pages):
+    """AC-T7 over all four sheets: corrections between runs survive runs 2 and 3, which add no device; a deleted
+    duplicate stays deleted and is not re-proposed (I4)."""
+    an = env.analyzer(AV.FakeVerifier(), AD.FakeDiscoverer(), RecordedDet0(det0_pages))
+    run1 = an.start(sha, ACTOR)
+    assert all(run1.sheets[s].status == "done" for s in SHEETS4)
+    assert {s: len(env.devices(s)) for s in SHEETS4} == {
+        s: sum(1 for d in det0_pages[p]["detections"]) for p, s in enumerate(SHEETS4, 1)}
+
+    corrected: dict[str, TM.Device] = {}
+    for sid in SHEETS4:
+        devices1 = env.devices(sid)
+        view = env.views(sha, sid)
+        g = C.PageGeometry(*view["geometry"]["crop_native"], rotation=view["geometry"]["rotation"])
+
+        def isolated(d):  # nearest other device more than 20 pt away, so a 3 pt move stays unambiguous
+            return all(math.dist(d.point_pt, o.point_pt) > 20 for o in devices1 if o.id != d.id)
+
+        pool = [d for d in devices1 if isolated(d)]
+        sub_dev = next(d for d in pool if d.category in ("switch", "receptacle"))
+        move_dev = next(d for d in pool if d.id != sub_dev.id)
+        rej_dev = next(d for d in pool if d.id not in (sub_dev.id, move_dev.id))
+        dup_dev = next(d for d in pool if d.id not in (sub_dev.id, move_dev.id, rej_dev.id))
+        subs = [s.name for s in T.CATEGORIES[sub_dev.category]]
+        env.svc.update_device(sub_dev.id, ACTOR, {"subtype": next(s for s in subs if s != sub_dev.subtype)})
+        moved_pt = (move_dev.point_pt[0] + 3.0, move_dev.point_pt[1])
+        u, v = C.unrotated_to_normalized(g, moved_pt)
+        env.svc.update_device(move_dev.id, ACTOR, {"point": {"u": u, "v": v}})
+        env.svc.reject(rej_dev.id, ACTOR, "not a device")
+        (mx, my), = clear_points(view, 1, sep=40.0, avoid=[d.point_pt for d in devices1])
+        mu, mv = C.unrotated_to_normalized(g, (mx, my))
+        env.svc.create_device(sha, sid, ACTOR, "receptacle", "gfi", {"u": mu, "v": mv})
+        # the reviewer adds the detected device by hand at its spot, then deletes the detected one as the duplicate
+        du, dv = C.unrotated_to_normalized(g, (dup_dev.point_pt[0] + 1.0, dup_dev.point_pt[1]))
+        twin = env.svc.create_device(sha, sid, ACTOR, dup_dev.category, dup_dev.subtype, {"u": du, "v": dv})
+        assert env.open_flags(dup_dev.id, "duplicate_warning") and env.open_flags(twin.id, "duplicate_warning")
+        env.svc.delete(dup_dev.id, ACTOR, "duplicate of the manual entry")
+        corrected.update({d.id: env.store.get("devices", d.id)
+                          for d in env.svc.devices(sha, sid, include_deleted=True)})
+
+    state = None
+    for n in (2, 3):
+        run = an.start(sha, ACTOR)
+        assert all(run.sheets[s].status == "done" for s in SHEETS4)
+        now = {d.id: d for s in SHEETS4 for d in env.svc.devices(sha, s, include_deleted=True)}
+        assert set(now) == set(corrected), f"run {n} added or lost a device"
+        for d in now.values():
+            before = corrected[d.id]
+            assert all(getattr(d, f) == getattr(before, f) for f in HUMAN), d.id
+            assert (d.revision, d.deleted) == (before.revision, before.deleted), d.id
+        assert not [f for f in env.store.list("flags") if f.run_id == run.id and f.type == "ambiguous_match"]
+        devices, figures, flags = _state(env, list(SHEETS4))
+        # Known and reported (final-fix report): a decision flag a run re-opens while an earlier run's is still open
+        # (classification_conflict on the corrected subtype, info not_redetected on a manual device) is added again,
+        # so the flags are compared as a set of (device, type); the devices and figures must be equal.
+        if state is None:
+            state = devices, figures, set(flags)
+        else:
+            assert (devices, figures, set(flags)) == state  # run 3 changes nothing run 2 left

@@ -444,7 +444,7 @@ def test_config_reports_ai_availability_and_implementation(make, tmp_path, monke
     assert cfg["score_label"] == "match score (not a probability)"
     assert "switch" in cfg["taxonomy"]["categories"]
     assert cfg["tolerances_pt"]["match"] == 6.0 and cfg["tolerances_pt"]["duplicate"] == 3.0
-    assert cfg["versions"]["schema"] == "takeoff-schema/1" and cfg["versions"]["merge"] == "takeoff-merge/1"
+    assert cfg["versions"]["schema"] == "takeoff-schema/1" and cfg["versions"]["merge"] == "takeoff-merge/2"
     assert cfg["versions"]["detector"] == "fake/1"
     ai = cfg["ai"]
     assert ai["model"] == "fake-verifier"

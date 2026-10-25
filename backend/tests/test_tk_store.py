@@ -55,7 +55,7 @@ def test_device_round_trip_and_event_schema_version(store):
     ev = store.events("device", d.id)
     assert len(ev) == 1 and ev[0].action == "create"
     assert ev[0].schema_version == TM.SCHEMA_VERSION == "takeoff-schema/1"
-    assert TM.MERGE_VERSION == "takeoff-merge/1"
+    assert TM.MERGE_VERSION == "takeoff-merge/2"
     meta = dict(store._conn.execute("SELECT key, value FROM meta").fetchall())
     assert meta == {"store_version": "takeoff-store/1", "schema_version": "takeoff-schema/1"}
     assert store.STORE_VERSION == "takeoff-store/1"

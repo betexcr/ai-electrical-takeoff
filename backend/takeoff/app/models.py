@@ -16,7 +16,7 @@ from pydantic import Field, field_validator
 from takeoff.groundtruth.models import NormPoint, PtRect, RoomRef, _Model, new_id, utcnow
 
 SCHEMA_VERSION = "takeoff-schema/1"
-MERGE_VERSION = "takeoff-merge/1"
+MERGE_VERSION = "takeoff-merge/2"  # /2: one-to-one nearest-first det/0 assignment (final review)
 
 ReviewState = Literal["proposed", "accepted", "rejected"]
 Origin = Literal["detector", "ai", "manual"]

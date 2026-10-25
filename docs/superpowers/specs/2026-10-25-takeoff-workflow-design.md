@@ -4,6 +4,7 @@
 - Revision 2 added AI verification, the ceiling-fan fallback, exact counters, an explicit ground-truth path and a git preflight (§4.15 to §4.19).
 - Revision 3 adds a non-authoritative AI **discovery** pass, the full `model_disagrees` lifecycle, and a leaner AI payload with honest usage accounting (§4.20 to §4.22).
 - Revision 3.1 corrects the tile-overlap dedupe and adds a live-access preflight (§4.23, §4.24).
+- rev 3.2 (final review): one-to-one nearest-first assignment (§5.3, `takeoff-merge/2`).
 
 **Detectors:** `det/0` (`backend/takeoff/detection/det0.py`), plus the AI stages `ai-verify/1` and `ai-discover/1` (§5.9).
 
@@ -254,12 +255,13 @@ An accepted detector device is reported as origin `detector_accepted`. A manual 
    A sheet without a recognizable legend gets `skipped: no legend`, with a plain message. Other sheets still complete.
 2. **Merge.** Merging into the takeoff happens per sheet, in one transaction, after that sheet's detections are saved. The rules, in deterministic order:
    - **Possible matches** for a detection are non-deleted devices on the same sheet within **6 pt** (the protocol's match tolerance).
-   - **Likely match:** exactly one possible device, the same category, and no other detection of this run claims that device (one-to-one, nearest first). Then:
+   - **Assignment is one-to-one, nearest first** (rev 3.2, final review; `takeoff-merge/2`). A detection's candidate is its nearest possible device. When several detections have the same nearest device, the closest takes it, in the deterministic order (distance, detection id, device id). Re-running the same detections therefore matches each to the device it created and adds nothing.
+   - **Likely match:** the nearest possible device has the same category and this detection took it. Then:
      - subtype equal → attach `Evidence(outcome=confirmed)`;
      - subtype different → attach `Evidence(outcome=conflict)` and open the flag `classification_conflict`. The record is unchanged.
-   - **Different category:** exactly one possible device, with a different category. Attach `Evidence(outcome=conflict)` to the existing device and open `classification_conflict`, recording the run's category. The reviewer decides between "same device, keep", "same device, change category" and "separate device, create it". The last option creates a proposed record from that detection.
-   - **Ambiguous:** two or more possible devices. Create a new **proposed** device from the detection, flagged `ambiguous_match`, and link the candidate devices in the flag.
-   - **No possible match:** create a new **proposed** device.
+   - **Different category:** the nearest possible device has a different category. Attach `Evidence(outcome=conflict)` to the existing device and open `classification_conflict`, recording the run's category. The reviewer decides between "same device, keep", "same device, change category" and "separate device, create it". The last option creates a proposed record from that detection.
+   - **Ambiguous:** the detection's nearest possible device was already taken by a closer detection, or its two nearest possible devices are tied (equal distance within 1e-6 pt). Create a new **proposed** device from the detection, flagged `ambiguous_match`, and link all its possible devices in the flag. (Revision 3.1 called every detection with two or more possible devices ambiguous; that added a device for each close pair on every re-run.)
+   - **No possible match:** create a new **proposed** device, unless a deleted detector or AI device (a deleted duplicate, §5.2) is within 6 pt: then nothing is created, so a delete is never undone by a re-run. Deleted manual devices are ignored.
    - **A rejected device as the likely match:** attach evidence; it stays rejected.
    - **Not re-detected:** any non-deleted device that no detection in this run matched gets the flag `not_redetected`. *(My call:)* this is severity *review* for detector-origin devices, and *info* for manual ones ("still missed by the detector"). Info flags don't block bulk accept.
    - **Fields are never overwritten.** The merge never writes category, subtype, room, point or review state on an existing device. It only adds evidence and flags.

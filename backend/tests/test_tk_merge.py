@@ -1,4 +1,4 @@
-"""takeoff-merge/1: det/0 and AI detections joined to the living device set. Detectors propose, reviewers decide."""
+"""takeoff-merge/2: det/0 and AI detections joined to the living device set. Detectors propose, reviewers decide."""
 
 from __future__ import annotations
 
@@ -171,9 +171,9 @@ def test_nearest_claimant_wins_even_when_it_sorts_later():
         assert outcomes(res) == {("d2", "x1"): "confirmed", ("d1", "run-002:d1"): "created"}
         assert [(f.type, f.device_id, f.details) for f in res.flags] == [
             ("ambiguous_match", "run-002:d1", {"possible_device_ids": ["x1"]})]
-    # equal distances fall back to the sort order (y, x, id), deterministically
-    tie = run_merge([det("d3", pt=(100.0, 203.0)), det("d4", pt=(100.0, 197.0))], [existing])
-    assert outcomes(tie) == {("d4", "x1"): "confirmed", ("d3", "run-002:d3"): "created"}
+    # equal distances fall back to (distance, detection id, device id), deterministically (merge/2)
+    tie = run_merge([det("d4", pt=(100.0, 197.0)), det("d3", pt=(100.0, 203.0))], [existing])
+    assert outcomes(tie) == {("d3", "x1"): "confirmed", ("d4", "run-002:d4"): "created"}
 
 
 def test_rejected_device_redetected_stays_rejected_with_evidence():
@@ -230,12 +230,69 @@ def test_human_set_fields_never_change():
     assert reviewer_fixed.category == "receptacle" and reviewer_fixed.human_set == ["category", "subtype", "room", "review_state"]
 
 
-def test_deleted_devices_are_ignored():
-    gone = dev("x1", deleted=True)
+def test_deleted_manual_devices_are_ignored():
+    gone = dev("x1", deleted=True, origin="manual", created_by_run=None)  # a mistaken manual entry
     res = run_merge([det("d1")], [gone])
     assert [d.id for d in res.new_devices] == ["run-002:d1"]
     assert outcomes(res) == {("d1", "run-002:d1"): "created"}
     assert res.flags == []  # neither a match, an ambiguity nor not_redetected
+
+
+def test_deleted_detected_device_blocks_reproposal_at_its_spot():
+    """I4: a deleted detector or AI device (a duplicate) is never re-proposed; nothing is matched to it either."""
+    for origin in ("detector", "ai"):
+        gone = dev("x1", deleted=True, origin=origin)
+        res = run_merge([det("d1", pt=(102.0, 200.0)), ai("a1", pt=(101.0, 201.0))], [gone])
+        assert res == MergeResult(), origin
+
+
+def test_deleted_duplicate_lets_the_survivor_take_its_redetection():
+    """I4: of a duplicate pair, the reviewer deleted one; re-running the same two detections adds nothing."""
+    keep = dev("keep", pt=(100.0, 200.0))
+    gone = dev("gone", pt=(102.0, 200.0), deleted=True, delete_reason="duplicate")
+    dets = [det("d1", pt=(100.0, 200.0)), det("d2", pt=(102.0, 200.0))]
+    for order in (dets, dets[::-1]):
+        res = run_merge(order, [keep, gone])
+        assert res.new_devices == []
+        assert outcomes(res) == {("d1", "keep"): "confirmed"}
+        assert res.flags == []
+    # only the duplicate's own detection: it matches the surviving device
+    res = run_merge([det("d2", pt=(102.0, 200.0))], [keep, gone])
+    assert res.new_devices == [] and outcomes(res) == {("d2", "keep"): "confirmed"} and res.flags == []
+
+
+def test_close_pair_reanalysis_matches_each_detection_to_its_own_device():
+    """I2: two devices 4 pt apart, re-detected at the same spots: one-to-one, nearest first, nothing ambiguous."""
+    a, b = dev("xa", pt=(100.0, 200.0)), dev("xb", pt=(104.0, 200.0))
+    dets = [det("d1", pt=(100.0, 200.0)), det("d2", pt=(104.0, 200.0))]
+    for order in (dets, dets[::-1]):
+        res = run_merge(order, [b, a])
+        assert res.new_devices == []
+        assert outcomes(res) == {("d1", "xa"): "confirmed", ("d2", "xb"): "confirmed"}
+        assert res.flags == []
+
+
+def test_second_candidate_is_not_used_when_the_nearest_is_taken():
+    """I2: a detection whose nearest device went to a closer detection is ambiguous, listing all its candidates."""
+    a, b = dev("xa", pt=(100.0, 200.0)), dev("xb", pt=(105.0, 200.0))
+    res = run_merge([det("d1", pt=(100.0, 200.0)), det("d2", pt=(101.0, 200.0))], [a, b])
+    assert outcomes(res) == {("d1", "xa"): "confirmed", ("d2", "run-002:d2"): "created"}
+    [amb] = flags_of(res, "ambiguous_match")
+    assert (amb.device_id, amb.details) == ("run-002:d2", {"possible_device_ids": ["xa", "xb"]})
+
+
+def test_tied_nearest_candidates_make_an_ambiguous_match():
+    """I2: equal distance (within 1e-6 pt) to two devices is ambiguous even when neither is taken."""
+    a, b = dev("xa", pt=(100.0, 200.0)), dev("xb", pt=(104.0, 200.0))
+    for x in (102.0, 102.0 + 4e-7):
+        res = run_merge([det("d1", pt=(x, 200.0))], [b, a])
+        [new] = res.new_devices
+        assert new.id == "run-002:d1"
+        [amb] = flags_of(res, "ambiguous_match")
+        assert sorted(amb.details["possible_device_ids"]) == ["xa", "xb"]
+    # just outside the tie tolerance: the nearer device is the match
+    res = run_merge([det("d1", pt=(102.0 - 1e-3, 200.0))], [b, a])
+    assert res.new_devices == [] and outcomes(res) == {("d1", "xa"): "confirmed"}
 
 
 def test_mixed_sheets_raise_and_empty_lists_are_fine():

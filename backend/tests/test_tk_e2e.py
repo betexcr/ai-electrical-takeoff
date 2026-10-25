@@ -368,7 +368,7 @@ def test_detail_panel_shows_read_fields_and_score_label(page, server):
     dev = detail["device"]
     assert dev["room"]["kind"] == "labeled"
     for want in ("switch", "ELECTRICAL SWITCH", dev["room"]["name"], "proposed nearest label", "proposed",
-                 "detector", SCORE_LABEL, "0.90", "run-001", "fake-detector", "fake/1", "takeoff-merge/1",
+                 "detector", SCORE_LABEL, "0.90", "run-001", "fake-detector", "fake/1", "takeoff-merge/2",
                  "ai-verify/1", "created", "Subtype source", "default", "tokens"):
         assert want in text, (want, text)
     assert page.inner_text("#ai-line").strip() == "AI second opinion: agrees" + FAKE
@@ -1302,7 +1302,7 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
             show_device(page, m, d)
             text = page.inner_text("#device")
             for want in (cat, labels[(cat, d["subtype"])], d["review_state"], "detector", SCORE_LABEL, run["id"],
-                         run["detector_version"], "takeoff-merge/1", "Subtype source", "History"):
+                         run["detector_version"], "takeoff-merge/2", "Subtype source", "History"):
                 assert want in text, (cat, want, text)
             if d["room"]:
                 assert d["room"]["name"] in text

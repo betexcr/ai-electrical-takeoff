@@ -1,4 +1,4 @@
-"""``takeoff-merge/1``: how one run's detections join the living set of reviewable devices.
+"""``takeoff-merge/2``: how one run's detections join the living set of reviewable devices.
 
 Detectors propose, reviewers decide. A run never changes the category, subtype, room, point or
 review state of an existing device and never deletes anything: it only adds ``Evidence``, ``Flag``
@@ -11,17 +11,28 @@ A merge is for exactly one sheet: the detections and devices passed in must all 
 Distances are Euclidean, in PDF points (``point_pt``), and the tolerance boundary is inclusive
 (with a tiny epsilon so that float rounding cannot push an exact-tolerance match outside it).
 
+**det/0 assignment is one-to-one, nearest first** (merge/2, final review): each detection looks at its
+nearest live device within the tolerance. Claims on a device are settled by (distance, detection id,
+device id); the winner matches it, and a detection whose nearest device went to a closer detection is
+``ambiguous_match``. A detection is also ambiguous when its two nearest candidates are tied (equal
+distance within :data:`TIE_PT`). So re-running the same detections over the devices they created adds
+nothing: each finds its own device at distance 0. (merge/1 called every detection with two candidates
+ambiguous, so each re-run of two close detections added a device.)
+
+**A deleted detector or AI device blocks re-proposal** (delete is only for duplicates of those): a
+detection that would otherwise create a new device, but has a deleted non-manual device within the
+tolerance, creates nothing (its ``RunDetection`` row stays stored). Deleted manual devices are ignored.
+
 A device counts as re-detected, and so never gets ``not_redetected``, when this run produced
 same-position evidence for it: det/0 ``confirmed``, ``conflict`` or ``rejected_redetected``, or an AI
 ``ai_corroborates`` or discover ``conflict``. A device that is only a candidate of an ambiguous
-(2+) detection is not re-detected.
+detection is not re-detected.
 """
 
 from __future__ import annotations
 
 import copy
 import math
-from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -31,6 +42,7 @@ from takeoff.groundtruth.models import RoomRef, utcnow
 from takeoff.groundtruth.taxonomy import default_status
 
 MATCH_TOL_PT = 6.0
+TIE_PT = 1e-6  # two candidates whose distances differ by no more than this are tied (ambiguous)
 _EPS = 1e-9
 _ROOM_KEYS = ("kind", "name", "label_bbox_pt")
 
@@ -102,6 +114,8 @@ def merge_sheet(
     unplaced = sorted(d.id for d in live if d.point_pt is None)
     if unplaced:
         raise ValueError(f"devices without point_pt cannot be matched: {unplaced}")
+    # deleted duplicates of detections: they block re-proposal at their spot (never matched, never flagged)
+    blockers = [d for d in devices if d.deleted and d.origin != "manual" and d.point_pt is not None]
     ordered = sorted(detections, key=_order)
     det0s = [d for d in ordered if d.source == "det0"]
     ais = [d for d in ordered if d.source == "ai_discover"]
@@ -138,17 +152,27 @@ def merge_sheet(
         add_evidence(det, dev, "created", 0.0)
         return dev
 
-    # ---- det/0 ---------------------------------------------------------------------------------
-    claims: dict[str, list[tuple[float, tuple, RunDetection]]] = defaultdict(list)
-    claimed_device: dict[str, Device] = {}
+    def blocked(det: RunDetection) -> bool:
+        return bool(_possible(det, blockers, tol_pt))
+
+    def ambiguous(det: RunDetection, poss: list[tuple[float, Device]]) -> None:
+        det_device[det.id] = create(det, "detector")
+        add_flag(det.id, det_device[det.id], "ambiguous_match", "review",
+                 {"possible_device_ids": [d.id for _, d in poss]})
+
+    # ---- det/0: one-to-one, nearest first -------------------------------------------------------
+    claims: list[tuple[float, str, str, RunDetection, Device, list]] = []
     for det in det0s:
         poss = _possible(det, live, tol_pt)
-        if len(poss) == 1:
-            dist, dev = poss[0]
-            if dev.category == det.category:
-                claims[dev.id].append((dist, _order(det), det))
-                claimed_device[dev.id] = dev
-                continue
+        if not poss:
+            if not blocked(det):
+                det_device[det.id] = create(det, "detector")  # rule 5
+            continue
+        if len(poss) > 1 and poss[1][0] - poss[0][0] <= TIE_PT:
+            ambiguous(det, poss)  # rule 4: the nearest candidates are tied
+            continue
+        dist, dev = poss[0]
+        if dev.category != det.category:
             # rule 3: another category at the same spot; the reviewer decides, nothing new is created
             add_evidence(det, dev, "conflict", dist)
             add_flag(det.id, dev, "classification_conflict", "review",
@@ -156,17 +180,16 @@ def merge_sheet(
                       "kind": "category"})
             touched.add(dev.id)
             det_device[det.id] = dev
-        elif poss:
-            # rule 4: ambiguous between two or more devices
-            det_device[det.id] = create(det, "detector")
-            add_flag(det.id, det_device[det.id], "ambiguous_match", "review",
-                     {"possible_device_ids": [d.id for _, d in poss]})
-        else:
-            det_device[det.id] = create(det, "detector")  # rule 5
+            continue
+        claims.append((dist, det.id, dev.id, det, dev, poss))
 
-    for dev_id in sorted(claims):
-        dev = claimed_device[dev_id]
-        (dist, _, winner), *losers = sorted(claims[dev_id], key=lambda t: (t[0], t[1]))
+    taken: set[str] = set()
+    for dist, _, dev_id, winner, dev, poss in sorted(claims, key=lambda t: t[:3]):
+        if dev_id in taken:  # rule 4: its nearest device went to a closer detection
+            if not blocked(winner):  # e.g. the deleted duplicate of that device
+                ambiguous(winner, poss)
+            continue
+        taken.add(dev_id)
         touched.add(dev.id)
         det_device[winner.id] = dev
         if dev.review_state == "rejected":
@@ -177,15 +200,12 @@ def merge_sheet(
             add_evidence(winner, dev, "conflict", dist)
             add_flag(winner.id, dev, "classification_conflict", "review",
                      {"run_category": winner.category, "run_subtype": winner.subtype, "detection_id": winner.id})
-        for _, _, det in losers:  # a later claim on the same device is ambiguous (rule 4)
-            det_device[det.id] = create(det, "detector")
-            add_flag(det.id, det_device[det.id], "ambiguous_match", "review", {"possible_device_ids": [dev.id]})
 
     # ---- verify verdicts -------------------------------------------------------------------------
     usable = sorted((v for v in (verdicts or []) if v.kind == "verify"), key=lambda v: v.id)
     for det in det0s:
-        target = det_device[det.id]
-        if target.review_state == "rejected":
+        target = det_device.get(det.id)
+        if target is None or target.review_state == "rejected":  # None: blocked by a deleted duplicate
             continue
         for v in usable:
             if not verify_usable_for(v, det.id):  # per item: a batch's parse error spares its other items (R15)
@@ -208,6 +228,8 @@ def merge_sheet(
         poss = _possible(det, pool + list(new_devices.values()), tol_pt)
         same = [p for p in poss if p[1].category == det.category]
         if not poss:
+            if blocked(det):  # a deleted duplicate is never re-proposed
+                continue
             dev = create(det, "ai")
             tile_id = next((s.tile_id for s in det.supporting if s.verdict_id == det.verdict_id), None)
             if tile_id is None:
