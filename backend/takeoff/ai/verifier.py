@@ -32,7 +32,7 @@ VERIFY_BATCH_SIZE = 8
 MAX_ICONS = 8
 CROP_PT = 48.0
 TOKEN_RADIUS_PT = 15.0
-MAX_OUTPUT_TOKENS = 4096
+MAX_OUTPUT_TOKENS = 2048  # ruling R16
 FAKE_MODEL = "fake-verifier"
 
 CATEGORIES = tuple(T.CATEGORIES)
@@ -170,8 +170,13 @@ def build_verify_request(batch: list[RunDetection], crops: Mapping[str, bytes], 
 
 
 def _image_shas(batch: list[RunDetection], crops: Mapping[str, bytes], icons: Mapping[str, dict]) -> list[str]:
-    pngs = [i["png"] for i in relevant_icons(batch, icons)] + [crops[d.id] for d in reading_order(batch)]
-    return [hashlib.sha256(p).hexdigest() for p in pngs]
+    """SHA-256 of every image the batch's request carries, in request order (empty if the inputs are broken;
+    the request then fails and is recorded as an error verdict)."""
+    try:
+        pngs = [i["png"] for i in relevant_icons(batch, icons)] + [crops[d.id] for d in reading_order(batch)]
+        return [hashlib.sha256(p).hexdigest() for p in pngs]
+    except Exception:
+        return []
 
 
 # --- verdicts ------------------------------------------------------------------------------------------------
@@ -243,8 +248,11 @@ class _BatchVerifier:
             batch, base, allowed = job
             if not allowed:
                 return ModelVerdict(**base, error={"code": "skipped_budget"})
-            system, content = build_verify_request(batch, crops, icons, tokens_by_id)
-            return verdict_from(base, batch, self._call(system, content, batch))
+            try:
+                system, content = build_verify_request(batch, crops, icons, tokens_by_id)
+                return verdict_from(base, batch, self._call(system, content, batch))
+            except Exception as e:  # one batch's failure never aborts the sheet: it is recorded on that batch
+                return ModelVerdict(**base, error=AC.unexpected_error(e))
 
         return AC.map_concurrent(one, work)
 

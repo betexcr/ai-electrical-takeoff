@@ -357,6 +357,28 @@ def test_verdict_error_adds_no_flag():
     assert res.flags == []
 
 
+def test_per_item_parse_error_spares_the_rest_of_the_batch():
+    """R15: d2 is missing from the answer and d3 is answered twice; d1 and d4 still flag on disagreement."""
+    devices = [dev(f"x{i}", pt=(100.0 * i, 100.0)) for i in (1, 2, 3, 4)]
+    dets = [det(f"d{i}", pt=(100.0 * i, 100.0)) for i in (1, 2, 3, 4)]
+    rows = [item("d1", category="receptacle", subtype="duplex"), item("d3", is_device=False, category="not_a_device"),
+            item("d3", uncertain=True), item("d4", uncertain=True)]
+    v = TM.ModelVerdict(
+        id="vv-1", run_id=RUN.id, sheet_id=SHEET, kind="verify", implementation="fake", model="m",
+        prompt_version="ai-verify-prompt/1", ai_version="ai-verify/1", detection_ids=["d1", "d2", "d3", "d4"],
+        output={"verdicts": rows}, agreement={"d1": TM.Agreement(category=False, subtype=False),
+                                             "d4": TM.Agreement(category=True, subtype=True)},
+        error={"code": "parse_error", "detection_ids": ["d2", "d3"], "missing": ["d2"], "duplicated": ["d3"]})
+    res = run_merge(dets, devices, [v])
+    assert sorted(f.device_id for f in flags_of(res, "model_disagrees")) == ["x1", "x4"]  # never x2 or x3
+    # a whole-request error with the same shape of error but another code stays unusable for every item
+    other = v.model_copy(update={"error": {"code": "timeout", "detection_ids": ["d2"]}})
+    assert flags_of(run_merge(dets, devices, [other]), "model_disagrees") == []
+    # and a parse error without an agreement (nothing parsed) gives nothing
+    none = v.model_copy(update={"agreement": None})
+    assert flags_of(run_merge(dets, devices, [none]), "model_disagrees") == []
+
+
 def test_verify_disagreement_on_rejected_device_is_skipped():
     v = verify_verdict("vv-1", ["d1"], [item("d1", category="receptacle")], agreement={"d1": TM.Agreement(category=False)})
     res = run_merge([det("d1")], [dev("x1", state="rejected")], [v])

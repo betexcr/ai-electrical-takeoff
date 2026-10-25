@@ -61,6 +61,22 @@ def _possible(det: RunDetection, pool: list[Device], tol_pt: float) -> list[tupl
     return sorted(found, key=lambda t: (t[0], t[1].id))
 
 
+def verify_usable_for(v: ModelVerdict, detection_id: str) -> bool:
+    """Whether a verify verdict's answer for one detection may be used (ruling R15).
+
+    A verdict without an error is usable for all its items. A per-item ``parse_error`` (the model left an
+    item out or answered it twice; ``error["detection_ids"]`` lists those items and ``agreement`` omits them)
+    stays usable for every other item of the batch. Any other error, a whole-request failure, is unusable.
+    """
+    if v.kind != "verify" or detection_id not in v.detection_ids:
+        return False
+    if v.error is None:
+        return True
+    bad = v.error.get("detection_ids")
+    return (v.error.get("code") == "parse_error" and isinstance(bad, list) and v.agreement is not None
+            and detection_id not in bad)
+
+
 def _room_ref(prop: RoomProposal) -> RoomRef | None:
     """A copy of the proposed room as a ``RoomRef`` (the proposal may hold the caller's own dict)."""
     if prop.room is None:
@@ -166,13 +182,13 @@ def merge_sheet(
             add_flag(det.id, det_device[det.id], "ambiguous_match", "review", {"possible_device_ids": [dev.id]})
 
     # ---- verify verdicts -------------------------------------------------------------------------
-    usable = sorted((v for v in (verdicts or []) if v.kind == "verify" and v.error is None), key=lambda v: v.id)
+    usable = sorted((v for v in (verdicts or []) if v.kind == "verify"), key=lambda v: v.id)
     for det in det0s:
         target = det_device[det.id]
         if target.review_state == "rejected":
             continue
         for v in usable:
-            if det.id not in v.detection_ids:
+            if not verify_usable_for(v, det.id):  # per item: a batch's parse error spares its other items (R15)
                 continue
             row = next((r for r in ((v.output or {}).get("verdicts") or []) if r.get("item_id") == det.id), None)
             ag = (v.agreement or {}).get(det.id)

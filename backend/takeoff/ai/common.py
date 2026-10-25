@@ -3,13 +3,23 @@
 Everything the stages send goes through ``AIClient.call``, which never raises for a request failure: it returns a
 ``CallResult`` whose ``error`` is ``{"code": ...}`` with one of ``rate_limited``, ``timeout``, ``connection``,
 ``http_<status>``, ``refusal`` or ``parse_error`` (``skipped_budget`` is recorded by the stage when
-``RequestBudget.take`` refuses, without calling). Credentials resolve as the SDK resolves them (environment or an
-``ant`` profile); their values are never read, logged or stored here.
+``RequestBudget.take`` refuses, without calling). ``{"code": "error", "type": <exception class>, "message": ...}``
+is the deliberate catch-all for an unexpected exception (a bug or an SDK change rather than an API outcome): it
+keeps the run completing and the failure visible, and it is never mistaken for one of the API codes above.
+Credentials resolve as the SDK resolves them (environment or an ``ant`` profile); their values are never read,
+logged or stored here.
+
+Refusal-safe parsing: ``messages.parse`` in anthropic 2.3.0 validates the JSON while building its result, so a
+refusal whose text is not JSON would raise before ``stop_reason`` could be read. ``call`` therefore asks for the
+raw response of ``messages.parse`` (the SDK's own raw-response wrapper; 2.3.0's ``messages.with_raw_response``
+has no ``parse``), reads ``stop_reason`` and the four usage fields from the raw message first, and only then runs
+the SDK's validation, so usage and stop reason are kept whatever the outcome.
 """
 
 from __future__ import annotations
 
 import base64
+import json
 import math
 import os
 import threading
@@ -68,9 +78,24 @@ def error_for(e: BaseException, sdk=None) -> dict:
             return {"code": f"http_{e.status_code}", "message": _message(e)}
         if isinstance(e, sdk.APIResponseValidationError):
             return {"code": "parse_error", "message": _message(e)}
-    if isinstance(e, (pydantic.ValidationError, ValueError)):  # the SDK validates structured output and raises
+    if isinstance(e, (pydantic.ValidationError, json.JSONDecodeError)):  # invalid structured output
         return {"code": "parse_error", "message": _message(e)}
+    return unexpected_error(e)
+
+
+def unexpected_error(e: BaseException) -> dict:
+    """The catch-all record for an exception that is not an API outcome (see the module docstring)."""
     return {"code": "error", "type": type(e).__name__, "message": _message(e)}
+
+
+def _raw_parse(messages, sdk):
+    """``messages.parse`` returning the SDK's raw ``APIResponse`` (validation deferred to ``.parse()``)."""
+    raw = getattr(getattr(messages, "with_raw_response", None), "parse", None)
+    if raw is not None:  # a future SDK may expose it directly
+        return raw
+    from anthropic._response import to_raw_response_wrapper  # what the SDK's own ``with_raw_response`` uses
+
+    return to_raw_response_wrapper(messages.parse)
 
 
 def _has_no_credentials(client) -> bool:
@@ -137,20 +162,27 @@ class AIClient:
         t0 = time.perf_counter()
         elapsed = lambda: round((time.perf_counter() - t0) * 1000.0, 3)  # noqa: E731
         try:
-            response = self._sdk_client().with_options(timeout=TIMEOUT_S).messages.parse(
+            messages = self._sdk_client().with_options(timeout=TIMEOUT_S).messages
+            raw = _raw_parse(messages, sdk)(
                 model=self.model, max_tokens=max_tokens, system=system,
                 messages=[{"role": "user", "content": content_blocks}], output_format=output_model)
+            body = json.loads(raw.read())  # the message as sent by the API, before any validation
         except Exception as e:
             return CallResult(latency_ms=elapsed(), error=error_for(e, sdk))
-        latency = elapsed()
-        u = getattr(response, "usage", None)
-        result = CallResult(stop_reason=getattr(response, "stop_reason", None), latency_ms=latency,
-                            **{f: getattr(u, f, None) for f in ("input_tokens", "output_tokens",
-                                                                "cache_creation_input_tokens", "cache_read_input_tokens")})
-        if result.stop_reason == "refusal":  # before reading any output
-            result.error = {"code": "refusal"}
+        u = body.get("usage") if isinstance(body, dict) else None
+        u = u if isinstance(u, dict) else {}
+        result = CallResult(stop_reason=body.get("stop_reason") if isinstance(body, dict) else None,
+                            **{f: u.get(f) for f in ("input_tokens", "output_tokens",
+                                                     "cache_creation_input_tokens", "cache_read_input_tokens")})
+        if result.stop_reason == "refusal":  # before any output is read or validated
+            result.latency_ms, result.error = elapsed(), {"code": "refusal"}
             return result
-        parsed = getattr(response, "parsed_output", None)
+        try:
+            parsed = getattr(raw.parse(), "parsed_output", None)  # the SDK's own validation runs here
+        except Exception as e:
+            result.latency_ms, result.error = elapsed(), error_for(e, sdk)  # usage and stop_reason are kept
+            return result
+        result.latency_ms = elapsed()
         if parsed is None:
             result.error = {"code": "parse_error", "message": f"no parsed output (stop_reason {result.stop_reason})"}
             return result

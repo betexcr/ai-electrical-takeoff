@@ -6,6 +6,7 @@ exception classes, built with the SDK's own constructors.
 
 from __future__ import annotations
 
+import json
 import threading
 import time
 from types import SimpleNamespace
@@ -34,12 +35,34 @@ def response(parsed=None, stop_reason="end_turn", u=None):
     return SimpleNamespace(parsed_output=parsed, stop_reason=stop_reason, usage=u or usage())
 
 
+def text_response(text, stop_reason="end_turn", u=None):
+    """A raw message whose text is validated only when ``.parse()`` runs, as the SDK does."""
+    return SimpleNamespace(text=text, stop_reason=stop_reason, usage=u or usage())
+
+
+class StubRaw:
+    """Mimics the SDK's raw ``APIResponse`` of ``messages.parse``: ``read()`` gives the raw message JSON, and
+    ``parse()`` runs the structured-output validation (which may raise)."""
+
+    def __init__(self, item, kw):
+        self.item, self.kw = item, kw
+
+    def read(self) -> bytes:
+        return json.dumps({"stop_reason": self.item.stop_reason, "usage": vars(self.item.usage)}).encode()
+
+    def parse(self):
+        if hasattr(self.item, "text"):
+            return SimpleNamespace(parsed_output=self.kw["output_format"].model_validate_json(self.item.text))
+        return self.item
+
+
 class StubMessages:
     def __init__(self, outer):
         self.outer = outer
+        self.with_raw_response = SimpleNamespace(parse=self._raw_parse)
 
-    def parse(self, **kw):
-        return self.outer._parse(**kw)
+    def _raw_parse(self, **kw):
+        return StubRaw(self.outer._parse(**kw), kw)
 
 
 class StubClient:
@@ -139,6 +162,72 @@ def test_each_exception_and_refusal_and_parse_failure_map_to_codes():
     # usage of a refused request is still recorded
     r = call(StubClient([response(None, stop_reason="refusal", u=usage(900, 3))]))
     assert (r.input_tokens, r.output_tokens, r.stop_reason) == (900, 3, "refusal")
+
+
+def test_refusal_with_non_json_text_is_refusal_and_keeps_usage():
+    r = call(StubClient([text_response("I can't help with that.", stop_reason="refusal", u=usage(900, 7, 0, 0))]))
+    assert r.error == {"code": "refusal"} and r.parsed is None and r.stop_reason == "refusal"
+    assert (r.input_tokens, r.output_tokens, r.cache_creation_input_tokens, r.cache_read_input_tokens) == (900, 7, 0, 0)
+    assert r.latency_ms is not None
+
+
+def test_non_json_without_refusal_is_parse_error_and_keeps_usage():
+    r = call(StubClient([text_response("Sure! Here is my answer.", u=usage(800, 12, 3, 4))]))
+    assert r.error["code"] == "parse_error" and r.parsed is None and r.stop_reason == "end_turn"
+    assert (r.input_tokens, r.output_tokens, r.cache_creation_input_tokens, r.cache_read_input_tokens) == (800, 12, 3, 4)
+
+
+def test_max_tokens_with_invalid_json_is_parse_error_with_stop_reason():
+    r = call(StubClient([text_response('{"answer": "trunc', stop_reason="max_tokens", u=usage(700, 2048))]))
+    assert r.error["code"] == "parse_error" and r.stop_reason == "max_tokens"
+    assert (r.input_tokens, r.output_tokens) == (700, 2048)
+    # valid JSON through the same raw path parses
+    r = call(StubClient([text_response('{"answer": "ok"}', u=usage(10, 3))]))
+    assert r.error is None and r.parsed == Out(answer="ok")
+
+
+def _sdk_message(text, stop_reason):
+    return {"id": "msg_stub", "type": "message", "role": "assistant", "model": "claude-test",
+            "content": [{"type": "text", "text": text}], "stop_reason": stop_reason, "stop_sequence": None,
+            "usage": {"input_tokens": 321, "output_tokens": 9, "cache_creation_input_tokens": 0,
+                      "cache_read_input_tokens": 0}}
+
+
+def test_real_sdk_raw_parse_path_offline():
+    """The installed SDK's own client and parse path, over an in-memory transport: no request leaves the process."""
+    seen = []
+
+    def client_for(text, stop_reason):
+        def handler(request):
+            seen.append(json.loads(request.content))
+            return httpx2.Response(200, json=_sdk_message(text, stop_reason))
+        return anthropic.Anthropic(api_key="offline-stub-not-a-key", base_url="http://stub.invalid", max_retries=0,
+                                   http_client=httpx2.Client(transport=httpx2.MockTransport(handler)))
+
+    r = call(client_for("I can't help with that.", "refusal"))
+    assert r.error == {"code": "refusal"} and (r.input_tokens, r.output_tokens) == (321, 9)
+    r = call(client_for("not json at all", "end_turn"))
+    assert r.error["code"] == "parse_error" and r.stop_reason == "end_turn" and r.input_tokens == 321
+    r = call(client_for('{"answer": "tru', "max_tokens"))
+    assert r.error["code"] == "parse_error" and r.stop_reason == "max_tokens" and r.output_tokens == 9
+    r = call(client_for('{"answer": "ok"}', "end_turn"))
+    assert r.error is None and r.parsed == Out(answer="ok") and r.cache_read_input_tokens == 0
+    body = seen[-1]
+    assert body["model"] == "claude-test" and body["max_tokens"] == 256 and body["output_config"]["format"]["type"] == "json_schema"
+
+
+def test_error_for_maps_only_validation_and_json_errors_to_parse_error():
+    try:
+        Out.model_validate_json("{}")
+    except Exception as e:
+        assert AC.error_for(e)["code"] == "parse_error"
+    try:
+        json.loads("{")
+    except json.JSONDecodeError as e:
+        assert AC.error_for(e)["code"] == "parse_error"
+    other = AC.error_for(ValueError("a bug, not an API outcome"))
+    assert other["code"] == "error" and other["type"] == "ValueError"
+    assert AC.error_for(KeyError("x"))["code"] == "error"
 
 
 def test_unavailable_without_sdk_credentials_or_model(monkeypatch, tmp_path):

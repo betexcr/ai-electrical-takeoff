@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from takeoff.ai import common as AC  # noqa: E402
 from takeoff.ai import verifier as AV  # noqa: E402
+from takeoff.app.merge import verify_usable_for  # noqa: E402
 from takeoff.evaluation import matching as EM  # noqa: E402
 from takeoff.groundtruth.export import ExportError, require_verified  # noqa: E402
 from takeoff.groundtruth.models import utcnow  # noqa: E402
@@ -41,8 +42,9 @@ NOTES = [
     "Verify only sees det/0's detections: devices det/0 missed are not measured here (that is ai-discover/1's job).",
     "Truth at each detection: a same-category ground-truth device within 6 pt (eval/1 matching), else any remaining "
     "ground-truth device within 6 pt (det/0 got the category wrong), else none (det/0 false positive).",
-    "An item counts as answered only as the app would use it: its request succeeded with no error and it was "
-    "answered exactly once. A batch with a parse error gives no flags for any of its items, as in the merge.",
+    "An item counts as answered only as the app would use it (ruling R15): it was answered exactly once by a "
+    "request that succeeded. An item the model left out or answered twice is unanswered (parse_error) and never "
+    "flags; the other items of its batch still count. A whole-request failure leaves all its items unanswered.",
     "A flag is what the merge would open: category or subtype disagreement with det/0, not a device, or uncertain.",
     "The ground truth was built with the candidate generators det/0 uses as hints; it was not built with the AI.",
 ]
@@ -93,7 +95,7 @@ def _items(dets, gt_rows, verdicts, tol_pt):
         else:
             err = None
         v = by_det.get(d.id)
-        ag = (v.agreement or {}).get(d.id) if v is not None and v.error is None else None
+        ag = (v.agreement or {}).get(d.id) if v is not None and verify_usable_for(v, d.id) else None  # as the merge
         row = None
         if ag is not None:
             row = next(r for r in v.output["verdicts"] if r["item_id"] == d.id)
@@ -149,28 +151,36 @@ def score(dets, gt_rows: list[dict], verdicts, groups: dict[str, list[str]], tol
 
 # --- the run -------------------------------------------------------------------------------------------------
 
-def run(export: Path, pdf: Path, verifier, sheets: list[str] | None, budget: AC.RequestBudget, cache: Path):
-    """det/0 on the export's checked candidates, then verify for each selected sheet."""
+def det0_detections(export: Path, pdf: Path) -> dict:
+    """det/0 on the export's own candidates; ``EV.evaluate`` checks the PDF hash and the candidate run hashes.
+
+    Returns det/0's output with ``detections`` limited to the electrical regions (as the evaluator scores them).
+    """
+    from takeoff.detection import det0
+    from takeoff.evaluation import evaluate as EV
+    from takeoff.groundtruth import candidates as CA
+
+    ev = EV.evaluate(export, pdf, results=CA.generate(pdf), detectors={"det0": det0.detect})
+    found = ev.detections["det0"]
+    return {**found, "detections": [d for d in found["detections"]
+                                    if EV._in_region(ev.regions, d["sheet_id"], d["x_pt"], d["y_pt"])]}
+
+
+def verify_sheets(pdf: Path, raw: list[dict], verifier, sheets: list[str], budget: AC.RequestBudget, cache: Path):
+    """``RunDetection``s, crops, nearby text and legend icons for each sheet, then ``verifier.verify``."""
     import pymupdf
 
     from takeoff.app import models as TM
     from takeoff.app import sheets as TS
-    from takeoff.detection import det0
-    from takeoff.evaluation import evaluate as EV
-    from takeoff.groundtruth import candidates as CA
     from takeoff.groundtruth import sheets as S
     from takeoff.pdf import coords as C
 
-    ev = EV.evaluate(export, pdf, results=CA.generate(pdf), detectors={"det0": det0.detect})
-    found = ev.detections["det0"]
-    raw = [d for d in found["detections"] if EV._in_region(ev.regions, d["sheet_id"], d["x_pt"], d["y_pt"])]
     sha = hashlib.sha256(Path(pdf).read_bytes()).hexdigest()
     infos = {s.sheet_id: s for s in TS.intake(pdf, sha)}
-    chosen = sheets or sorted({d["sheet_id"] for d in raw})
     dets, verdicts = [], []
     doc = pymupdf.open(stream=Path(pdf).read_bytes(), filetype="pdf")
     try:
-        for sid in chosen:
+        for sid in sheets:
             info = infos[sid]
             view = TS.sheet_view(pdf, info, sha, cache)
             path, mapping = S.render_region_image(doc[info.page_number - 1], view["region"]["bbox_pt"], sha, cache)
@@ -180,8 +190,9 @@ def run(export: Path, pdf: Path, verifier, sheets: list[str] | None, budget: AC.
                 u, v = C.unrotated_to_normalized(g, (d["x_pt"], d["y_pt"]))
                 here.append(TM.RunDetection(id=d["id"], run_id=RUN_ID, document_id=sha, sheet_id=sid,
                                             category=d["category"], subtype=d["subtype"], status=d["status"],
-                                            point={"u": u, "v": v}, point_pt=(d["x_pt"], d["y_pt"]), score=d["score"],
-                                            members=d["members"], subtype_source=d["subtype_source"], tokens=d["tokens"]))
+                                            point={"u": u, "v": v}, point_pt=(d["x_pt"], d["y_pt"]), score=d.get("score"),
+                                            members=d.get("members", []), subtype_source=d.get("subtype_source"),
+                                            tokens=d.get("tokens", [])))
             region = AV.load_gray(path)
             crops = {d.id: AV.build_crop(region, mapping, d.point_pt) for d in here}
             tokens = AV.tokens_near(here, view["tokens"])
@@ -190,10 +201,42 @@ def run(export: Path, pdf: Path, verifier, sheets: list[str] | None, budget: AC.
             print(f"{sid}: {len(here)} detections, {AC.summarize(verdicts)['requests']} requests so far", file=sys.stderr)
     finally:
         doc.close()
-    annotations = [json.loads(line) for line in (export / "annotations.jsonl").read_text(encoding="utf-8").splitlines()
-                   if line.strip()]
-    gt_rows = [a for a in annotations if not a.get("deleted") and a["sheet_id"] in chosen]
-    return dets, gt_rows, verdicts, found, chosen, ev
+    return dets, verdicts
+
+
+def ground_truth(export: Path, sheets: list[str]) -> list[dict]:
+    rows = [json.loads(line) for line in (export / "annotations.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()]
+    return [a for a in rows if not a.get("deleted") and a["sheet_id"] in sheets]
+
+
+def run(export: Path, pdf: Path, verifier, sheets: list[str] | None, budget: AC.RequestBudget, cache: Path):
+    """det/0 on the export's checked candidates, then verify for each selected sheet."""
+    found = det0_detections(export, pdf)
+    chosen = sheets or sorted({d["sheet_id"] for d in found["detections"]})
+    dets, verdicts = verify_sheets(pdf, found["detections"], verifier, chosen, budget, cache)
+    return dets, ground_truth(export, chosen), verdicts, found, chosen
+
+
+def build_metrics(export: Path, manifest: dict, verifier, batch_size: int, budget: AC.RequestBudget, dets, gt_rows,
+                  verdicts, found: dict, chosen: list[str], reproduce: str) -> dict:
+    import anthropic
+
+    from takeoff.evaluation import evaluate as EV
+
+    groups = {g: [s for s in ss if s in chosen] for g, ss in GROUPS.items()}
+    groups = {g: ss for g, ss in groups.items() if ss}
+    return {
+        "ai_version": AV.AI_VERSION, "prompt_version": AV.PROMPT_VERSION, "model": verifier.model,
+        "implementation": verifier.implementation, "sdk_version": anthropic.__version__, "batch_size": batch_size,
+        "max_output_tokens": AV.MAX_OUTPUT_TOKENS, "tolerance_pt": TOLERANCE_PT, "created_at": utcnow(),
+        "code": EV._git(), "heading": HEADING, "reproduce": reproduce, "sheets": chosen, "groups": groups,
+        "export": {"id": export.name, "manifest_sha256": hashlib.sha256((export / "manifest.json").read_bytes()).hexdigest(),
+                   "level": manifest["level"], "input_pdf_sha256": manifest["input_pdf_sha256"]},
+        "det0": {"detector_version": found["detector_version"], "n_detections": len(dets)},
+        "budget": {"max_requests": budget.max_requests, "used": budget.used, "skipped": budget.skipped},
+        "results": score(dets, gt_rows, verdicts, groups), "notes": NOTES,
+    }
 
 
 def _cell(v):
@@ -273,43 +316,30 @@ def main(argv=None, verifier=None) -> int:
               "only the Claude implementation is evaluated, never a fake or test double", file=sys.stderr)
         return 3
     v.batch_size = args.batch_size
-    ok, reason = v.available()
-    if not ok:
-        print(f"refused: AI verifier unavailable: {reason}", file=sys.stderr)
-        return 3
     out = Path(args.out) if args.out else out_dir(export, args.batch_size, sheets)
-    if out.exists():
+    if out.exists():  # before available(): a refused run makes no model check at all
         print(f"{out} already exists; evaluations are never overwritten. Pass a new --out.", file=sys.stderr)
         return 2
     unknown = sorted(set(sheets or []) - set(manifest["sheets"]))
     if unknown:
         print(f"refused: sheets {unknown} are not in the export", file=sys.stderr)
         return 2
+    ok, reason = v.available()
+    if not ok:
+        print(f"refused: AI verifier unavailable: {reason}", file=sys.stderr)
+        return 3
 
     from takeoff.evaluation import evaluate as EV
     budget = AC.RequestBudget(args.max_requests) if args.max_requests is not None else AC.RequestBudget.from_env()
     try:
-        dets, gt_rows, verdicts, found, chosen, _ = run(export, Path(args.pdf), v, sheets, budget, Path(args.cache))
+        dets, gt_rows, verdicts, found, chosen = run(export, Path(args.pdf), v, sheets, budget, Path(args.cache))
     except EV.EvaluationError as e:
         print(f"refused: {e}", file=sys.stderr)
         return 2
-    groups = {g: [s for s in ss if s in chosen] for g, ss in GROUPS.items()}
-    groups = {g: ss for g, ss in groups.items() if ss}
-    import anthropic
     cmd = " ".join(["uv run python tools/eval_ai_verifier.py", f"--export ../data/ground_truth/exports/{export.name}",
                     f"--batch-size {args.batch_size}", *([f"--sheets {args.sheets}"] if sheets else []),
                     f"--max-requests {budget.max_requests}"])
-    metrics = {
-        "ai_version": AV.AI_VERSION, "prompt_version": AV.PROMPT_VERSION, "model": v.model,
-        "implementation": v.implementation, "sdk_version": anthropic.__version__, "batch_size": args.batch_size,
-        "tolerance_pt": TOLERANCE_PT, "created_at": utcnow(),
-        "code": EV._git(), "heading": HEADING, "reproduce": cmd, "sheets": chosen, "groups": groups,
-        "export": {"id": export.name, "manifest_sha256": hashlib.sha256((export / "manifest.json").read_bytes()).hexdigest(),
-                   "level": manifest["level"], "input_pdf_sha256": manifest["input_pdf_sha256"]},
-        "det0": {"detector_version": found["detector_version"], "n_detections": len(dets)},
-        "budget": {"max_requests": budget.max_requests, "used": budget.used, "skipped": budget.skipped},
-        "results": score(dets, gt_rows, verdicts, groups), "notes": NOTES,
-    }
+    metrics = build_metrics(export, manifest, v, args.batch_size, budget, dets, gt_rows, verdicts, found, chosen, cmd)
     write(out, metrics, verdicts)
     summary = {g: {"items": x["items"], "answered": x["answered"], "flags": x["flags"], "ai_vs_gt": x["ai_vs_gt"],
                    "usage": x["usage"]} for g, x in metrics["results"].items()}

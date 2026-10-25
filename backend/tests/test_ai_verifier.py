@@ -54,6 +54,15 @@ def verdict_row(item_id, category="receptacle", subtype="gfi", is_device=True, u
                         rationale=rationale, uncertain=uncertain)
 
 
+def item_ids(kw) -> list[str]:
+    return [b["text"].split(": detector says")[0].removeprefix("Item ")
+            for b in kw["messages"][0]["content"] if b["type"] == "text" and b["text"].startswith("Item ")]
+
+
+def answer_receptacle_gfi(kw):
+    return response(AV.AIVerdictBatch(verdicts=[verdict_row(i) for i in item_ids(kw)]))
+
+
 def claude(stub, **kw):
     return AV.ClaudeVerifier(AC.AIClient(model="claude-test", client=stub), **kw)
 
@@ -99,12 +108,7 @@ def test_batches_of_at_most_8_in_reading_order():
     assert [d.id for b in bs for d in b] == [d.id for d in expected]
     assert [len(b) for b in AV.batches(dets, 1)] == [1] * 19
 
-    def answer(kw):
-        ids = [b["text"].split(": detector says")[0].removeprefix("Item ")
-               for b in kw["messages"][0]["content"] if b["type"] == "text" and b["text"].startswith("Item ")]
-        return response(AV.AIVerdictBatch(verdicts=[verdict_row(i) for i in ids]))
-
-    stub = StubClient(default=answer)
+    stub = StubClient(default=answer_receptacle_gfi)
     out = claude(stub).verify("run-001", SHEET, dets, {d.id: png(200) for d in dets}, {}, {}, AC.RequestBudget(100))
     assert len(stub.calls) == 3 and len(out) == 3
     assert [x.detection_ids for x in out] == [[d.id for d in b] for b in bs]
@@ -319,3 +323,97 @@ def test_eval_scoring_against_ground_truth_on_synthetic_items():
     assert held["unanswered_by_code"] == {"timeout": 1}
     assert held["usage"]["errors_by_code"] == {"timeout": 1} and dev["usage"]["tokens"]["input"] == 10
     assert m["total"]["items"] == 4
+
+
+# --- fix round 1 ---------------------------------------------------------------------------------------------
+
+def test_one_failing_batch_becomes_an_error_verdict_without_aborting():
+    batch = [det(f"d{i}", 10 * i, 10) for i in range(10)]
+    crops = {d.id: png(5) for d in batch if d.id != "d9"}  # broken input for the second batch only
+    stub = StubClient(default=answer_receptacle_gfi)
+    out = claude(stub).verify("run-001", SHEET, batch, crops, {}, {}, AC.RequestBudget(10))
+    assert [x.detection_ids for x in out] == [[f"d{i}" for i in range(8)], ["d8", "d9"]]
+    assert out[0].error is None and set(out[0].agreement) == {f"d{i}" for i in range(8)}
+    assert out[1].error["code"] == "error" and out[1].error["type"] == "KeyError"
+    assert out[1].agreement is None and out[1].output is None and len(stub.calls) == 1
+    assert AV.MAX_OUTPUT_TOKENS == 2048 and stub.calls[0]["max_tokens"] == 2048  # ruling R16
+
+
+def test_eval_scoring_counts_per_item_parse_errors():
+    """R15 in the eval: the item the model left out is unanswered and never flags; the rest of its batch counts."""
+    ev = _eval_module()
+    gt = [{"id": f"g{i}", "sheet_id": "A1-111", "category": "receptacle", "subtype": "gfi",
+           "point_pt": [100.0 * i, 100.0]} for i in (1, 2, 3)]
+    dets = [det("k1", 100, 100, "receptacle", "afi_duplex"),  # det/0 subtype error, the AI disagrees: a true flag
+            det("k2", 200, 100, "receptacle", "afi_duplex"),  # det/0 subtype error, but missing from the answer
+            det("k3", 300, 100, "receptacle", "gfi")]          # det/0 right, the AI agrees
+    rows = [verdict_row("k1", subtype="gfi"), verdict_row("k3")]
+    v = TM.ModelVerdict(run_id="run-eval", sheet_id="A1-111", kind="verify", implementation="claude", model="m",
+                        prompt_version="p", ai_version="a", detection_ids=["k1", "k2", "k3"],
+                        output={"verdicts": [r.model_dump() for r in rows]},
+                        agreement={"k1": {"category": True, "subtype": False}, "k3": {"category": True, "subtype": True}},
+                        error={"code": "parse_error", "detection_ids": ["k2"], "missing": ["k2"], "duplicated": []})
+    m = ev.score(dets, gt, [v], {"dev": ["A1-111"]})["dev"]
+    assert m["items"] == 3 and m["answered"] == 2 and m["unanswered_by_code"] == {"parse_error": 1}
+    assert m["flags"] == {"flagged": 1, "true_flags": 1, "precision": 1.0, "recall": 0.5, "recall_answered": 1.0}
+    assert m["ai_vs_gt"]["subtype"] == {"n": 2, "agree": 2, "rate": 1.0}
+
+
+@pytest.mark.skipif(not EXPORT.exists(), reason="gt_001 export missing")
+def test_eval_checks_out_before_availability(tmp_path, capsys):
+    ev = _eval_module()
+    out = tmp_path / "exists"
+    out.mkdir()
+    stub = StubClient()
+    assert ev.main(["--export", str(EXPORT), "--out", str(out)], verifier=claude(stub)) == 2
+    assert "already exists" in capsys.readouterr().err and stub.retrieved == []  # no model check was made
+
+
+def answer_echoing_det0(kw):
+    """Agrees with whatever det/0 claimed for each item."""
+    rows = []
+    for b in kw["messages"][0]["content"]:
+        if b["type"] == "text" and b["text"].startswith("Item "):
+            item_id, rest = b["text"].removeprefix("Item ").split(": detector says ")
+            cat, sub = rest.split(";")[0].split("/")
+            rows.append(verdict_row(item_id, category=cat, subtype=None if sub == "None" else sub))
+    return response(AV.AIVerdictBatch(verdicts=rows), u=usage(1500, 120, 0, 0))
+
+
+PDF = ROOT / "plans" / "Escondido_Electrical_Plans_Ceiling_Fans.pdf"
+
+
+@pytest.mark.skipif(not (EXPORT.exists() and PDF.exists()), reason="gt_001 export or supplied PDF missing")
+def test_eval_success_path_offline(tmp_path, monkeypatch):
+    """main -> run -> verify_sheets -> score -> write/report on the real A1 sheet, with a stub Claude client and
+    det/0 replaced by three detections placed on ground-truth devices (one with a wrong category)."""
+    ev = _eval_module()
+    rows = [json.loads(line) for line in (EXPORT / "annotations.jsonl").read_text(encoding="utf-8").splitlines() if line]
+    a1 = sorted((r for r in rows if r["sheet_id"] == SHEET and not r.get("deleted")), key=lambda r: r["id"])[:3]
+    raw = []
+    for k, r in enumerate(a1):
+        cat, sub = r["category"], r["subtype"]
+        if k == 2:
+            cat, sub = ("switch", "standard") if cat != "switch" else ("receptacle", "gfi")
+        raw.append({"id": f"{SHEET}:det0-90{k:02d}", "sheet_id": SHEET, "category": cat, "subtype": sub,
+                    "status": "as_drawn", "x_pt": r["point_pt"][0], "y_pt": r["point_pt"][1], "members": [], "tokens": []})
+    monkeypatch.setattr(ev, "det0_detections", lambda export, pdf: {"detector_version": "det/0", "detections": raw})
+    stub = StubClient(default=answer_echoing_det0)
+    out = tmp_path / "out"
+    code = ev.main(["--export", str(EXPORT), "--sheets", SHEET, "--out", str(out), "--cache", str(tmp_path / "cache")],
+                   verifier=claude(stub))
+    assert code == 0 and len(stub.calls) == 1
+    assert sorted(p.name for p in out.iterdir()) == ["metrics.json", "report.md", "verdicts.jsonl"]
+    report = (out / "report.md").read_text(encoding="utf-8")
+    assert report.startswith("# ai-verify/1 evaluation") and "measured separately; not used by the app's totals" in report
+    assert "| | dev | total |" in report and "## Notes" in report and "flag recall vs det/0 errors" in report
+    m = json.loads((out / "metrics.json").read_text(encoding="utf-8"))
+    dev = m["results"]["dev"]
+    assert m["implementation"] == "claude" and m["sheets"] == [SHEET] and m["max_output_tokens"] == 2048
+    assert dev["items"] == 3 and dev["answered"] == 3 and dev["det0_errors"] == 1
+    assert dev["ai_vs_gt"]["category"] == {"n": 3, "agree": 2, "rate": 0.6667}
+    assert dev["flags"]["flagged"] == 0 and dev["flags"]["recall"] == 0.0
+    assert dev["usage"]["tokens"]["input"] == 1500 and dev["usage"]["requests"] == 1
+    assert len(m["items"]) == 3
+    verdicts = [json.loads(line) for line in (out / "verdicts.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert len(verdicts) == 1 and verdicts[0]["implementation"] == "claude" and len(verdicts[0]["image_sha256s"]) >= 3
