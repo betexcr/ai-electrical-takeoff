@@ -2,7 +2,8 @@
 
 The text is built once from the taxonomy at import time and contains no timestamps or random ids, so the same
 inputs always give byte-identical requests. Any change to the wording, or to the taxonomy it is built from,
-needs a new prompt version and a re-run of ``tools/eval_ai_verifier.py``.
+needs a new prompt version and a re-run of ``tools/eval_ai_verifier.py`` (verify) or
+``tools/eval_ai_discovery.py`` (discover).
 """
 
 from __future__ import annotations
@@ -63,4 +64,45 @@ VERIFY_SYSTEM = "\n".join([
     "",
     "Return exactly one verdict per item id given, each id exactly once, and no other ids. Do not agree with the",
     "detector by default: answer what the drawing shows.",
+])
+
+
+# --- ai-discover-prompt/1 (spec §5.9.2) -----------------------------------------------------------------------
+
+DISCOVER_PROMPT_VERSION = "ai-discover-prompt/1"
+DISCOVER_RATIONALE_MAX_CHARS = 150
+DISCOVER_MAX_ITEMS = 60
+
+DISCOVER_TAXONOMY_TEXT = "\n".join([
+    "Categories and subtypes (subtype name: legend wording):",
+    *_taxonomy_lines(),
+    "",
+    "Text tags and the subtypes they usually mean:",
+    *_token_lines(),
+])
+
+DISCOVER_SYSTEM = "\n".join([
+    "You find electrical device symbols on tiles cut from residential electrical floor plans.",
+    "",
+    "Each request has two images:",
+    "- first, a reference image of this sheet's own legend: each cell shows one legend icon with its legend wording;",
+    "- second, one tile of the plan at 300 DPI, an overlapping square window of the sheet's electrical plan area.",
+    "",
+    "Mark every electrical device symbol you can see in the tile: switches, receptacles, lights, fans, ceiling fans,",
+    "detectors, junction boxes and the other categories listed in the request. Mark each symbol once, at the centre",
+    "of the symbol itself (not at its text tag or its wiring). Symbols cut by the tile edge count when enough of the",
+    "symbol is visible to recognise it. Do not mark wires, dimensions, room names, door swings, plumbing fixtures,",
+    "furniture or legend and title-block content.",
+    "",
+    "Coordinates are pixels of the tile image (the second image): x_px from its left edge, y_px from its top edge,",
+    "with the origin at the top-left corner. They must lie inside the tile image.",
+    "",
+    "For each symbol answer with:",
+    "- x_px, y_px: the symbol centre in tile pixels;",
+    "- category: one of the categories in the request;",
+    "- subtype: a subtype name of that category from the request, or null when you cannot tell or there is none;",
+    "- uncertain: true when you are not confident that this is an electrical device symbol of that category;",
+    f"- rationale: at most {DISCOVER_RATIONALE_MAX_CHARS} characters on the visual evidence you used.",
+    "",
+    f"Return at most {DISCOVER_MAX_ITEMS} points. Return an empty list when the tile shows no device symbol.",
 ])

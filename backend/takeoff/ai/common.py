@@ -236,13 +236,14 @@ def _percentile(values: list[float], p: float) -> float | None:
 
 
 def summarize(verdicts) -> dict:
-    """Requests sent, failures by code (budget skips included), summed tokens, latency p50/p95 and implementation.
+    """Requests sent, failures by code (skips included), summed tokens, latency p50/p95 and implementation.
 
     The keys match ``AIStageStatus`` apart from ``status``, which the stage sets.
     """
     verdicts = list(verdicts)
     codes = Counter((v.error or {}).get("code") for v in verdicts if v.error)
-    sent = [v for v in verdicts if (v.error or {}).get("code") != "skipped_budget"]
+    # skipped_budget and discovery's skipped_no_legend were never sent
+    sent = [v for v in verdicts if not str((v.error or {}).get("code") or "").startswith("skipped_")]
     total = lambda f: sum(getattr(v, f) or 0 for v in verdicts)  # noqa: E731
     latencies = [v.latency_ms for v in sent if v.latency_ms is not None]
     impls = sorted({v.implementation for v in verdicts})
