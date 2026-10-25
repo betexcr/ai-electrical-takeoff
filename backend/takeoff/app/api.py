@@ -119,7 +119,13 @@ class SheetViews:
     computed once per (document, sheet) under that key's lock and handed out as a copy.
 
     ``KeyError`` for a sheet that is not stored (the service maps it to ``not_found``). A sheet whose view cannot be
-    built (for example a rotated page) is remembered as unavailable and raises ``TakeoffError("invalid")``.
+    built raises ``TakeoffError("invalid")``. Only a deterministic failure (the page itself cannot be read, for
+    example a rotated page) is remembered; an OS error (the PDF is missing, moved or unreadable right now) is
+    retried on the next call, so restoring the file is enough.
+
+    **Lock order (the one rule):** the store lock may be held while a key lock here is taken (an export snapshot
+    and a merge transaction read views under the store lock), never the reverse. So every store read (the sheet's
+    info, the PDF path) happens *before* a key lock is taken, and nothing done under a key lock touches the store.
     """
 
     def __init__(self, store: TakeoffStore, pdf_path_of, cache_dir: Path):
@@ -141,17 +147,28 @@ class SheetViews:
         with self._lock:
             return self._key_locks.setdefault(key, threading.Lock())
 
+    def _resolve(self, document_id: str, sheet_id: str) -> tuple[TM.SheetInfo, Path]:
+        """The store reads a computation needs; called with no key lock held (the lock order above)."""
+        info = self.info(document_id, sheet_id)  # a missing sheet is not cached: it may be stored later
+        return info, Path(self.pdf_path_of(document_id))
+
     def _entry(self, document_id: str, sheet_id: str) -> dict | str:
         key = (document_id, sheet_id)
-        with self._key_lock(key):
-            if key not in self._views:
-                info = self.info(document_id, sheet_id)  # a missing sheet is not cached: it may be stored later
-                try:
-                    self._views[key] = TS.sheet_view(Path(self.pdf_path_of(document_id)), info, document_id,
-                                                     self.cache_dir)
-                except Exception as e:
-                    log.warning("sheet %s of %s cannot be displayed: %s", sheet_id, document_id[:12], _why(e))
-                    self._views[key] = _why(e)
+        hit = self._views.get(key)
+        if hit is not None:
+            return hit
+        info, pdf = self._resolve(document_id, sheet_id)
+        with self._key_lock(key):  # from here on: no store access
+            if key in self._views:
+                return self._views[key]
+            try:
+                self._views[key] = TS.sheet_view(pdf, info, document_id, self.cache_dir)
+            except OSError as e:  # missing or unreadable now: may be fixed by restoring the file, never cached
+                log.warning("sheet %s of %s cannot be displayed now: %s", sheet_id, document_id[:12], _why(e))
+                return _why(e)
+            except Exception as e:  # the page itself cannot be read: deterministic, remembered
+                log.warning("sheet %s of %s cannot be displayed: %s", sheet_id, document_id[:12], _why(e))
+                self._views[key] = _why(e)
             return self._views[key]
 
     def __call__(self, document_id: str, sheet_id: str) -> dict:
@@ -167,10 +184,13 @@ class SheetViews:
     def image(self, document_id: str, sheet_id: str) -> Path:
         view = self(document_id, sheet_id)
         key = (document_id, sheet_id)
-        with self._key_lock(key):
+        hit = self._images.get(key)
+        if hit is not None:
+            return hit
+        info, pdf = self._resolve(document_id, sheet_id)
+        with self._key_lock(key):  # from here on: no store access
             if key not in self._images:
-                info = self.info(document_id, sheet_id)
-                doc = pymupdf.open(stream=Path(self.pdf_path_of(document_id)).read_bytes(), filetype="pdf")
+                doc = pymupdf.open(stream=pdf.read_bytes(), filetype="pdf")
                 try:  # the render is cached on disk by sheet_view; this only resolves its path
                     path, _ = S.render_region_image(doc[info.page_number - 1], view["region"]["bbox_pt"], document_id,
                                                     self.cache_dir)
