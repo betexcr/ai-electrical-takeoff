@@ -24,25 +24,16 @@ const st = {
   drag: null,
 };
 
-// ---------------------------------------------------------------- coordinates
+// ---------------------------------------------------------------- coordinates / view helpers (shared, /shared/planview.js)
 
-function normToImg(u, v) {
-  const m = st.meta.image, c = m.covers;
-  return [(u - c.u0) / (c.u1 - c.u0) * m.width_px, (v - c.v0) / (c.v1 - c.v0) * m.height_px];
-}
-function imgToNorm(x, y) {
-  const m = st.meta.image, c = m.covers;
-  return [c.u0 + x / m.width_px * (c.u1 - c.u0), c.v0 + y / m.height_px * (c.v1 - c.v0)];
-}
-function imgToScreen(x, y) { return [st.view.tx + x * st.view.s, st.view.ty + y * st.view.s]; }
-function screenToImg(sx, sy) { return [(sx - st.view.tx) / st.view.s, (sy - st.view.ty) / st.view.s]; }
-function normToScreen(u, v) { const [x, y] = normToImg(u, v); return imgToScreen(x, y); }
-function screenToNorm(sx, sy) { const [x, y] = screenToImg(sx, sy); return imgToNorm(x, y); }
-function distPt(a, b) {
-  const g = st.meta.geometry;
-  return Math.hypot((a.u - b.u) * g.displayed_width_pt, (a.v - b.v) * g.displayed_height_pt);
-}
-function ptToScreenLen(pt) { return pt * st.meta.image.dpi / 72 * st.view.s; }
+const pv = makePlanView(st, {
+  viewport: document.getElementById("viewport"), image: document.getElementById("plan"), onChange: () => renderOverlay(),
+});
+const {
+  normToImg, imgToNorm, imgToScreen, screenToImg, normToScreen, screenToNorm, distPt, ptToScreenLen,
+  applyView, setView, fitView, minScale, zoomAt, centerOnNorm,
+  svg, subLabel, subtypeOptions, suggestSubtype, nearbyTokens, roomOptions,
+} = pv;
 
 // ---------------------------------------------------------------- api
 
@@ -107,33 +98,6 @@ async function refresh() { await loadSheet(st.sheetId, true); }
 
 // ---------------------------------------------------------------- view
 
-function applyView() {
-  const { s, tx, ty } = st.view;
-  document.getElementById("plan").style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
-  renderOverlay();
-}
-function setView(s, tx, ty) { st.view = { s, tx, ty }; applyView(); }
-function fitView() {
-  const vp = document.getElementById("viewport").getBoundingClientRect();
-  const m = st.meta.image;
-  const s = Math.min(vp.width / m.width_px, vp.height / m.height_px) * 0.96;
-  setView(s, (vp.width - m.width_px * s) / 2, (vp.height - m.height_px * s) / 2);
-}
-function minScale() {
-  const vp = document.getElementById("viewport").getBoundingClientRect();
-  return Math.min(vp.width / st.meta.image.width_px, vp.height / st.meta.image.height_px) * 0.25;
-}
-function zoomAt(sx, sy, factor) {
-  const s = Math.min(8, Math.max(minScale(), st.view.s * factor));
-  const [x, y] = screenToImg(sx, sy);
-  setView(s, sx - x * s, sy - y * s);
-}
-function centerOnNorm(u, v, s) {
-  const vp = document.getElementById("viewport").getBoundingClientRect();
-  const [x, y] = normToImg(u, v);
-  s = s || st.view.s;
-  setView(s, vp.width / 2 - x * s, vp.height / 2 - y * s);
-}
 function goToCell(i) {
   const cells = st.meta.cells;
   st.cellIndex = (i + cells.length) % cells.length;
@@ -147,13 +111,6 @@ function goToCell(i) {
 }
 
 // ---------------------------------------------------------------- rendering
-
-function svg(tag, attrs, parent) {
-  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
-  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
-  if (parent) parent.appendChild(el);
-  return el;
-}
 
 function renderAll() { renderTopbar(); applyView(); renderPanel(); }
 
@@ -313,44 +270,6 @@ function findSelected() {
 }
 
 function select(sel) { st.selected = sel; renderOverlay(); renderDetails(); }
-
-function nearbyTokens(point) {
-  const r = st.config.tolerances_pt.token_suggest;
-  return st.meta.tokens.map((t) => ({ t, d: distPt(point, t.center) })).filter((x) => x.d <= r).sort((a, b) => a.d - b.d);
-}
-
-function suggestSubtype(category, tokens) {
-  const rules = st.config.taxonomy.token_rules;
-  for (const t of tokens) {
-    const rule = rules[t.text.toUpperCase()];
-    if (rule && rule[category]) return rule[category][0];
-  }
-  const subs = st.config.taxonomy.categories[category].map((s) => s.name);
-  return category === "switch" ? "standard" : subs[0];
-}
-
-function roomOptions(current) {
-  const rooms = st.meta.rooms;
-  const counts = {};
-  rooms.forEach((r) => { counts[r.name] = (counts[r.name] || 0) + 1; });
-  return `<option value="">— room —</option>` + rooms.map((r, i) => {
-    const label = r.kind === "labeled" && counts[r.name] > 1 ? `${r.name} @(${Math.round(r.label_bbox_pt[0])},${Math.round(r.label_bbox_pt[1])})` : r.name;
-    const same = current && current.kind === r.kind && current.name === r.name &&
-      JSON.stringify(current.label_bbox_pt || null) === JSON.stringify(r.label_bbox_pt || null);
-    return `<option value="${i}" ${same ? "selected" : ""}>${label}</option>`;
-  }).join("");
-}
-
-// Subtypes are stored by their stable id (s.name) but shown with the sheets' exact legend wording.
-function subLabel(category, subtype) {
-  const s = (st.config.taxonomy.categories[category] || []).find((x) => x.name === subtype);
-  return s ? s.label : subtype;
-}
-
-function subtypeOptions(category, current) {
-  return st.config.taxonomy.categories[category].map((s) =>
-    `<option value="${s.name}" ${s.name === current ? "selected" : ""}>${s.label}</option>`).join("");
-}
 
 function deviceForm(prefix, v, tokensNear) {
   const linked = new Set((v.text_tokens || []).map((t) => t.text + JSON.stringify(t.bbox_pt)));
@@ -675,11 +594,6 @@ function stopPlacing() { st.placing = false; document.getElementById("viewport")
 
 // ---------------------------------------------------------------- input
 
-function localXY(e) {
-  const r = document.getElementById("viewport").getBoundingClientRect();
-  return [e.clientX - r.left, e.clientY - r.top];
-}
-
 function placeAt(sx, sy) {
   const [u, v] = screenToNorm(sx, sy);
   if (u < 0 || u > 1 || v < 0 || v > 1) return;
@@ -690,24 +604,7 @@ function placeAt(sx, sy) {
 }
 
 function setupInput() {
-  const vp = document.getElementById("viewport");
-  vp.addEventListener("wheel", (e) => { e.preventDefault(); const [x, y] = localXY(e); zoomAt(x, y, Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
-  vp.addEventListener("mousedown", (e) => {
-    vp.focus();
-    const [x, y] = localXY(e);
-    st.drag = { x, y, tx: st.view.tx, ty: st.view.ty, moved: false, shift: e.shiftKey };
-  });
-  window.addEventListener("mousemove", (e) => {
-    if (!st.drag) return;
-    const [x, y] = localXY(e);
-    if (Math.hypot(x - st.drag.x, y - st.drag.y) > 3) st.drag.moved = true;
-    if (st.drag.moved) setView(st.view.s, st.drag.tx + x - st.drag.x, st.drag.ty + y - st.drag.y);
-  });
-  window.addEventListener("mouseup", (e) => {
-    const d = st.drag; st.drag = null;
-    if (!d || d.moved) return;
-    if (st.placing || d.shift) placeAt(d.x, d.y);
-  });
+  pv.attachPanZoom({ onClick: (d) => { if (st.placing || d.shift) placeAt(d.x, d.y); } });
   window.addEventListener("keydown", (e) => {
     if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {
       if (e.key === "Enter" && st.selected?.type === "new" && document.activeElement.tagName !== "TEXTAREA") { e.preventDefault(); saveNew(); }

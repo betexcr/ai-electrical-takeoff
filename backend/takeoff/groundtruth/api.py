@@ -28,6 +28,7 @@ from takeoff.groundtruth.review import BlindScanInProgress, GateError, PhaseErro
 from takeoff.groundtruth.store import NotFound, Store, StoreError
 
 STATIC_DIR = Path(__file__).resolve().parents[2] / "reviewer" / "static"
+SHARED_DIR = Path(__file__).resolve().parents[2] / "shared" / "static"
 
 
 class Body(BaseModel):
@@ -375,5 +376,7 @@ def create_app(pdf_path: Path, db_path: Path, cache_dir: Path, export_dir: Path,
 
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+    if SHARED_DIR.exists():
+        app.mount("/shared", StaticFiles(directory=SHARED_DIR), name="shared")
 
     return app
