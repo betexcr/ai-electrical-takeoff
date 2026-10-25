@@ -26,6 +26,7 @@ from typing import Any, Literal
 
 from takeoff.app import counts as COUNTS
 from takeoff.app import flags as F
+from takeoff.app.merge import verify_usable_for
 from takeoff.app.models import BulkAction, BulkBefore, Device, Evidence, Flag, ModelVerdict, RunDetection
 from takeoff.app.rooms import propose_room
 from takeoff.app.store import TakeoffStore
@@ -688,6 +689,14 @@ class TakeoffService:
             return {"status": status, "text": text + (FAKE_SUFFIX if impl == "fake" else ""),
                     "implementation": impl, "verdict_id": verdict.id if verdict is not None else None, **extra}
 
+        def discover_verdict(rows_: list[dict]) -> ModelVerdict | None:
+            """The discover verdict behind AI-discovered evidence, so a test double is labelled (M-b)."""
+            for r in rows_:
+                det = r["detection"]
+                if det is not None and det.source == "ai_discover" and det.verdict_id in by_id:
+                    return by_id[det.verdict_id]
+            return None
+
         def disagrees(f: Flag) -> dict:
             verdict = by_id.get(f.details.get("verdict_id"))
             extra = dict(flag_id=f.id, open=f.open, resolution=f.resolution)
@@ -714,10 +723,12 @@ class TakeoffService:
         for v in verdicts:
             if v.kind != "verify" or v.run_id != latest or not det_ids & set(v.detection_ids):
                 continue
-            if v.error is not None:
-                reason = f"AI error: {v.error.get('code', 'error')}"
+            mine = sorted(det_ids & set(v.detection_ids))
+            usable = [d for d in mine if verify_usable_for(v, d)]  # a parse error spares the batch's other items
+            if not usable:
+                reason = f"AI error: {(v.error or {}).get('code', 'error')}"
                 return out("not_verified", f"AI second opinion: not verified ({reason})", v, reason=reason)
-            for det_id in sorted(det_ids & set(v.detection_ids)):
+            for det_id in usable:
                 ag = (v.agreement or {}).get(det_id)
                 if ag is None:
                     continue
@@ -728,10 +739,11 @@ class TakeoffService:
                 return out("disagrees", f"AI second opinion: disagrees ({what})", v, what=what)
             reason = "no usable AI answer"
             return out("not_verified", f"AI second opinion: not verified ({reason})", v, reason=reason)
-        if any(r["evidence"].outcome == "ai_corroborates" for r in here):
-            return out("agrees", "AI second opinion: agrees", None, source="discover")
+        corroborating = [r for r in here if r["evidence"].outcome == "ai_corroborates"]
+        if corroborating:
+            return out("agrees", "AI second opinion: agrees", discover_verdict(corroborating), source="discover")
         if device.origin == "ai" and any(r["detection"] is not None and r["detection"].source == "ai_discover"
                                          for r in here):
-            return out("ai_only", AI_ONLY_TEXT)
+            return out("ai_only", AI_ONLY_TEXT, discover_verdict(here))
         reason = "not checked by AI"
         return out("not_verified", f"AI second opinion: not verified ({reason})", reason=reason)

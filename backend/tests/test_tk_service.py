@@ -444,3 +444,61 @@ def test_ai_summary_reflects_resolution_and_missing_rows(env):
         seed_flag(store, dev, "model_disagrees", verdict_id="v-x", ai_category=ai_category, ai_subtype=None,
                   rationale=None, source="verify")
         assert svc.device_detail(dev.id)["ai_summary"]["text"] == f"AI second opinion: disagrees ({what})"
+
+
+def test_partial_parse_batch_gives_each_parsed_item_its_own_verdict(env):
+    """M-a (ruling R15): a parse_error naming some items of a batch leaves the other items' answers usable."""
+    store, svc = env
+    common = dict(run_id=RUN_ID, sheet_id=SHEET, kind="verify", model="claude-opus-5-5", implementation="claude",
+                  prompt_version="ai-verify-prompt/1", ai_version="ai-verify/1")
+    good = seed_detection(store, "det-good")
+    bad = seed_detection(store, "det-bad", pt=NEAR_HALL)
+    other = seed_detection(store, "det-other", pt=(170.0, 150.0), category="receptacle", subtype="gfi")
+    store.insert("verdicts", TM.ModelVerdict(
+        id="v-part", detection_ids=[good.id, bad.id, other.id],
+        output={"verdicts": [{"item_id": good.id, "category": "switch", "subtype": "standard", "is_device": True,
+                              "uncertain": False},
+                             {"item_id": other.id, "category": "switch", "subtype": "dimmer", "is_device": True,
+                              "uncertain": False}]},
+        agreement={good.id: TM.Agreement(category=True, subtype=True),
+                   other.id: TM.Agreement(category=False, subtype=False)},
+        error={"code": "parse_error", "detection_ids": [bad.id]}, **common), "system")
+    seed_device(store, "good", detection=good)
+    seed_device(store, "bad", pt=NEAR_HALL, room=HALL, detection=bad)
+    seed_device(store, "other", pt=(170.0, 150.0), category="receptacle", subtype="gfi", detection=other)
+    assert svc.device_detail("good")["ai_summary"]["text"] == "AI second opinion: agrees"
+    assert svc.device_detail("other")["ai_summary"]["text"] == "AI second opinion: disagrees (switch / dimmer)"
+    assert svc.device_detail("bad")["ai_summary"]["text"] == "AI second opinion: not verified (AI error: parse_error)"
+
+
+def test_discover_summaries_of_a_test_double_are_labelled(env, tmp_path):
+    """M-b: discover corroboration and AI-only candidates from the fake say so, like every other AI line."""
+    store, svc = env
+    common = dict(run_id=RUN_ID, sheet_id=SHEET, kind="discover", model="fake-discoverer", implementation="fake",
+                  prompt_version="ai-discover-prompt/1", ai_version="ai-discover/1")
+    store.insert("verdicts", TM.ModelVerdict(id="v-tile-1", tile_id="t1", **common), "system")
+    store.insert("verdicts", TM.ModelVerdict(id="v-tile-2", tile_id="t2", **common), "system")
+    det = seed_detection(store, "det-1")
+    corr = seed_detection(store, "ai-1", pt=(131.0, 150.0), source="ai_discover", verdict_id="v-tile-1")
+    seed_device(store, "d1", detection=det)
+    store.insert("evidence", TM.Evidence(id="ev:ai-1", device_id="d1", detection_id=corr.id, run_id=RUN_ID,
+                                         outcome="ai_corroborates", distance_pt=1.0), "system")
+    only = seed_detection(store, "ai-2", pt=NEAR_HALL, source="ai_discover", verdict_id="v-tile-2")
+    a = seed_device(store, "a2", pt=NEAR_HALL, room=HALL, origin="ai", detection=only)
+    seed_flag(store, a, "ai_only_candidate", verdict_id="v-tile-2", tile_id="t2", rationale=None)
+    s1 = svc.device_detail("d1")["ai_summary"]
+    assert (s1["status"], s1["implementation"]) == ("agrees", "fake")
+    assert s1["text"] == "AI second opinion: agrees · test double, not a model"
+    s2 = svc.device_detail("a2")["ai_summary"]
+    assert (s2["status"], s2["implementation"]) == ("ai_only", "fake")
+    assert s2["text"].endswith(" · test double, not a model")
+    # the export's review rows carry the same label (ai_implementation, ai_summary)
+    import csv
+
+    from takeoff.app.export import export_takeoff
+
+    out = export_takeoff(svc, DOC, tmp_path / "exports", ACTOR)
+    with open(out / "devices_review.csv", encoding="utf-8", newline="") as fh:
+        rows = {r["id"]: r for r in csv.DictReader(fh)}
+    for did in ("d1", "a2"):
+        assert rows[did]["ai_implementation"] == "fake" and rows[did]["ai_summary"].endswith("not a model"), rows[did]
