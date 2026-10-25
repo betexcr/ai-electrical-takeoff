@@ -77,11 +77,11 @@
       "shows": "Export: the status bar states 'Export incomplete' with the manifest's reasons (A1's flagged proposals and every A2-A4 detection still await review); the local export path is shortened to its directory name for this screenshot"
     }
   ],
-  "analysis_seconds": 89.4,
+  "analysis_seconds": 91.6,
   "run_id": "run-001",
   "detector": "det0",
   "detector_version": "det/0",
-  "merge_version": "takeoff-merge/1",
+  "merge_version": "takeoff-merge/2",
   "sheets": {
     "A1-111": {
       "status": "done",
@@ -336,7 +336,7 @@
     }
   },
   "export": {
-    "source_dir_name": "tk_001_20261025T203725Z",
+    "source_dir_name": "tk_001_20261025T215744Z",
     "copied_to": "export/ (next to this run.json)",
     "complete": false,
     "incomplete_reasons": [
@@ -390,6 +390,6 @@
       "room_key": "BEDROOM / STUDIO"
     }
   },
-  "finished_at": "2026-10-25T20:37:25Z",
+  "finished_at": "2026-10-25T21:57:45Z",
   "evidence": "published to reports/takeoff/demo/"
 }

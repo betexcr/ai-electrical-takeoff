@@ -6,7 +6,7 @@
   "official_records": 43,
   "review_records": 270
  },
- "created_at": "2026-10-25T20:37:25.545+00:00",
+ "created_at": "2026-10-25T21:57:44.918+00:00",
  "created_by": "e2e",
  "document_name": "Escondido_Electrical_Plans_Ceiling_Fans.pdf",
  "document_sha256": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
@@ -29,7 +29,7 @@
   "270 detected devices awaiting review",
   "94 open room_ambiguous flags"
  ],
- "merge_version": "takeoff-merge/1",
+ "merge_version": "takeoff-merge/2",
  "open_flags_by_type": {
   "room_ambiguous": 94
  },
@@ -242,13 +242,13 @@
      }
     }
    },
-   "created_at": "2026-10-25T20:35:52.394+00:00",
+   "created_at": "2026-10-25T21:56:09.639+00:00",
    "created_by": "e2e",
    "detector": "det0",
    "detector_version": "det/0",
-   "finished_at": "2026-10-25T20:37:21.072+00:00",
+   "finished_at": "2026-10-25T21:57:40.801+00:00",
    "id": "run-001",
-   "merge_version": "takeoff-merge/1",
+   "merge_version": "takeoff-merge/2",
    "sheets": {
     "A1-111": {
      "message": null,
