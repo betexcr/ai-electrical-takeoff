@@ -192,7 +192,11 @@ Append dated entries for architecture changes, model/prompt/schema releases, eva
   - **Takeoff workflow (2026-10-25):** Tasks 0–7 of the approved plan are done and reviewed on branch `takeoff-workflow`: store, sheet intake, room proposal, merge rules, flags, service, and bulk accept.
     - 412 non-browser tests pass.
     - Room proposals are weak on the held-out sheets: 48.8% correct (`reports/takeoff/room_proposal_eval.md`). They are defaults the reviewer corrects, never an accuracy claim.
-    - Next: the AI stages (Tasks 8–9), then the analyzer, export, API and UI.
+    - **Update after Tasks 8–12 (2026-10-25):**
+      - Done: AI verify (`ai-verify/1`) and AI discovery (`ai-discover/1`), the analyzer (immutable runs, safe re-analysis, no-legend handling), export (`takeoff-export/1`, a one-snapshot read, reconciling totals, honest completeness), and the API with the `serve` command (port 8766).
+      - 504 non-browser tests pass.
+      - **Live AI not run:** the safe preflight (no request sent) found no Anthropic API credentials for the app in this environment. The live preflight, `eval_ai_verifier.py` and `eval_ai_discovery.py` are blocked until the user configures their own `ANTHROPIC_API_KEY` or `ant auth login`. No AI accuracy figures exist.
+      - Next: shared plan-view JS, the takeoff page, then the demo path (Tasks 13–15).
   - Held-out F1 0.95 (P 0.92 / R 0.98), subtype accuracy 0.95. Baseline: best generator F1 0.79.
   - Upward biases are recorded in R1-04: candidate-seeded ground truth, single reviewer, and one plan set.
   - No app workflow exists yet. R1-01 to R1-03 are not started.
