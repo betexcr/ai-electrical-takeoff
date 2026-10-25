@@ -5,6 +5,8 @@ from __future__ import annotations
 import copy
 import random
 
+import pytest
+
 from takeoff.app import models as TM
 from takeoff.app.merge import MergeResult, merge_sheet
 from takeoff.app.rooms import RoomProposal
@@ -152,12 +154,26 @@ def test_two_possible_devices_create_flagged_proposal():
 
 def test_second_claim_on_same_device_becomes_ambiguous_proposal():
     existing = dev("x1", pt=(100.0, 200.0))
-    near, far = det("d1", pt=(105.0, 200.0)), det("d2", pt=(101.0, 200.0))  # d2 is nearer, so it claims
-    res = run_merge([near, far], [existing])
+    far, near = det("d1", pt=(105.0, 200.0)), det("d2", pt=(101.0, 200.0))  # d2 is nearer, so it claims
+    res = run_merge([far, near], [existing])
     assert outcomes(res) == {("d2", "x1"): "confirmed", ("d1", "run-002:d1"): "created"}
     assert [d.id for d in res.new_devices] == ["run-002:d1"]
     [f] = res.flags
     assert (f.type, f.severity, f.device_id, f.details) == ("ambiguous_match", "review", "run-002:d1", {"possible_device_ids": ["x1"]})
+
+
+def test_nearest_claimant_wins_even_when_it_sorts_later():
+    existing = dev("x1", pt=(100.0, 200.0))
+    sorts_first = det("d1", pt=(100.0, 194.0))  # y=194 sorts first, but is 6.0 away
+    nearer = det("d2", pt=(100.0, 201.0))       # y=201 sorts later, 1.0 away: it must win
+    for order in ([sorts_first, nearer], [nearer, sorts_first]):
+        res = run_merge(order, [existing])
+        assert outcomes(res) == {("d2", "x1"): "confirmed", ("d1", "run-002:d1"): "created"}
+        assert [(f.type, f.device_id, f.details) for f in res.flags] == [
+            ("ambiguous_match", "run-002:d1", {"possible_device_ids": ["x1"]})]
+    # equal distances fall back to the sort order (y, x, id), deterministically
+    tie = run_merge([det("d3", pt=(100.0, 203.0)), det("d4", pt=(100.0, 197.0))], [existing])
+    assert outcomes(tie) == {("d4", "x1"): "confirmed", ("d3", "run-002:d3"): "created"}
 
 
 def test_rejected_device_redetected_stays_rejected_with_evidence():
@@ -178,12 +194,27 @@ def test_not_redetected_severity_by_origin():
         ("det", "not_redetected", "review"), ("man", "not_redetected", "info"),
         ("aid", "not_redetected", "info"), ("acc", "not_redetected", "review")}
     assert {f.id for f in res.flags} == {f"run-002:{d}:not_redetected" for d in ("det", "man", "aid", "acc")}
-    assert all(f.details == {} or isinstance(f.details, dict) for f in res.flags)
+    assert all(f.details == {} for f in res.flags)
 
 
 def test_confirmed_device_is_not_flagged_not_redetected():
     res = run_merge([det("d1")], [dev("x1")])
     assert flags_of(res, "not_redetected") == []
+
+
+def test_device_seen_only_by_other_category_det0_is_not_flagged_not_redetected():
+    res = run_merge([det("d1", category="receptacle", subtype="duplex")], [dev("x1")])
+    assert [f.type for f in res.flags] == ["classification_conflict"]
+
+
+def test_device_seen_only_by_subtype_conflict_is_not_flagged_not_redetected():
+    res = run_merge([det("d1", subtype="dimmer")], [dev("x1")])
+    assert [f.type for f in res.flags] == ["classification_conflict"]
+
+
+def test_rejected_unseen_device_gets_no_flag():
+    res = run_merge([], [dev("x1", state="rejected"), dev("x2", pt=(300.0, 300.0), state="rejected", origin="manual")])
+    assert res.flags == [] and res.evidence == [] and res.new_devices == []
 
 
 def test_human_set_fields_never_change():
@@ -207,9 +238,34 @@ def test_deleted_devices_are_ignored():
     assert res.flags == []  # neither a match, an ambiguity nor not_redetected
 
 
-def test_devices_on_other_sheets_are_not_matches():
+def test_mixed_sheets_raise_and_empty_lists_are_fine():
     other = dev("x1", sheet_id="A2-111")
-    res = run_merge([det("d1")], [other])
+    with pytest.raises(ValueError, match="one sheet"):
+        merge_sheet(RUN, [det("d1")], [other], propose, now=NOW)  # detection vs device
+    with pytest.raises(ValueError, match="one sheet"):
+        merge_sheet(RUN, [det("d1"), det("d2", sheet_id="A2-111")], [], propose, now=NOW)  # two detections
+    with pytest.raises(ValueError, match="one sheet"):
+        merge_sheet(RUN, [], [dev("x1"), other], propose, now=NOW)  # two devices
+    with pytest.raises(ValueError, match="one sheet"):
+        merge_sheet(RUN, [], [dev("x1"), dev("x2", sheet_id="A2-111", deleted=True)], propose, now=NOW)
+    assert run_merge([], []) == MergeResult()
+    assert run_merge([det("d1")], []).new_devices[0].sheet_id == SHEET
+    assert [f.type for f in run_merge([], [dev("x1")]).flags] == ["not_redetected"]
+
+
+def test_device_without_point_pt_raises_unless_deleted():
+    with pytest.raises(ValueError, match="point_pt"):
+        merge_sheet(RUN, [det("d1")], [dev("x1", point_pt=None)], propose, now=NOW)
+    res = run_merge([det("d1")], [dev("x1", point_pt=None, deleted=True)])  # deleted devices are ignored
+    assert outcomes(res) == {("d1", "run-002:d1"): "created"}
+
+
+def test_diagonal_exact_tolerance_survives_float_rounding():
+    # (3.6, 4.8) is exactly 6 away on paper; in floats hypot gives 6.000000000000005
+    assert ((103.6 - 100.0) ** 2 + (204.8 - 200.0) ** 2) ** 0.5 > 6.0
+    res = run_merge([det("d1", pt=(100.0, 200.0))], [dev("x1", pt=(103.6, 204.8))])
+    assert outcomes(res) == {("d1", "x1"): "confirmed"}
+    res = run_merge([det("d1", pt=(100.0, 200.0))], [dev("x1", pt=(103.6, 204.81))])
     assert outcomes(res) == {("d1", "run-002:d1"): "created"}
 
 
@@ -313,7 +369,29 @@ def test_ai_point_near_same_category_corroborates():
     assert res.new_devices == []
     assert [(e.device_id, e.detection_id, e.outcome, e.distance_pt) for e in res.evidence] == [("x1", "a1", "ai_corroborates", 3.0)]
     assert flags_of(res, "model_disagrees") == [] and flags_of(res, "ai_only_candidate") == []
-    assert flags_of(res, "not_redetected")[0].device_id == "x1"  # corroboration by AI is not a det/0 re-detection
+    assert flags_of(res, "not_redetected") == []  # AI corroboration at the same position is a re-detection (R5)
+
+
+def test_ai_origin_device_corroborated_by_discover_is_not_flagged_not_redetected():
+    ai_dev = dev("x1", origin="ai", pt=(500.0, 500.0))
+    unseen = dev("x2", origin="ai", pt=(900.0, 900.0))
+    res = run_merge([ai("a1", pt=(502.0, 500.0))], [ai_dev, unseen])
+    assert outcomes(res) == {("a1", "x1"): "ai_corroborates"}
+    assert [(f.type, f.device_id, f.severity) for f in res.flags] == [("not_redetected", "x2", "info")]
+
+
+def test_mixed_neighbourhood_same_category_nearest_wins_over_nearer_other_category():
+    same = dev("x1", category="switch", pt=(100.0, 200.0))            # 4.0 away
+    other = dev("x2", category="receptacle", subtype="duplex", pt=(100.0, 202.0))  # 2.0 away, nearer
+    res = run_merge([ai("a1", pt=(100.0, 204.0), category="switch")], [other, same])
+    assert res.new_devices == []
+    assert outcomes(res) == {("a1", "x1"): "ai_corroborates"}
+    assert flags_of(res, "model_disagrees") == []
+    assert [(f.type, f.device_id) for f in res.flags] == [("not_redetected", "x2")]
+    # two same-category neighbours: the nearest one is linked
+    near_same = dev("x3", category="switch", pt=(100.0, 203.0))
+    res2 = run_merge([ai("a1", pt=(100.0, 204.0), category="switch")], [same, near_same])
+    assert outcomes(res2) == {("a1", "x3"): "ai_corroborates"}
 
 
 def test_ai_point_near_other_category_flags_model_disagrees():
@@ -322,6 +400,7 @@ def test_ai_point_near_other_category_flags_model_disagrees():
     res = run_merge([a], [existing])
     assert res.new_devices == []
     assert outcomes(res) == {("a1", "x1"): "conflict"}
+    assert flags_of(res, "not_redetected") == []  # a discover conflict at the same position is a re-detection (R5)
     [f] = flags_of(res, "model_disagrees")
     assert (f.device_id, f.severity, f.id) == ("x1", "review", "run-002:a1:model_disagrees")
     assert f.details == {"verdict_id": "v-a1", "ai_category": "receptacle", "ai_subtype": "duplex",
@@ -375,7 +454,23 @@ def test_det0_is_processed_before_ai_regardless_of_position():
     assert [f.type for f in res.flags] == ["model_disagrees"]
 
 
-def test_ai_does_not_touch_for_not_redetected_and_det0_ignores_ai_created_devices():
-    # a det/0 detection never matches a device created by AI in the same merge (det/0 is processed first)
-    res = run_merge([det("d1", pt=(100.0, 200.0)), ai("a1", pt=(300.0, 300.0))])
-    assert {d.id for d in res.new_devices} == {"run-002:d1", "run-002:a1"}
+def test_other_category_det0_on_rejected_device_keeps_the_flag():
+    existing = dev("x1", category="switch", state="rejected")
+    res = run_merge([det("d1", category="receptacle", subtype="duplex")], [existing])
+    assert res.new_devices == []
+    assert outcomes(res) == {("d1", "x1"): "conflict"}
+    [f] = res.flags
+    assert (f.type, f.severity, f.device_id, f.details["kind"]) == ("classification_conflict", "review", "x1", "category")
+
+
+def test_room_dict_from_propose_is_copied_not_aliased():
+    room = {"kind": "labeled", "name": "Kitchen", "label_bbox_pt": [10.0, 10.0, 50.0, 20.0], "bbox": None}
+    snapshot = copy.deepcopy(room)
+    res = merge_sheet(RUN, [det("d1"), det("d2", pt=(300.0, 300.0))], [],
+                      lambda pt: RoomProposal(room=room, ambiguous=False, reason=None), now=NOW)
+    assert room == snapshot  # the proposal's dict is not mutated
+    room["name"] = "Changed"
+    room["label_bbox_pt"][0] = 999.0
+    assert [d.room.name for d in res.new_devices] == ["Kitchen", "Kitchen"]
+    assert [d.room.label_bbox_pt for d in res.new_devices] == [(10.0, 10.0, 50.0, 20.0)] * 2
+    assert res.new_devices[0].room is not res.new_devices[1].room

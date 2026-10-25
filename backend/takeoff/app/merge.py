@@ -6,8 +6,15 @@ records and new *proposed* devices. This module is pure (no store, no I/O, input
 and deterministic: shuffled inputs give an equal ``MergeResult``, with ids derived from the run,
 the detection and the device (spec §5.3, §5.9.2, §5.9.3).
 
-Callers pass the devices of the sheet being merged. Distances are Euclidean, in PDF points
-(``point_pt``), and the tolerance boundary is inclusive.
+A merge is for exactly one sheet: the detections and devices passed in must all share one
+``sheet_id`` (``ValueError`` otherwise), and every non-deleted device needs a ``point_pt``.
+Distances are Euclidean, in PDF points (``point_pt``), and the tolerance boundary is inclusive
+(with a tiny epsilon so that float rounding cannot push an exact-tolerance match outside it).
+
+A device counts as re-detected, and so never gets ``not_redetected``, when this run produced
+same-position evidence for it: det/0 ``confirmed``, ``conflict`` or ``rejected_redetected``, or an AI
+``ai_corroborates`` or discover ``conflict``. A device that is only a candidate of an ambiguous
+(2+) detection is not re-detected.
 """
 
 from __future__ import annotations
@@ -24,6 +31,7 @@ from takeoff.groundtruth.models import RoomRef, utcnow
 from takeoff.groundtruth.taxonomy import default_status
 
 MATCH_TOL_PT = 6.0
+_EPS = 1e-9
 _ROOM_KEYS = ("kind", "name", "label_bbox_pt")
 
 
@@ -44,13 +52,11 @@ def _dist(a: tuple[float, float], b: tuple[float, float]) -> float:
 
 
 def _possible(det: RunDetection, pool: list[Device], tol_pt: float) -> list[tuple[float, Device]]:
-    """Devices of the detection's sheet within the tolerance, nearest first."""
+    """Devices within the tolerance (inclusive), nearest first. The pool is a single sheet's devices."""
     found = []
     for dev in pool:
-        if dev.sheet_id != det.sheet_id or dev.point_pt is None:
-            continue
         d = _dist(det.point_pt, dev.point_pt)
-        if d <= tol_pt:
+        if d <= tol_pt + _EPS:
             found.append((d, dev))
     return sorted(found, key=lambda t: (t[0], t[1].id))
 
@@ -73,7 +79,13 @@ def merge_sheet(
     now: str | None = None,
 ) -> MergeResult:
     now = utcnow() if now is None else now
+    sheets = {d.sheet_id for d in detections} | {d.sheet_id for d in devices}
+    if len(sheets) > 1:
+        raise ValueError(f"merge_sheet takes one sheet's detections and devices, got sheets {sorted(sheets)}")
     live = [d for d in devices if not d.deleted]
+    unplaced = sorted(d.id for d in live if d.point_pt is None)
+    if unplaced:
+        raise ValueError(f"devices without point_pt cannot be matched: {unplaced}")
     ordered = sorted(detections, key=_order)
     det0s = [d for d in ordered if d.source == "det0"]
     ais = [d for d in ordered if d.source == "ai_discover"]
@@ -81,7 +93,7 @@ def merge_sheet(
     new_devices: dict[str, Device] = {}
     evidence: dict[str, Evidence] = {}
     flags: dict[str, Flag] = {}
-    touched: set[str] = set()          # existing devices matched by a det/0 detection
+    touched: set[str] = set()          # existing devices with same-position evidence from this run
     det_device: dict[str, Device] = {}  # det/0 detection id -> the device it created or touched
 
     def add_evidence(det: RunDetection, dev: Device, outcome: str, distance: float) -> None:
@@ -188,6 +200,7 @@ def merge_sheet(
                      {"verdict_id": det.verdict_id, "tile_id": tile_id, "rationale": det.rationale})
             continue
         dist, dev = same[0] if same else poss[0]
+        touched.add(dev.id)  # AI corroboration or a discover conflict counts as re-detection (spec §5.3)
         rejected = dev.review_state == "rejected"
         if same:
             add_evidence(det, dev, "rejected_redetected" if rejected else "ai_corroborates", dist)
