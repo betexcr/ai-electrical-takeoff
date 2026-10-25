@@ -1,2 +1,3 @@
 # Ground-truth exports are hashed in their manifest: keep the bytes exact on every checkout.
 data/ground_truth/exports/** -text
+reports/takeoff/demo/** -text

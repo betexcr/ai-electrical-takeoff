@@ -12,3 +12,7 @@ reports/feasibility/**/*_nowm_*.png
 # Ground-truth working store and render cache (exports under data/ground_truth/exports are kept).
 data/ground_truth/working.sqlite*
 data/ground_truth/cache/
+
+# Brainstorming companion mockups (local only).
+.superpowers/
+data/takeoff/
