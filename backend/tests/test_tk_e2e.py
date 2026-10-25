@@ -456,8 +456,18 @@ def test_move_create_reject_delete_from_the_plan(page, server):
     assert dist_pt(m, manual["point"], nw) <= 0.5
     assert page.locator(marker(manual["id"])).count() == 1
 
-    # reject: never counted, shown crossed and faded
+    # a detection is rejected, not deleted (final review I4): Delete is disabled, the Delete key only explains
     select_device(page, d1["id"])
+    delete_msg = ("Use Reject for a detection that is not a real device. Reject keeps it from being proposed again; "
+                  "Delete is for manual mistakes and duplicates.")
+    assert page.locator("#delete").is_disabled() and page.get_attribute("#delete", "title") == delete_msg
+    page.locator("#viewport").focus()
+    page.keyboard.press("Delete")
+    page.wait_for_selector("#toast.show.error")
+    assert page.text_content("#toast") == delete_msg
+    assert server.device(d1["id"])["device"]["deleted"] is False
+
+    # reject: never counted, shown crossed and faded
     page.click("#reject-selected")
     page.wait_for_selector(f"{marker(d1['id'])}.state-rejected")
     assert server.device(d1["id"])["device"]["review_state"] == "rejected"

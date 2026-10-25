@@ -497,6 +497,11 @@ def test_error_codes_and_statuses(make, sha, tmp_path):
         "not_found")
 
     dev = eligible["ids"][0]
+    body = err(c.post(f"/api/devices/{dev}/delete", json={"reason": "not a device"}), 400,
+               "detection_cannot_be_deleted")  # final review I4: reject it instead
+    assert body["message"] == ("Use Reject for a detection that is not a real device. Reject keeps it from being "
+                               "proposed again; Delete is for manual mistakes and duplicates.")
+    assert c.get(f"/api/devices/{dev}").json()["device"]["deleted"] is False
     flag = c.app.state.store.insert("flags", TM.Flag(device_id=dev, document_id=sha, sheet_id=A1,
                                                      type="classification_conflict", severity="review",
                                                      details={}, run_id=run["id"]), "test")

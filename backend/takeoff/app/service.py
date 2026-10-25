@@ -40,6 +40,7 @@ ERROR_STATUS = {
     "reason_required": 400,
     "ai_disagreement_reason_required": 409,
     "manual_cannot_be_rejected": 400,
+    "detection_cannot_be_deleted": 400,
     "blocked_by_flags": 409,
     "bulk_count_changed": 409,
     "run_in_progress": 409,
@@ -75,6 +76,11 @@ SKIPPED_CHANGED = "changed_after_bulk"
 
 AI_ONLY_TEXT = "AI-proposed location: check position before accepting"
 FAKE_SUFFIX = " · test double, not a model"
+
+# Delete is for mistaken manual entries and duplicates; reject is the decision on a detection (spec §5.2, final
+# review I4). A deleted detection would otherwise come back as a fresh proposal on the next Analyze.
+DELETE_DETECTED_MESSAGE = ("Use Reject for a detection that is not a real device. Reject keeps it from being "
+                           "proposed again; Delete is for manual mistakes and duplicates.")
 
 
 class TakeoffError(Exception):
@@ -250,6 +256,8 @@ class TakeoffService:
             return self._write(conn, before, new, actor, "reject", now)
 
     def delete(self, device_id: str, actor: str, reason: str) -> Device:
+        """Soft-delete a manual device, or a detector / AI device with an open ``duplicate_warning`` (the duplicate
+        of another device); any other detection is refused with ``detection_cannot_be_deleted`` (reject it)."""
         if not _has_text(reason):
             raise TakeoffError("reason_required", "deleting a device requires a reason")
         found = self._get_device(device_id)
@@ -257,6 +265,10 @@ class TakeoffService:
         now = utcnow()
         with self.store.transaction() as conn:
             before = self._live_device(device_id)
+            if before.origin != "manual" and not any(
+                    f.open and f.device_id == device_id and f.type == "duplicate_warning"
+                    for f in self.store.list("flags", before.sheet_id)):
+                raise TakeoffError("detection_cannot_be_deleted", DELETE_DETECTED_MESSAGE)
             new = before.model_copy(update={"deleted": True, "delete_reason": reason.strip()})
             open_flags = self._sync(conn, sheet, actor, now, pending=[new])
             # A deleted device is in no figure; its decision flags would otherwise stay open forever.

@@ -99,6 +99,11 @@ function flagsByDevice() {
 
 function openFlagsOf(id) { return st.openFlags.filter((f) => f.device_id === id && f.open); }
 
+// Delete is for manual mistakes and duplicates; a detection that is not a device is rejected (service.delete).
+const DELETE_DETECTED_MSG = "Use Reject for a detection that is not a real device. Reject keeps it from being " +
+  "proposed again; Delete is for manual mistakes and duplicates.";
+function canDelete(d) { return d.origin === "manual" || openFlagsOf(d.id).some((f) => f.type === "duplicate_warning"); }
+
 function subName(category, subtype) {
   if (subtype === null || subtype === undefined) return "";
   return (st.config.taxonomy.categories[category] || []).some((s) => s.name === subtype) ? subLabel(category, subtype) : subtype;
@@ -672,7 +677,7 @@ function renderDevice({ keepForm = false } = {}) {
       <div id="move-note" class="muted">${st.pendingPoint ? "New position set: Save to apply it (Esc to cancel)." : ""}</div>
       <button class="primary" id="save" type="button">Save</button>
       <button id="move" type="button">Move</button>
-      <button id="delete" type="button">Delete…</button>
+      <button id="delete" type="button"${canDelete(dv) ? "" : ` disabled title="${esc(DELETE_DETECTED_MSG)}"`}>Delete…</button>
       <span class="muted">Save is a correction: a proposed device is accepted unless a flag still blocks it.</span>
     </div>` +
     `<div id="history">${historyHtml(det)}</div>`;
@@ -851,6 +856,7 @@ async function rejectSelected() {
 async function deleteSelected() {
   const dv = selectedDevice();
   if (!dv) return;
+  if (!canDelete(dv)) { toast(DELETE_DETECTED_MSG, true); return; } // Del/Backspace on a detection
   const reason = prompt("Reason for deleting this device?");
   if (!reason || !reason.trim()) return;
   if (await guarded(() => api("POST", `/api/devices/${dv.id}/delete`, { reason: reason.trim() })) === undefined) return;

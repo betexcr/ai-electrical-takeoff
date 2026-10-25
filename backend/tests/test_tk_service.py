@@ -6,7 +6,7 @@ import pytest
 
 from takeoff.app import flags as F
 from takeoff.app import models as TM
-from takeoff.app.service import TakeoffError
+from takeoff.app.service import DELETE_DETECTED_MESSAGE, TakeoffError
 from tk_helpers import (ACTOR, DOC, FAR_FROM_LABELS, HALL, KITCHEN, NEAR_HALL, NEAR_KITCHEN, RUN_ID, SHEET, flag_types,
                               flags_of, make, norm, room_ref, seed_detection, seed_device, seed_flag)
 
@@ -138,6 +138,8 @@ def test_reject_and_delete_never_count(env):
     rejected = svc.reject("a", ACTOR, reason="not a switch")
     assert (rejected.review_state, rejected.accept_kind) == ("rejected", None)
     raises("reason_required", svc.delete, "b", ACTOR, "  ")
+    seed_flag(store, store.get("devices", "b"), "duplicate_warning", id="cond:b:duplicate_warning",
+              other_device_ids=["c"])  # a detected device is deleted only as a duplicate (final review I4)
     deleted = svc.delete("b", ACTOR, "duplicate of c")
     assert deleted.deleted and deleted.delete_reason == "duplicate of c"
     assert [d.id for d in svc.devices(DOC)] == ["a", "c"]
@@ -241,6 +243,27 @@ def test_deleting_duplicate_partner_clears_the_other_flag(env):
         assert not fl.open and fl.resolution == "condition cleared"
     assert svc.accept("a", ACTOR).review_state == "accepted"
     assert official_total(svc) == 1
+
+
+def test_detected_device_is_deleted_only_as_a_duplicate(env):
+    """I4: delete is for manual mistakes and duplicates; a detection that is not a device is rejected instead."""
+    store, svc = env
+    for origin in ("detector", "ai"):
+        a = seed_device(store, f"{origin}-a", origin=origin)
+        err = raises("detection_cannot_be_deleted", svc.delete, a.id, ACTOR, "not a device")
+        assert err.status == 400 and err.message == DELETE_DETECTED_MESSAGE
+        assert not store.get("devices", a.id).deleted and len(store.events("device", a.id)) == 1  # nothing written
+        # with an open duplicate_warning (a real one: a second device 1 pt away) the delete is allowed
+        b = seed_device(store, f"{origin}-b", pt=(NEAR_KITCHEN[0] + 1.0, NEAR_KITCHEN[1]), origin=origin)
+        svc.resync_flags(DOC, SHEET)
+        assert "duplicate_warning" in flag_types(store, a.id)
+        assert svc.delete(a.id, ACTOR, "duplicate of the other").deleted
+        # its partner has no duplicate left: it is rejected or kept, not deleted
+        raises("detection_cannot_be_deleted", svc.delete, b.id, ACTOR, "and this one too")
+        svc.reject(b.id, ACTOR, "clean up")
+    # a closed duplicate flag does not count, and a manual device is always deletable
+    manual = svc.create_device(DOC, SHEET, ACTOR, "switch", "standard", norm(FAR_FROM_LABELS))
+    assert svc.delete(manual.id, ACTOR, "added by mistake").deleted
 
 
 def test_manual_device_cannot_be_rejected_only_deleted(env):

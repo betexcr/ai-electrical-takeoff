@@ -150,7 +150,8 @@ def test_undo_skips_devices_changed_after_bulk_and_reports_them(env):
     bulk = svc.bulk_accept(DOC, BULK_ACTOR, expected_count=4)
     svc.reject("d1", ACTOR, "wrong")  # changed after the bulk accept
     svc.update_device("d2", ACTOR, {"notes": "checked on site"})  # even a notes-only save bumps the revision
-    svc.delete("d3", ACTOR, "not there")
+    seed_flag(store, store.get("devices", "d3"), "duplicate_warning", id="cond:d3:duplicate_warning")
+    svc.delete("d3", ACTOR, "duplicate")  # a detected device is deleted only as a duplicate (final review I4)
     undo = svc.undo_bulk(bulk.id, ACTOR)
     assert undo.device_ids == ["d0"]
     assert sorted(s["device_id"] for s in undo.skipped) == ["d1", "d2", "d3"]

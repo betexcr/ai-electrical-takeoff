@@ -242,6 +242,8 @@ An accepted detector device is reported as origin `detector_accepted`. A manual 
 **Delete vs reject** *(my call)*:
 - **Reject** is a review decision on a **detector** device. The device stays visible as rejected and blocks re-proposal at that spot. Manual devices can't be rejected, only deleted (§4.17).
 - **Delete** is a soft delete for a mistaken *manual* entry or a duplicate, with a required reason. It's kept in history and the export's review section.
+  - *(rev 3.2, final review)* The service enforces this: a detector or AI device can be deleted only while it has an open `duplicate_warning`; otherwise the delete is refused (`detection_cannot_be_deleted`: "Use Reject for a detection that is not a real device. Reject keeps it from being proposed again; Delete is for manual mistakes and duplicates."). The page disables Delete for such a device, with that message as its tooltip, and the Delete key only shows the message.
+  - A deleted detector or AI device blocks re-proposal at its spot, as a rejected one does (§5.3), so a re-run never undoes a delete.
 - Both remove the device from the official totals.
 
 ### 5.3 Analyze and merge
