@@ -1,0 +1,167 @@
+{
+  "calibration_recomputed": {
+    "max_d1_pt": 104.912,
+    "max_label_distance_pt": 100.0,
+    "n": 84,
+    "p95_d1_pt": 96.483,
+    "percentile": 95,
+    "sheets": [
+      "A1-111",
+      "A2-111"
+    ]
+  },
+  "export": {
+    "id": "gt_001_20261025T020009Z",
+    "input_pdf_sha256": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
+    "manifest_sha256": "f03b11a38264a348e700b618f3342fed64eb30589a922dee715ae07852b14a1f"
+  },
+  "groups": {
+    "dev": {
+      "accuracy": 0.7168,
+      "ambiguous": 21,
+      "ambiguous_rate": 0.1858,
+      "ambiguous_reasons": {
+        "far_from_labels": 6,
+        "two_labels_close": 15
+      },
+      "correct": 81,
+      "correct_but_flagged": 7,
+      "correct_but_flagged_rate_of_correct": 0.0864,
+      "devices": 121,
+      "gt_exterior": 7,
+      "gt_exterior_given_a_labeled_proposal": 7,
+      "gt_labeled": 113,
+      "gt_unlabeled": 1,
+      "gt_unlabeled_given_a_labeled_proposal": 1,
+      "sheets": [
+        "A1-111",
+        "A2-111"
+      ],
+      "wrong_and_unflagged": 18
+    },
+    "held_out": {
+      "accuracy": 0.4881,
+      "ambiguous": 52,
+      "ambiguous_rate": 0.3095,
+      "ambiguous_reasons": {
+        "far_from_labels": 23,
+        "two_labels_close": 29
+      },
+      "correct": 82,
+      "correct_but_flagged": 13,
+      "correct_but_flagged_rate_of_correct": 0.1585,
+      "devices": 179,
+      "gt_exterior": 10,
+      "gt_exterior_given_a_labeled_proposal": 2,
+      "gt_labeled": 168,
+      "gt_unlabeled": 1,
+      "gt_unlabeled_given_a_labeled_proposal": 1,
+      "sheets": [
+        "A3-111",
+        "A4-111"
+      ],
+      "wrong_and_unflagged": 47
+    }
+  },
+  "heading": "not shown in the app; not a room-detection accuracy claim",
+  "notes": [
+    "dev (A1, A2) is the calibration set: its numbers are in-sample. held_out (A3, A4) did not influence the parameters.",
+    "Accuracy is measured over devices whose ground-truth room is a labeled room; a proposal is correct when kind, name and label box all match.",
+    "Exterior is never proposed and Unlabeled is only proposed far from every label; ground-truth Exterior/Unlabeled devices are counted, not scored.",
+    "'wrong and unflagged' proposals carry no ambiguity flag, so every room stays a reviewer decision; the proposal is a convenience default only.",
+    "Room polygons are not extracted; this checks a nearest-label heuristic on one supplied plan set and is not evidence that room detection is reliable."
+  ],
+  "params": {
+    "ambiguity_ratio": 1.25,
+    "calibrated_on": {
+      "date": "2026-10-25",
+      "export_id": "gt_001_20261025T020009Z",
+      "manifest_sha256": "f03b11a38264a348e700b618f3342fed64eb30589a922dee715ae07852b14a1f",
+      "n": 84,
+      "percentile": 95,
+      "sheets": [
+        "A1-111",
+        "A2-111"
+      ]
+    },
+    "max_label_distance_pt": 100.0
+  },
+  "per_sheet": {
+    "A1-111": {
+      "accuracy": 0.6667,
+      "ambiguous": 12,
+      "ambiguous_rate": 0.2353,
+      "ambiguous_reasons": {
+        "far_from_labels": 5,
+        "two_labels_close": 7
+      },
+      "correct": 34,
+      "correct_but_flagged": 3,
+      "correct_but_flagged_rate_of_correct": 0.0882,
+      "devices": 55,
+      "gt_exterior": 4,
+      "gt_exterior_given_a_labeled_proposal": 4,
+      "gt_labeled": 51,
+      "gt_unlabeled": 0,
+      "gt_unlabeled_given_a_labeled_proposal": 0,
+      "wrong_and_unflagged": 8
+    },
+    "A2-111": {
+      "accuracy": 0.7581,
+      "ambiguous": 9,
+      "ambiguous_rate": 0.1452,
+      "ambiguous_reasons": {
+        "far_from_labels": 1,
+        "two_labels_close": 8
+      },
+      "correct": 47,
+      "correct_but_flagged": 4,
+      "correct_but_flagged_rate_of_correct": 0.0851,
+      "devices": 66,
+      "gt_exterior": 3,
+      "gt_exterior_given_a_labeled_proposal": 3,
+      "gt_labeled": 62,
+      "gt_unlabeled": 1,
+      "gt_unlabeled_given_a_labeled_proposal": 1,
+      "wrong_and_unflagged": 10
+    },
+    "A3-111": {
+      "accuracy": 0.5263,
+      "ambiguous": 28,
+      "ambiguous_rate": 0.3684,
+      "ambiguous_reasons": {
+        "far_from_labels": 11,
+        "two_labels_close": 17
+      },
+      "correct": 40,
+      "correct_but_flagged": 9,
+      "correct_but_flagged_rate_of_correct": 0.225,
+      "devices": 82,
+      "gt_exterior": 5,
+      "gt_exterior_given_a_labeled_proposal": 1,
+      "gt_labeled": 76,
+      "gt_unlabeled": 1,
+      "gt_unlabeled_given_a_labeled_proposal": 1,
+      "wrong_and_unflagged": 17
+    },
+    "A4-111": {
+      "accuracy": 0.4565,
+      "ambiguous": 24,
+      "ambiguous_rate": 0.2609,
+      "ambiguous_reasons": {
+        "far_from_labels": 12,
+        "two_labels_close": 12
+      },
+      "correct": 42,
+      "correct_but_flagged": 4,
+      "correct_but_flagged_rate_of_correct": 0.0952,
+      "devices": 97,
+      "gt_exterior": 5,
+      "gt_exterior_given_a_labeled_proposal": 1,
+      "gt_labeled": 92,
+      "gt_unlabeled": 0,
+      "gt_unlabeled_given_a_labeled_proposal": 0,
+      "wrong_and_unflagged": 30
+    }
+  }
+}
