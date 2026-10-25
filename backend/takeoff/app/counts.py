@@ -8,7 +8,8 @@
   ``official_total = accepted_detected + manual``, ``detected_ai_only <= detected``.
 
 "Flagged" is the bulk-accept gate (:func:`takeoff.app.flags.bulk_eligible`): an open ``review`` flag, or an open
-``ai_only_candidate`` / ``model_disagrees`` whatever its severity. So the bulk button's N is ``awaiting_unflagged``.
+``ai_only_candidate`` / ``model_disagrees`` whatever its severity. So the (per-sheet) bulk button's N is that
+sheet's ``review_by_sheet[...]["awaiting_unflagged"]``, and those sum to the document's ``awaiting_unflagged``.
 Pure module: no store, no I/O.
 """
 

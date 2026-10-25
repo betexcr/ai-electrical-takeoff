@@ -345,7 +345,8 @@ class TakeoffService:
     # --- bulk accept and undo (spec 4.9) ---------------------------------------------------------------
 
     def bulk_eligible_ids(self, document_id: str, sheet_id: str | None = None) -> list[str]:
-        """Ids a bulk accept would take now: ``len(...)`` is *W_unflagged*, the bulk button's N (spec 4.17)."""
+        """Ids a bulk accept would take now. With ``sheet_id``, ``len(...)`` is that sheet's unflagged awaiting U, the
+        page's bulk N; without it, the document's *W_unflagged*, the sum of U over the sheets (spec 4.17, per sheet)."""
         self._bulk_scope(document_id, sheet_id)
         return self._eligible(document_id, sheet_id)
 

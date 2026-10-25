@@ -56,7 +56,7 @@
   - *D_ai ⊆ D*;
   - *W = W_unflagged + W_flagged*;
   - *Official = A_det + M*;
-  - the bulk button's N = *W_unflagged*.
+  - per sheet (the bulk button is scoped to the sheet shown): the button's N = that sheet's unflagged awaiting *U*, and the sheets' N sum to the document's *W_unflagged*.
 - **Tolerances:**
   - match and dedupe: `6.0` pt;
   - duplicate: `3.0` pt;
@@ -433,7 +433,7 @@
 
 **Interfaces:**
 - Produces:
-  - **`bulk_eligible_ids(document_id, sheet_id=None) -> list[str]`:** its length is *W_unflagged*.
+  - **`bulk_eligible_ids(document_id, sheet_id=None) -> list[str]`:** with `sheet_id`, its length is that sheet's unflagged awaiting *U* (the page's bulk N); without it, the document's *W_unflagged* (the sum of U over the sheets).
   - **`bulk_accept(document_id, actor, expected_count, sheet_id=None) -> BulkAction`:**
     - one transaction, which recomputes eligibility;
     - a count ≠ `expected_count` raises `bulk_count_changed`;
