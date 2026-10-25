@@ -377,6 +377,136 @@ def test_blind_observations_persist_then_reconcile_without_duplicates(page, serv
     assert fan["id"] not in [a["id"] for a in server.call("GET", "/api/sheets/A1-111/reconcile")["unseen"]]
 
 
+# --- reconciliation keyboard shortcuts ------------------------------------------------------------------------
+
+def drive_to_reconcile(server, observations, sheet_id="A1-111"):
+    """Blind-scan via the API: place the given (category, point) observations, finish every cell, open reconcile."""
+    drive_to_blind(server, sheet_id)
+    for category, pt in observations:
+        server.call("POST", f"/api/sheets/{sheet_id}/observations", {"category": category, "point": pt})
+    for c in server.call("GET", f"/api/sheets/{sheet_id}/blind")["cells"]:
+        server.call("POST", f"/api/sheets/{sheet_id}/cells/{c['id']}", {"done": True})
+    server.call("POST", f"/api/sheets/{sheet_id}/phase/open-reconcile")
+
+
+def press_on(page, selector, key):
+    """Select a marker, return focus to the plan (as after a click), press a key."""
+    page.dispatch_event(selector, "mousedown")
+    page.locator("#viewport").focus()
+    page.keyboard.press(key)
+
+
+def selected(page):
+    return page.evaluate("gt.state.selected")
+
+
+def test_reconcile_shortcuts_match_promote_dismiss_keep_verify(page, server):
+    open_sheet(page, server)
+    m = meta(page)
+    hub = token(m, "J")["center"]
+    living = token(m, "LIVING")["center"]
+    fan = server.call("POST", "/api/sheets/A1-111/annotations",
+                      {"category": "ceiling_fan", "subtype": "optional_pre_wire", "point": hub})
+    extra = server.call("POST", "/api/sheets/A1-111/annotations",
+                        {"category": "light", "subtype": "pendant", "point": {"u": living["u"], "v": living["v"] - 0.01}})
+    drive_to_reconcile(server, [("ceiling_fan", hub), ("receptacle", {"u": hub["u"] + 0.02, "v": hub["v"]}),
+                                ("switch", {"u": living["u"] + 0.03, "v": living["v"]})])
+    open_sheet(page, server)
+    assert "M: match" in page.inner_text("#help") and "G: next pending item" in page.inner_text("#help")
+    obs = {o["category"]: o for o in page.evaluate("gt.state.observations")}
+    n_before = len(server.call("GET", "/api/sheets/A1-111/annotations"))
+
+    # G with nothing selected: the first pending observation, centred
+    page.locator("#viewport").focus()
+    page.keyboard.press("g")
+    page.wait_for_function("gt.state.selected && gt.state.selected.type === 'observation'")
+    first = selected(page)["id"]
+    assert first in [o["id"] for o in obs.values()]
+    vp, view = viewport_rect(page), page.evaluate("gt.view")
+    first_pt = next(o for o in obs.values() if o["id"] == first)["point"]
+    cx, cy = expected_screen(m, view, first_pt["u"], first_pt["v"])
+    assert abs(cx - vp["w"] / 2) <= 1.5 and abs(cy - vp["h"] / 2) <= 1.5
+
+    # M: match to the suggestion (no new record), then the selection advances to another pending observation
+    press_on(page, f'.observation[data-id="{obs["ceiling_fan"]["id"]}"]', "m")
+    page.wait_for_function("(gt.state.annotations.find(a => a.category === 'ceiling_fan') || {}).blind_confirmation === 'confirmed'")
+    assert len(server.call("GET", "/api/sheets/A1-111/annotations")) == n_before
+    page.wait_for_function("""(id) => { const s = gt.state.selected; return s && s.type === 'observation' && s.id !== id &&
+        gt.state.observations.find(o => o.id === s.id).reconciliation === 'pending'; }""", arg=obs["ceiling_fan"]["id"])
+
+    # O: promote with the subtype chosen in the panel (focus back on the plan after using the dropdown)
+    page.dispatch_event(f'.observation[data-id="{obs["receptacle"]["id"]}"]', "mousedown")
+    page.select_option("#promote-subtype", "gfi")
+    page.locator("#viewport").focus()
+    page.keyboard.press("o")
+    page.wait_for_function("gt.state.annotations.length === %d" % (n_before + 1))
+    promoted = [a for a in server.call("GET", "/api/sheets/A1-111/annotations") if a["provenance"]["origin"] == "blind_scan"]
+    assert len(promoted) == 1 and promoted[0]["subtype"] == "gfi" and promoted[0]["category"] == "receptacle"
+
+    # D: dismiss with the prompted reason
+    page.once("dialog", lambda d: d.accept("e2e: mis-click"))
+    press_on(page, f'.observation[data-id="{obs["switch"]["id"]}"]', "d")
+    page.wait_for_function("gt.state.observations.every(o => o.reconciliation !== 'pending')")
+    sw = next(o for o in server.call("GET", "/api/sheets/A1-111/reconcile")["observations"] if o["id"] == obs["switch"]["id"])
+    assert (sw["reconciliation"], sw["reason"]) == ("dismissed", "e2e: mis-click")
+
+    # with no observation pending, G reaches the annotation the blind scan did not see; K keeps it
+    page.evaluate("gt.select(null)")
+    page.locator("#viewport").focus()
+    page.keyboard.press("g")
+    page.wait_for_function("gt.state.selected && gt.state.selected.id === %r" % extra["id"])
+    page.once("dialog", lambda d: d.accept("e2e: re-inspected, faint symbol"))
+    page.keyboard.press("k")
+    page.wait_for_function("(gt.state.annotations.find(a => a.id === %r) || {}).blind_confirmation === 'not_seen_in_blind_scan'" % extra["id"])
+    assert server.call("GET", "/api/sheets/A1-111/reconcile")["unseen"] == []
+
+    # V: saves the unsaved room choice, then verifies; repeat over the remaining work list via auto-advance
+    room_idx = next(i for i, r in enumerate(m["rooms"]) if r["kind"] == "labeled")
+    page.dispatch_event(f'.annotation[data-id="{fan["id"]}"]', "mousedown")
+    for _ in range(3):
+        page.wait_for_selector("#ed-room")
+        page.select_option("#ed-room", str(room_idx))
+        page.locator("#viewport").focus()
+        before = selected(page)["id"]
+        page.keyboard.press("v")
+        page.wait_for_function("(gt.state.annotations.find(a => a.id === %r) || {}).review_state === 'verified'" % before)
+    anns = server.call("GET", "/api/sheets/A1-111/annotations")
+    assert len(anns) == n_before + 1
+    assert all(a["review_state"] == "verified" and a["room"]["name"] == m["rooms"][room_idx]["name"] for a in anns)
+    page.keyboard.press("g")
+    page.wait_for_function("document.getElementById('toast').textContent.includes('Nothing left to reconcile')")
+
+
+def test_reconcile_shortcuts_are_inert_outside_reconcile_and_while_typing(page, server):
+    open_sheet(page, server)
+    m = meta(page)
+    hub = token(m, "J")["center"]
+    fan = server.call("POST", "/api/sheets/A1-111/annotations",
+                      {"category": "ceiling_fan", "subtype": "optional_pre_wire", "point": hub})
+    page.evaluate("gt.refresh()")
+    page.wait_for_function("gt.state.annotations.length === 1")
+    posts = []
+    page.on("request", lambda r: posts.append(r.url) if r.method in ("POST", "PATCH") else None)
+    dialogs = []
+    page.on("dialog", lambda d: (dialogs.append(d.message), d.dismiss()))
+    for key in "modkvg":  # pass 1: none of these may act, prompt or complain
+        press_on(page, f'.annotation[data-id="{fan["id"]}"]', key)
+    page.wait_for_timeout(300)
+    assert posts == [] and dialogs == [] and page.inner_text("#toast") == ""
+    assert server.call("GET", "/api/sheets/A1-111/annotations")[0]["review_state"] == "draft"
+
+    drive_to_reconcile(server, [("ceiling_fan", hub)])
+    open_sheet(page, server)
+    (o,) = page.evaluate("gt.state.observations")
+    page.dispatch_event(f'.observation[data-id="{o["id"]}"]', "mousedown")
+    page.focus("#promote-subtype")
+    for key in "mod":  # focus is in a field: keys belong to the field
+        page.keyboard.press(key)
+    page.wait_for_timeout(300)
+    assert posts == [] and dialogs == []
+    assert server.call("GET", "/api/sheets/A1-111/reconcile")["observations"][0]["reconciliation"] == "pending"
+
+
 def test_originals_untouched_by_e2e_session():
     expected = "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587"
     assert hashlib.sha256(PDF.read_bytes()).hexdigest() == expected

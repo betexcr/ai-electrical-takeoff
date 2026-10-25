@@ -297,7 +297,9 @@ function renderPanel() {
   renderLists();
   document.getElementById("help").textContent = blind()
     ? "C / shift-click: place observation · 1-8: category · N/P: next/prev cell · Space: mark cell blind-scanned · Del: remove selected observation · wheel: zoom · drag: pan · F: fit"
-    : "C / shift-click: place annotation · 1-8: category · A: accept candidate · R: reject candidate · N/P: next/prev cell · Space: mark cell done · Del: delete selected · wheel: zoom · drag: pan · F: fit";
+    : phase() === "reconcile"
+      ? "G: next pending item · M: match · O: promote · D: dismiss · K: keep unseen · V: save & verify · Esc: leave a field · C / shift-click: place annotation · 1-8: category · Del: delete selected · wheel: zoom · drag: pan · F: fit"
+      : "C / shift-click: place annotation · 1-8: category · A: accept candidate · R: reject candidate · N/P: next/prev cell · Space: mark cell done · Del: delete selected · wheel: zoom · drag: pan · F: fit";
 }
 
 function findSelected() {
@@ -434,14 +436,14 @@ function renderDetails() {
         ? `<div>Suggested match: ${sug.suggested_annotation_id.slice(0, 8)} at ${sug.distance_pt} pt ${sug.conflicts.length ? '<br><span style="color:#b35900">' + sug.conflicts.join("; ") + "</span>" : ""}</div>`
         : `<div class="muted">No annotation within ${st.config.tolerances_pt.match} pt — likely missed in pass 1.</div>`;
       html += `<div class="form"><label>Promote as subtype <select id="promote-subtype">${subtypeOptions(o.category, o.subtype || suggestSubtype(o.category, nearbyTokens(o.point).map((x) => x.t)))}</select></label></div>
-        <button class="primary" id="match" ${sug?.suggested_annotation_id ? "" : "disabled"}>Match to suggestion</button>
-        <button id="promote">Promote (new device)</button> <button id="dismiss">Dismiss</button>`;
+        <button class="primary" id="match" ${sug?.suggested_annotation_id ? "" : "disabled"}>Match to suggestion (M)</button>
+        <button id="promote">Promote (new device) (O)</button> <button id="dismiss">Dismiss (D)</button>`;
     }
     act(html);
     if (o.reconciliation === "pending" && phase() === "reconcile") {
-      document.getElementById("match").onclick = () => run(() => api("POST", `/api/observations/${o.id}/match`, { annotation_id: sug.suggested_annotation_id }));
-      document.getElementById("promote").onclick = () => run(() => api("POST", `/api/observations/${o.id}/promote`, { subtype: document.getElementById("promote-subtype").value }));
-      document.getElementById("dismiss").onclick = () => { const r = prompt("Why dismiss this observation?", "mis-click"); if (r) run(() => api("POST", `/api/observations/${o.id}/dismiss`, { reason: r })); };
+      document.getElementById("match").onclick = () => runThenNext(matchSelected);
+      document.getElementById("promote").onclick = () => runThenNext(promoteSelected);
+      document.getElementById("dismiss").onclick = () => runThenNext(dismissSelected);
     }
     return;
   }
@@ -456,8 +458,8 @@ function renderDetails() {
     html += `<label><input type="checkbox" id="ed-adjudicate" ${a.review_state === "needs_adjudication" ? "checked" : ""}> needs adjudication</label>
       <button class="primary" id="save-ann">Save</button> <button id="del-ann">Delete…</button> <button id="hist">History</button>`;
     if (phase() === "reconcile") {
-      if (!a.blind_confirmation) html += `<div>Not matched by the blind scan: <button id="keep">Keep…</button> <button id="unseen-del">Delete…</button></div>`;
-      else if (a.review_state !== "verified") html += ` <button class="primary" id="verify">Verify</button>`;
+      if (!a.blind_confirmation) html += `<div>Not matched by the blind scan: <button id="keep">Keep… (K)</button> <button id="unseen-del">Delete…</button></div>`;
+      else if (a.review_state !== "verified") html += ` <button class="primary" id="verify">Save &amp; verify (V)</button>`;
     }
   }
   act(html + '<pre id="hist-out" class="help"></pre>');
@@ -473,11 +475,11 @@ function renderDetails() {
     document.getElementById("hist-out").textContent = h.map((e) => `${e.timestamp.slice(0, 19)} ${e.actor} ${e.action}`).join("\n");
   };
   const keep = document.getElementById("keep");
-  if (keep) keep.onclick = () => { const r = prompt("Re-inspected: why keep it?"); if (r) run(() => api("POST", `/api/annotations/${a.id}/unseen`, { decision: "keep", reason: r })); };
+  if (keep) keep.onclick = () => runThenNext(keepSelected);
   const udel = document.getElementById("unseen-del");
   if (udel) udel.onclick = () => { const r = prompt("Why delete it?"); if (r) run(() => api("POST", `/api/annotations/${a.id}/unseen`, { decision: "delete", reason: r })); };
   const ver = document.getElementById("verify");
-  if (ver) ver.onclick = () => run(() => api("POST", `/api/annotations/${a.id}/verify`));
+  if (ver) ver.onclick = () => runThenNext(verifySelected);
 }
 
 function renderLists() {
@@ -556,6 +558,99 @@ async function rejectSelected() {
   st.selected = null; renderAll();
 }
 
+// --- reconciliation: shared by the buttons and the M / O / D / K / V / G keys
+
+// What still blocks "Complete sheet", in the order the gates require it: pending observations,
+// then annotations the blind scan did not see, then annotations not yet verified.
+function workItems() {
+  if (phase() !== "reconcile" || !st.reconcile) return [];
+  const unseen = new Set(st.reconcile.unseen.map((a) => a.id));
+  return [
+    ...st.observations.filter((o) => !o.deleted && o.reconciliation === "pending").map((o) => ({ type: "observation", id: o.id, point: o.point })),
+    ...st.reconcile.unseen.map((a) => ({ type: "annotation", id: a.id, point: a.point })),
+    ...st.annotations.filter((a) => !unseen.has(a.id) && a.review_state !== "verified").map((a) => ({ type: "annotation", id: a.id, point: a.point })),
+  ];
+}
+
+function goToNextWorkItem() {
+  const items = workItems();
+  if (!items.length) { toast("Nothing left to reconcile — Complete sheet"); return; }
+  const s = st.selected;
+  const i = s ? items.findIndex((x) => x.type === s.type && x.id === s.id) : -1;
+  const next = items[(i + 1) % items.length];
+  centerOnNorm(next.point.u, next.point.v);
+  select({ type: next.type, id: next.id });
+}
+
+// Runs a reconcile action; on success refreshes and moves to the next work item. An action
+// returns false when the reviewer cancels its prompt.
+async function runThenNext(fn) {
+  try { if ((await fn()) === false) return; await refresh(); } catch (e) { return; /* toast shown */ }
+  goToNextWorkItem();
+}
+
+function pendingObservation() {
+  const s = st.selected;
+  const o = s?.type === "observation" && st.observations.find((x) => x.id === s.id);
+  if (!o || o.reconciliation !== "pending") { toast("Select a pending observation first (G)", true); return null; }
+  return o;
+}
+
+async function matchSelected() {
+  const o = pendingObservation();
+  if (!o) return false;
+  const sug = (st.reconcile?.suggestions || []).find((x) => x.observation_id === o.id);
+  if (!sug?.suggested_annotation_id) { toast("No annotation to match — promote (O) or dismiss (D)", true); return false; }
+  return api("POST", `/api/observations/${o.id}/match`, { annotation_id: sug.suggested_annotation_id });
+}
+
+async function promoteSelected() {
+  const o = pendingObservation();
+  if (!o) return false;
+  return api("POST", `/api/observations/${o.id}/promote`, { subtype: document.getElementById("promote-subtype").value });
+}
+
+async function dismissSelected() {
+  const o = pendingObservation();
+  if (!o) return false;
+  const r = prompt("Why dismiss this observation?", "mis-click");
+  if (!r) return false;
+  return api("POST", `/api/observations/${o.id}/dismiss`, { reason: r });
+}
+
+function selectedAnnotation() {
+  const s = st.selected;
+  const a = s?.type === "annotation" && st.annotations.find((x) => x.id === s.id);
+  if (!a) toast("Select an annotation first (G)", true);
+  return a || null;
+}
+
+async function keepSelected() {
+  const a = selectedAnnotation();
+  if (!a) return false;
+  if (a.blind_confirmation) { toast("This annotation already has a blind-scan decision", true); return false; }
+  const r = prompt("Re-inspected: why keep it?");
+  if (!r) return false;
+  return api("POST", `/api/annotations/${a.id}/unseen`, { decision: "keep", reason: r });
+}
+
+// Saves unsaved edits in the panel (room, subtype, tokens…) first, so they are not lost, then verifies.
+async function verifySelected() {
+  const a = selectedAnnotation();
+  if (!a) return false;
+  if (!a.blind_confirmation) { toast("Keep (K) or delete this unseen annotation before verifying", true); return false; }
+  if (a.review_state === "verified") { toast("Already verified", true); return false; }
+  if (document.getElementById("ed-adjudicate")?.checked) { toast("Untick “needs adjudication” before verifying", true); return false; }
+  const f = readForm("ed");
+  const norm = (x) => JSON.stringify([x.category, x.subtype, x.room || null,
+    (x.text_tokens || []).map((t) => [t.text, t.bbox_pt]), x.notes || null]);
+  if (norm(f) !== norm(a)) await api("PATCH", `/api/annotations/${a.id}`, { ...f, review_state: "draft" });
+  return api("POST", `/api/annotations/${a.id}/verify`);
+}
+
+const RECONCILE_KEYS = { g: goToNextWorkItem, m: () => runThenNext(matchSelected), o: () => runThenNext(promoteSelected),
+  d: () => runThenNext(dismissSelected), k: () => runThenNext(keepSelected), v: () => runThenNext(verifySelected) };
+
 async function deleteSelected() {
   const s = st.selected;
   if (s?.type === "observation" && blind()) {
@@ -620,7 +715,9 @@ function setupInput() {
       return;
     }
     const k = e.key;
-    if (k >= "1" && k <= "8") { st.category = CATS[+k - 1]; renderTopbar(); if (st.selected?.type === "new") renderDetails(); toast(`Category: ${st.category}`); }
+    const rk = phase() === "reconcile" && !e.ctrlKey && !e.metaKey && !e.altKey && RECONCILE_KEYS[k.toLowerCase()];
+    if (rk) { e.preventDefault(); rk(); }
+    else if (k >= "1" && k <= "8") { st.category = CATS[+k - 1]; renderTopbar(); if (st.selected?.type === "new") renderDetails(); toast(`Category: ${st.category}`); }
     else if (k === "c" || k === "C") startPlacing();
     else if (k === "Escape") { stopPlacing(); select(null); }
     else if (k === "Enter" && st.selected?.type === "new") saveNew();
@@ -659,7 +756,7 @@ async function boot() {
 
 // Test and debugging hooks (read-only views plus the view setter).
 window.gt = {
-  state: st, normToScreen, screenToNorm, normToImg, imgToNorm, setView, goToCell, refresh, loadSheet,
+  state: st, normToScreen, screenToNorm, normToImg, imgToNorm, setView, goToCell, refresh, loadSheet, select,
   get view() { return { ...st.view }; },
 };
 

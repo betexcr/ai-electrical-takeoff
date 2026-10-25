@@ -66,6 +66,7 @@ The workflow moves each sheet through four phases. Each gate is enforced by the 
      - **Dismiss** it with a reason, for example a mis-click.
    - Every annotation that no observation matched is `not_seen_in_blind_scan`. Look again, then verify it (a reason is required), correct it, or delete it.
    - Complete every annotation (subtype, tokens, room) and set it to `verified`.
+   - Keys: **G** goes to the next item that still blocks completion (pending observations, then unmatched annotations, then unverified ones). **M** match, **O** promote, **D** dismiss, **K** keep an unmatched annotation, **V** save the panel's edits and verify. Each action moves on to the next item. After using a dropdown, press **Esc** so the keys reach the plan.
 
    Gate to finish: 0 pending observations, every unmatched annotation decided, 0 drafts, 0 `needs_adjudication`, all warnings resolved or acknowledged.
 4. **Verified.** Export. A `verified` export is possible only when all four sheets are verified. The evaluator will refuse anything else.
