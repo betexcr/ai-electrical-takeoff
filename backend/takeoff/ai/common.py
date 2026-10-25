@@ -124,38 +124,44 @@ class AIClient:
     def available(self) -> tuple[bool, str | None]:
         """Whether the stage can run: SDK installed, credentials resolved, model found and accepting images.
 
-        Checked once per client (``models.retrieve``) and cached.
+        Checked with ``models.retrieve``. A success and a credential or configuration failure are cached for the
+        client's lifetime; any other failure of the check (network, timeout, 5xx, 429) is transient and checked
+        again on the next call, so the next run can use the AI once the network is back (final review M-e).
         """
         with self._lock:
-            if self._available is None:
-                self._available = self._check()
-            return self._available
+            if self._available is not None:
+                return self._available
+            ok, reason, lasting = self._check()
+            if lasting:
+                self._available = (ok, reason)
+            return ok, reason
 
-    def _check(self) -> tuple[bool, str | None]:
+    def _check(self) -> tuple[bool, str | None, bool]:
+        """``(ok, reason, lasting)``: ``lasting`` is False for a transient failure (not cached)."""
         sdk = _import_sdk()
         if sdk is None:
-            return False, "the anthropic SDK is not installed"
+            return False, "the anthropic SDK is not installed", True
         try:
             client = self._sdk_client()
         except Exception as e:  # e.g. a broken profile
-            return False, f"no usable credentials: the client could not be built ({type(e).__name__})"
+            return False, f"no usable credentials: the client could not be built ({type(e).__name__})", True
         if _has_no_credentials(client):
-            return False, "no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)"
+            return False, "no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)", True
         try:
             info = client.models.retrieve(self.model)
         except sdk.NotFoundError:
-            return False, f"model {self.model!r} not found"
+            return False, f"model {self.model!r} not found", True
         except (sdk.AuthenticationError, sdk.PermissionDeniedError) as e:
-            return False, f"credentials rejected (http_{e.status_code})"
+            return False, f"credentials rejected (http_{e.status_code})", True
         except TypeError:  # the SDK's "could not resolve authentication method"
-            return False, "no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)"
-        except Exception as e:
-            return False, f"model check failed: {error_for(e, sdk)['code']}"
+            return False, "no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)", True
+        except Exception as e:  # network, timeout, 5xx, 429 ...: try again next time
+            return False, f"model check failed: {error_for(e, sdk)['code']}", False
         caps = getattr(info, "capabilities", None)
         image = getattr(caps, "image_input", None) if caps is not None else None
         if image is not None and getattr(image, "supported", None) is False:
-            return False, f"model {self.model!r} reports no image input"
-        return True, None
+            return False, f"model {self.model!r} reports no image input", True
+        return True, None, True
 
     def call(self, system: str, content_blocks: list[dict], output_model, max_tokens: int) -> CallResult:
         sdk = _import_sdk()

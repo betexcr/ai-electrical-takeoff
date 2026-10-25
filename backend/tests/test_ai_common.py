@@ -369,3 +369,27 @@ def test_summarize_sums_tokens_and_counts_errors():
     TM.AIStageStatus(status="partial", **s)
     assert AC.summarize([])["requests"] == 0 and AC.summarize([])["latency_ms"] == {"p50": None, "p95": None}
     assert AC.summarize([_verdict(impl="fake")])["implementation"] == "fake"
+
+
+def test_availability_retries_transient_failures_and_caches_config_ones():
+    """M-e: a network, 5xx or 429 failure of the model check is retried on the next run; a credential or config
+    failure (and a success) is remembered for the client's lifetime."""
+    transient = (anthropic.APIConnectionError(request=REQ), anthropic.APITimeoutError(request=REQ),
+                 status_error(anthropic.InternalServerError, 503), status_error(anthropic.RateLimitError, 429))
+    for err in transient:
+        stub = StubClient(model_error=err)
+        client = AC.AIClient(model="m", client=stub)
+        ok, reason = client.available()
+        assert ok is False and reason.startswith("model check failed"), reason
+        stub.model_error = None  # the network is back
+        assert client.available() == (True, None)
+        assert client.available() == (True, None) and stub.retrieved == ["m", "m"]  # success is cached
+    config = (status_error(anthropic.NotFoundError, 404), status_error(anthropic.AuthenticationError, 401),
+              status_error(anthropic.PermissionDeniedError, 403))
+    for err in config:
+        stub = StubClient(model_error=err)
+        client = AC.AIClient(model="m", client=stub)
+        first = client.available()
+        assert first[0] is False
+        stub.model_error = None
+        assert client.available() == first and stub.retrieved == ["m"]  # not asked again
