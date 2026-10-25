@@ -4,11 +4,76 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Electrical takeoff</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <!-- Placeholder: the layout-A takeoff page (spec 5.6) replaces this file. The JSON API is under /api/. -->
-  <h1>Electrical takeoff</h1>
-  <p>The takeoff page is not built yet. The API is available: <a href="/api/config">/api/config</a>,
-     <a href="/api/documents">/api/documents</a>.</p>
+  <header id="topbar">
+    <strong>Electrical takeoff</strong>
+    <label>Document <select id="document"></select></label>
+    <button id="upload-btn" type="button">Upload…</button>
+    <input type="file" id="upload" accept="application/pdf,.pdf" hidden>
+    <label>Sheet <select id="sheet"></select></label>
+    <button id="analyze" class="primary" type="button">Analyze</button>
+    <label class="muted"><input type="checkbox" id="analyze-sheet-only"> this sheet only</label>
+    <span id="analyze-progress" class="muted"></span>
+    <span class="spacer"></span>
+    <button id="export" type="button">Export</button>
+    <label>Reviewer <input id="reviewer" size="10" placeholder="name"></label>
+  </header>
+  <div id="statusbar">
+    <span id="run-summary" data-testid="run-summary"></span>
+    <span id="stage-verify" class="stage" data-testid="stage-verify"></span>
+    <span id="stage-discover" class="stage" data-testid="stage-discover"></span>
+    <span id="export-status"></span>
+  </div>
+  <main>
+    <section id="viewport" tabindex="0" aria-label="plan viewer">
+      <img id="plan" alt="electrical plan region" draggable="false">
+      <svg id="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="mode-banner"></div>
+      <div id="sheet-note"></div>
+      <div id="layers" aria-label="layers">
+        <label><input type="checkbox" id="layer-proposed" checked> proposed</label>
+        <label><input type="checkbox" id="layer-accepted" checked> accepted</label>
+        <label><input type="checkbox" id="layer-rejected" checked> rejected</label>
+        <label><input type="checkbox" id="layer-ai" checked> AI-only candidates</label>
+        <label><input type="checkbox" id="layer-rooms" checked> rooms</label>
+        <label><input type="checkbox" id="layer-region" checked> region</label>
+      </div>
+    </section>
+    <aside id="panel">
+      <section>
+        <h3>Selected device</h3>
+        <div id="device"><span class="muted">Nothing selected. Click a marker, or press C to add a device.</span></div>
+      </section>
+      <section>
+        <h3>Review</h3>
+        <div id="review-lines" data-testid="review-lines"></div>
+      </section>
+      <section>
+        <h3>Actions</h3>
+        <div id="actions">
+          <button id="accept-selected" type="button" disabled>Accept selected</button>
+          <button id="reject-selected" type="button" disabled>Reject selected</button>
+          <button id="bulk-accept" type="button" class="primary" disabled>Accept all unflagged (0)</button>
+          <button id="review-flagged" type="button">Review flagged</button>
+          <button id="undo-bulk" type="button" disabled>Undo last bulk accept</button>
+          <button id="add" type="button">Add device (C)</button>
+          <div id="review-flagged-status" class="muted"></div>
+        </div>
+      </section>
+      <section>
+        <h3 id="totals-heading">Official takeoff totals (accepted and manual devices only)</h3>
+        <div id="totals"></div>
+      </section>
+      <section>
+        <h3>Keys</h3>
+        <div id="help" class="help">C: add a device · click a marker: select · A: accept selected · R: reject selected · G: review flagged · Del: delete selected · Esc: cancel · 1-8: category for a new device · wheel: zoom · drag: pan · F: fit</div>
+      </section>
+    </aside>
+  </main>
+  <div id="toast" role="status"></div>
+  <script src="/shared/planview.js"></script>
+  <script src="/static/app.js"></script>
 </body>
 </html>
