@@ -36,7 +36,7 @@ Read [docs/ground_truth_protocol.md](docs/ground_truth_protocol.md) first.
 ```bash
 cd backend
 uv run python tools/gt_review.py import-candidates
-uv run python tools/gt_review.py serve --reviewer YOUR_NAME
+uv run python tools/gt_review.py --reviewer YOUR_NAME serve
 uv run python tools/gt_review.py export
 ```
 - `import-candidates` pre-fills hints. They are never ground truth and are hidden during the blind scan.

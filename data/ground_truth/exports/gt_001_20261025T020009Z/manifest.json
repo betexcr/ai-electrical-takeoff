@@ -1,0 +1,248 @@
+{
+ "candidate_runs": [
+  {
+   "generator": "raster_plain",
+   "generator_version": "gt_candidates/1+symbols/1",
+   "id": "run-5769aa2eb5caba46",
+   "params": {
+    "classes": [
+     "switch_standard.png",
+     "receptacle_gfi_duplex.png",
+     "light_recessed_downlight.png",
+     "light_pendant_high_efficacy.png",
+     "light_wall_mounted_high_efficacy.png",
+     "ceiling_fan_optional_pre_wire.png",
+     "fan_exhaust.png",
+     "detector_smoke.png",
+     "junction_box_electrical.png"
+    ],
+    "dpi": 300,
+    "pages": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "threshold": 0.7
+   },
+   "run_hash": "5769aa2eb5caba46255cf2f6ee799dde8d9ad97c019dbb5f71d0e5db9cc29af0"
+  },
+  {
+   "generator": "raster_thickened",
+   "generator_version": "gt_candidates/1+symbols/1",
+   "id": "run-c655baca661652e5",
+   "params": {
+    "classes": [
+     "switch_standard.png",
+     "receptacle_gfi_duplex.png",
+     "light_recessed_downlight.png",
+     "light_pendant_high_efficacy.png",
+     "light_wall_mounted_high_efficacy.png",
+     "ceiling_fan_optional_pre_wire.png",
+     "fan_exhaust.png",
+     "detector_smoke.png",
+     "junction_box_electrical.png"
+    ],
+    "dpi": 300,
+    "erode_kernel": 5,
+    "pages": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "threshold": 0.6
+   },
+   "run_hash": "c655baca661652e54e4047f8755db982adfb290d1f3cc4f34378cfd658c0b9e0"
+  },
+  {
+   "generator": "vector_signature",
+   "generator_version": "gt_candidates/1+symbols/1",
+   "id": "run-b7f67ef489370cb1",
+   "params": {
+    "classes": [
+     "switch_standard.png",
+     "receptacle_gfi_duplex.png",
+     "light_recessed_downlight.png",
+     "light_pendant_high_efficacy.png",
+     "light_wall_mounted_high_efficacy.png",
+     "ceiling_fan_optional_pre_wire.png",
+     "fan_exhaust.png",
+     "detector_smoke.png",
+     "junction_box_electrical.png"
+    ],
+    "component_eps_pt": 0.3,
+    "dedupe": true,
+    "pages": [
+     1,
+     2,
+     3,
+     4
+    ]
+   },
+   "run_hash": "b7f67ef489370cb185cddd1c01b094478ceda175ff42ae0c1a5decf9c5ca4901"
+  }
+ ],
+ "counts": {
+  "annotations": 300
+ },
+ "created_at": "2026-10-25T02:00:09.638+00:00",
+ "created_by": "Alberto",
+ "export_format": "gt-export/1",
+ "files": {
+  "annotations.csv": {
+   "bytes": 58099,
+   "sha256": "93fd7d50f5deb7db90f742a0aebcbba507876167f96b56a9fb24c6f20809ce0a"
+  },
+  "annotations.jsonl": {
+   "bytes": 316244,
+   "sha256": "cf0fb0147a8630092a7673ace38ab453d799b2e5acc0e2559fc200f20c5158b6"
+  },
+  "blind_observations.jsonl": {
+   "bytes": 119991,
+   "sha256": "711d7e6ce1a59782f6944f7bd9ecd5cdecd7e254adc5ecc15f0bea9c34a35ee9"
+  },
+  "candidate_reviews.jsonl": {
+   "bytes": 220415,
+   "sha256": "079527f17febd75f5fef44244e94ea51f0ab73ce83b6802a85ad1e9d27baf558"
+  },
+  "totals.json": {
+   "bytes": 12200,
+   "sha256": "978a67091d99c16c8921cdeefb9b0262fdc4b40a7b2b372a65ca870cba5f4003"
+  },
+  "wiring_runs.jsonl": {
+   "bytes": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+ },
+ "input_pdf_sha256": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
+ "known_limitations": [
+  "Single reviewer: pass 1 and the blind scan are done by the same person, so memory of pass 1 can leak into the blind scan; no inter-annotator agreement is available.",
+  "Blind-scan consistency counts describe the review process, not detector accuracy.",
+  "Room assignment is the reviewer's choice; room polygons are not yet extracted (B-06).",
+  "Wiring runs are not annotated in B-03."
+ ],
+ "level": "verified",
+ "protocol_version": "protocol/1",
+ "schema_version": "gt-schema/1",
+ "sheets": {
+  "A1-111": {
+   "blind_scan_closed_at": "2026-10-24T23:51:42.244+00:00",
+   "blind_scan_consistency": {
+    "annotations_not_seen_in_blind_scan": 0,
+    "dismissed": 0,
+    "matched": 55,
+    "note": "review-process evidence, not detector accuracy",
+    "observations": 55,
+    "pending": 0,
+    "promoted": 0
+   },
+   "blind_scan_started_at": "2026-10-24T23:43:25.365+00:00",
+   "open_gate_reasons": {
+    "blind_scan_to_reconcile": [],
+    "pass1_to_blind_scan": [],
+    "reconcile_to_verified": []
+   },
+   "page_number": 1,
+   "phase": "verified",
+   "reconcile_completed_at": "2026-10-25T00:13:33.847+00:00",
+   "region_bbox_pt": [
+    854.4,
+    37.08,
+    1439.04,
+    870.12
+   ],
+   "region_confirmed": true,
+   "verified": true
+  },
+  "A2-111": {
+   "blind_scan_closed_at": "2026-10-25T00:34:57.378+00:00",
+   "blind_scan_consistency": {
+    "annotations_not_seen_in_blind_scan": 0,
+    "dismissed": 0,
+    "matched": 66,
+    "note": "review-process evidence, not detector accuracy",
+    "observations": 66,
+    "pending": 0,
+    "promoted": 0
+   },
+   "blind_scan_started_at": "2026-10-25T00:30:23.799+00:00",
+   "open_gate_reasons": {
+    "blind_scan_to_reconcile": [],
+    "pass1_to_blind_scan": [],
+    "reconcile_to_verified": []
+   },
+   "page_number": 2,
+   "phase": "verified",
+   "reconcile_completed_at": "2026-10-25T00:42:47.516+00:00",
+   "region_bbox_pt": [
+    143.88,
+    37.08,
+    1439.04,
+    556.68
+   ],
+   "region_confirmed": true,
+   "verified": true
+  },
+  "A3-111": {
+   "blind_scan_closed_at": "2026-10-25T01:04:42.362+00:00",
+   "blind_scan_consistency": {
+    "annotations_not_seen_in_blind_scan": 0,
+    "dismissed": 0,
+    "matched": 82,
+    "note": "review-process evidence, not detector accuracy",
+    "observations": 82,
+    "pending": 0,
+    "promoted": 0
+   },
+   "blind_scan_started_at": "2026-10-25T00:58:56.788+00:00",
+   "open_gate_reasons": {
+    "blind_scan_to_reconcile": [],
+    "pass1_to_blind_scan": [],
+    "reconcile_to_verified": []
+   },
+   "page_number": 3,
+   "phase": "verified",
+   "reconcile_completed_at": "2026-10-25T01:20:40.130+00:00",
+   "region_bbox_pt": [
+    818.4,
+    37.08,
+    1439.04,
+    870.0
+   ],
+   "region_confirmed": true,
+   "verified": true
+  },
+  "A4-111": {
+   "blind_scan_closed_at": "2026-10-25T01:47:53.323+00:00",
+   "blind_scan_consistency": {
+    "annotations_not_seen_in_blind_scan": 0,
+    "dismissed": 0,
+    "matched": 97,
+    "note": "review-process evidence, not detector accuracy",
+    "observations": 97,
+    "pending": 0,
+    "promoted": 0
+   },
+   "blind_scan_started_at": "2026-10-25T01:41:39.933+00:00",
+   "open_gate_reasons": {
+    "blind_scan_to_reconcile": [],
+    "pass1_to_blind_scan": [],
+    "reconcile_to_verified": []
+   },
+   "page_number": 4,
+   "phase": "verified",
+   "reconcile_completed_at": "2026-10-25T01:55:46.688+00:00",
+   "region_bbox_pt": [
+    1007.28,
+    37.08,
+    1870.68,
+    711.84
+   ],
+   "region_confirmed": true,
+   "verified": true
+  }
+ },
+ "store_version": "gt-store/1",
+ "taxonomy_version": "taxonomy/1"
+}

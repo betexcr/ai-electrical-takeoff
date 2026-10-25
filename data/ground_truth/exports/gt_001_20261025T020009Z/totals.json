@@ -1,0 +1,684 @@
+{
+ "derived_from": "annotations.jsonl",
+ "totals": {
+  "A1-111": {
+   "by_category": {
+    "ceiling_fan": {
+     "optional_pre_wire": 1
+    },
+    "detector": {
+     "combined_smoke_co": 1,
+     "smoke_detector": 1
+    },
+    "fan": {
+     "exhaust_fan": 2,
+     "iaq_fan": 1
+    },
+    "light": {
+     "exterior_wall_photosensor": 1,
+     "pendant": 1,
+     "recessed_downlight": 7,
+     "wall_mounted": 1
+    },
+    "receptacle": {
+     "afci_half_hot": 1,
+     "afi_duplex": 9,
+     "fan_coil_dedicated": 2,
+     "gfi": 6,
+     "gfi_240v": 4,
+     "gfi_dishwasher": 1,
+     "gfi_microwave": 1,
+     "gfi_weatherproof": 2
+    },
+    "switch": {
+     "astronomical_time_or_motion_sensor": 1,
+     "dimmer": 2,
+     "fan_switch": 3,
+     "standard": 2,
+     "three_way_dimmer": 4,
+     "vacancy_sensor": 1
+    }
+   },
+   "by_room": {
+    "BATH": {
+     "fan": {
+      "exhaust_fan": 1
+     },
+     "light": {
+      "recessed_downlight": 1,
+      "wall_mounted": 1
+     },
+     "receptacle": {
+      "gfi": 1,
+      "gfi_240v": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1,
+      "vacancy_sensor": 1
+     }
+    },
+    "BEDROOM / STUDIO": {
+     "ceiling_fan": {
+      "optional_pre_wire": 1
+     },
+     "detector": {
+      "smoke_detector": 1
+     },
+     "receptacle": {
+      "afi_duplex": 4,
+      "fan_coil_dedicated": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1
+     }
+    },
+    "Exterior": {
+     "light": {
+      "exterior_wall_photosensor": 1
+     },
+     "receptacle": {
+      "gfi_240v": 1,
+      "gfi_weatherproof": 2
+     }
+    },
+    "KITCHEN / DINING": {
+     "detector": {
+      "combined_smoke_co": 1
+     },
+     "fan": {
+      "exhaust_fan": 1
+     },
+     "light": {
+      "recessed_downlight": 4
+     },
+     "receptacle": {
+      "afci_half_hot": 1,
+      "afi_duplex": 3,
+      "gfi": 3,
+      "gfi_240v": 1,
+      "gfi_dishwasher": 1,
+      "gfi_microwave": 1
+     },
+     "switch": {
+      "fan_switch": 1,
+      "three_way_dimmer": 2
+     }
+    },
+    "LIVING": {
+     "light": {
+      "pendant": 1,
+      "recessed_downlight": 2
+     },
+     "receptacle": {
+      "afi_duplex": 2,
+      "gfi": 1
+     },
+     "switch": {
+      "astronomical_time_or_motion_sensor": 1,
+      "standard": 2,
+      "three_way_dimmer": 2
+     }
+    },
+    "LNDRY": {
+     "fan": {
+      "iaq_fan": 1
+     },
+     "receptacle": {
+      "fan_coil_dedicated": 1,
+      "gfi": 1,
+      "gfi_240v": 1
+     }
+    }
+   },
+   "total": 55
+  },
+  "A2-111": {
+   "by_category": {
+    "ceiling_fan": {
+     "optional_pre_wire": 2
+    },
+    "detector": {
+     "combined_smoke_co": 1,
+     "smoke_detector": 2
+    },
+    "fan": {
+     "exhaust_fan": 2,
+     "iaq_fan": 1
+    },
+    "light": {
+     "exterior_wall_photosensor": 1,
+     "pendant": 1,
+     "recessed_downlight": 11
+    },
+    "receptacle": {
+     "afi_duplex": 15,
+     "fan_coil_dedicated": 3,
+     "gfi": 7,
+     "gfi_240v": 3,
+     "gfi_dishwasher": 1,
+     "gfi_microwave": 1,
+     "gfi_weatherproof": 2
+    },
+    "switch": {
+     "astronomical_time_or_motion_sensor": 1,
+     "dimmer": 3,
+     "fan_switch": 4,
+     "standard": 2,
+     "three_way_dimmer": 2,
+     "vacancy_sensor": 1
+    }
+   },
+   "by_room": {
+    "BATH": {
+     "fan": {
+      "exhaust_fan": 1
+     },
+     "light": {
+      "recessed_downlight": 2
+     },
+     "receptacle": {
+      "afi_duplex": 1,
+      "gfi": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1,
+      "vacancy_sensor": 1
+     }
+    },
+    "BED 1": {
+     "ceiling_fan": {
+      "optional_pre_wire": 1
+     },
+     "detector": {
+      "smoke_detector": 1
+     },
+     "receptacle": {
+      "afi_duplex": 4,
+      "fan_coil_dedicated": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1
+     }
+    },
+    "BED 2": {
+     "ceiling_fan": {
+      "optional_pre_wire": 1
+     },
+     "detector": {
+      "smoke_detector": 1
+     },
+     "receptacle": {
+      "afi_duplex": 5,
+      "fan_coil_dedicated": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1
+     }
+    },
+    "DINING": {
+     "detector": {
+      "combined_smoke_co": 1
+     },
+     "light": {
+      "recessed_downlight": 3
+     },
+     "receptacle": {
+      "afi_duplex": 2,
+      "gfi": 2,
+      "gfi_dishwasher": 1
+     },
+     "switch": {
+      "standard": 1,
+      "three_way_dimmer": 1
+     }
+    },
+    "Exterior": {
+     "light": {
+      "exterior_wall_photosensor": 1
+     },
+     "receptacle": {
+      "gfi_weatherproof": 2
+     }
+    },
+    "HALLWAY": {
+     "light": {
+      "pendant": 1,
+      "recessed_downlight": 1
+     },
+     "switch": {
+      "standard": 1
+     }
+    },
+    "KITCHEN": {
+     "fan": {
+      "exhaust_fan": 1
+     },
+     "light": {
+      "recessed_downlight": 3
+     },
+     "receptacle": {
+      "gfi": 3,
+      "gfi_240v": 1,
+      "gfi_microwave": 1
+     },
+     "switch": {
+      "fan_switch": 1
+     }
+    },
+    "LIVING": {
+     "light": {
+      "recessed_downlight": 2
+     },
+     "receptacle": {
+      "afi_duplex": 3,
+      "fan_coil_dedicated": 1
+     },
+     "switch": {
+      "astronomical_time_or_motion_sensor": 1,
+      "three_way_dimmer": 1
+     }
+    },
+    "LNDRY": {
+     "fan": {
+      "iaq_fan": 1
+     },
+     "receptacle": {
+      "gfi": 1,
+      "gfi_240v": 1
+     }
+    },
+    "Unlabeled": {
+     "receptacle": {
+      "gfi_240v": 1
+     }
+    }
+   },
+   "total": 66
+  },
+  "A3-111": {
+   "by_category": {
+    "ceiling_fan": {
+     "optional_pre_wire": 2
+    },
+    "detector": {
+     "combined_smoke_co": 2,
+     "smoke_detector": 2
+    },
+    "fan": {
+     "exhaust_fan": 3,
+     "iaq_fan": 1
+    },
+    "light": {
+     "exterior_wall_photosensor": 2,
+     "pendant": 1,
+     "recessed_downlight": 13,
+     "wall_mounted": 2
+    },
+    "receptacle": {
+     "afci_half_hot": 1,
+     "afi_duplex": 15,
+     "fan_coil_dedicated": 3,
+     "gfi": 7,
+     "gfi_240v": 4,
+     "gfi_dishwasher": 1,
+     "gfi_microwave": 1,
+     "gfi_weatherproof": 2
+    },
+    "switch": {
+     "astronomical_time_or_motion_sensor": 1,
+     "dimmer": 4,
+     "fan_switch": 5,
+     "standard": 2,
+     "three_way_dimmer": 6,
+     "vacancy_sensor": 2
+    }
+   },
+   "by_room": {
+    "BATH 1": {
+     "fan": {
+      "exhaust_fan": 1
+     },
+     "light": {
+      "recessed_downlight": 1,
+      "wall_mounted": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1,
+      "vacancy_sensor": 1
+     }
+    },
+    "BATH 2": {
+     "fan": {
+      "exhaust_fan": 1
+     },
+     "light": {
+      "recessed_downlight": 1,
+      "wall_mounted": 1
+     },
+     "receptacle": {
+      "gfi": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1,
+      "vacancy_sensor": 1
+     }
+    },
+    "BED 1": {
+     "ceiling_fan": {
+      "optional_pre_wire": 1
+     },
+     "detector": {
+      "smoke_detector": 1
+     },
+     "receptacle": {
+      "afi_duplex": 4,
+      "fan_coil_dedicated": 1,
+      "gfi": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1
+     }
+    },
+    "BED 2": {
+     "ceiling_fan": {
+      "optional_pre_wire": 1
+     },
+     "detector": {
+      "smoke_detector": 1
+     },
+     "receptacle": {
+      "afi_duplex": 4,
+      "fan_coil_dedicated": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1
+     }
+    },
+    "Exterior": {
+     "light": {
+      "exterior_wall_photosensor": 2
+     },
+     "receptacle": {
+      "gfi_240v": 1,
+      "gfi_weatherproof": 2
+     }
+    },
+    "HALL": {
+     "detector": {
+      "combined_smoke_co": 1
+     },
+     "light": {
+      "pendant": 1,
+      "recessed_downlight": 2
+     },
+     "switch": {
+      "standard": 1,
+      "three_way_dimmer": 1
+     }
+    },
+    "KITCHEN / DINING": {
+     "detector": {
+      "combined_smoke_co": 1
+     },
+     "fan": {
+      "exhaust_fan": 1
+     },
+     "light": {
+      "recessed_downlight": 5
+     },
+     "receptacle": {
+      "afci_half_hot": 1,
+      "afi_duplex": 1,
+      "gfi": 4,
+      "gfi_240v": 1,
+      "gfi_dishwasher": 1,
+      "gfi_microwave": 1
+     },
+     "switch": {
+      "astronomical_time_or_motion_sensor": 1,
+      "fan_switch": 1,
+      "standard": 1,
+      "three_way_dimmer": 2
+     }
+    },
+    "LIVING": {
+     "light": {
+      "recessed_downlight": 4
+     },
+     "receptacle": {
+      "afi_duplex": 6,
+      "fan_coil_dedicated": 1
+     },
+     "switch": {
+      "three_way_dimmer": 3
+     }
+    },
+    "LNDRY": {
+     "fan": {
+      "iaq_fan": 1
+     },
+     "receptacle": {
+      "gfi": 1,
+      "gfi_240v": 1
+     }
+    },
+    "Unlabeled": {
+     "receptacle": {
+      "gfi_240v": 1
+     }
+    }
+   },
+   "total": 82
+  },
+  "A4-111": {
+   "by_category": {
+    "ceiling_fan": {
+     "optional_pre_wire": 3
+    },
+    "detector": {
+     "combined_smoke_co": 2,
+     "smoke_detector": 3
+    },
+    "fan": {
+     "exhaust_fan": 3,
+     "iaq_fan": 1
+    },
+    "light": {
+     "exterior_wall_photosensor": 1,
+     "recessed_downlight": 19,
+     "wall_mounted": 2
+    },
+    "receptacle": {
+     "afci_half_hot": 1,
+     "afi_duplex": 17,
+     "fan_coil_dedicated": 4,
+     "gfi": 10,
+     "gfi_240v": 4,
+     "gfi_dishwasher": 1,
+     "gfi_microwave": 1,
+     "gfi_weatherproof": 3
+    },
+    "switch": {
+     "astronomical_time_or_motion_sensor": 1,
+     "dimmer": 6,
+     "fan_switch": 6,
+     "standard": 3,
+     "three_way_dimmer": 4,
+     "vacancy_sensor": 2
+    }
+   },
+   "by_room": {
+    "BATH 1": {
+     "fan": {
+      "exhaust_fan": 1
+     },
+     "light": {
+      "recessed_downlight": 1,
+      "wall_mounted": 1
+     },
+     "receptacle": {
+      "gfi": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1,
+      "vacancy_sensor": 1
+     }
+    },
+    "BATH 2": {
+     "fan": {
+      "exhaust_fan": 1
+     },
+     "light": {
+      "recessed_downlight": 1,
+      "wall_mounted": 1
+     },
+     "receptacle": {
+      "gfi": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1,
+      "vacancy_sensor": 1
+     }
+    },
+    "BED 1": {
+     "ceiling_fan": {
+      "optional_pre_wire": 1
+     },
+     "detector": {
+      "smoke_detector": 1
+     },
+     "receptacle": {
+      "afi_duplex": 4,
+      "fan_coil_dedicated": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1,
+      "standard": 1
+     }
+    },
+    "BED 2": {
+     "ceiling_fan": {
+      "optional_pre_wire": 1
+     },
+     "detector": {
+      "smoke_detector": 1
+     },
+     "receptacle": {
+      "afi_duplex": 4,
+      "fan_coil_dedicated": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1
+     }
+    },
+    "Exterior": {
+     "light": {
+      "exterior_wall_photosensor": 1
+     },
+     "receptacle": {
+      "gfi_240v": 1,
+      "gfi_weatherproof": 3
+     }
+    },
+    "HALLWAY": {
+     "detector": {
+      "combined_smoke_co": 1
+     },
+     "light": {
+      "recessed_downlight": 3
+     },
+     "receptacle": {
+      "afi_duplex": 1
+     },
+     "switch": {
+      "standard": 1,
+      "three_way_dimmer": 1
+     }
+    },
+    "KITCHEN": {
+     "fan": {
+      "exhaust_fan": 1
+     },
+     "light": {
+      "recessed_downlight": 7
+     },
+     "receptacle": {
+      "afci_half_hot": 1,
+      "afi_duplex": 1,
+      "fan_coil_dedicated": 1,
+      "gfi": 7,
+      "gfi_240v": 1,
+      "gfi_dishwasher": 1,
+      "gfi_microwave": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1,
+      "standard": 1,
+      "three_way_dimmer": 2
+     }
+    },
+    "LIVING": {
+     "detector": {
+      "combined_smoke_co": 1
+     },
+     "light": {
+      "recessed_downlight": 6
+     },
+     "receptacle": {
+      "afi_duplex": 4
+     },
+     "switch": {
+      "astronomical_time_or_motion_sensor": 1,
+      "three_way_dimmer": 1
+     }
+    },
+    "LNDRY": {
+     "fan": {
+      "iaq_fan": 1
+     },
+     "receptacle": {
+      "gfi": 1,
+      "gfi_240v": 1
+     }
+    },
+    "OPTIONAL BED 3": {
+     "ceiling_fan": {
+      "optional_pre_wire": 1
+     },
+     "detector": {
+      "smoke_detector": 1
+     },
+     "receptacle": {
+      "afi_duplex": 3,
+      "fan_coil_dedicated": 1,
+      "gfi_240v": 1
+     },
+     "switch": {
+      "dimmer": 1,
+      "fan_switch": 1
+     }
+    },
+    "WALK-IN CLOSET": {
+     "light": {
+      "recessed_downlight": 1
+     }
+    }
+   },
+   "total": 97
+  }
+ }
+}
