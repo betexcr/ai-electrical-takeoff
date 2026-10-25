@@ -9,6 +9,10 @@ Detectors propose, reviewers decide, and saved device records determine the offi
   disagrees with needs a reviewer's reason; a correction that matches the model closes the flag.
 * **Condition flags** (duplicate, room) are recomputed after every change, in the same transaction.
 
+* **Bulk accept is one transaction and is undone as a whole** (spec 4.9). It takes only what
+  :func:`takeoff.app.flags.bulk_eligible` allows, after the reviewer confirmed the count they saw; the undo restores
+  a device only while nobody has touched it since (see :meth:`TakeoffService.undo_bulk`).
+
 Every mutation runs in one ``store.transaction()``; the store appends an event for every row it writes, so the
 history keeps the before and after of each change, its actor and its time. A refused mutation writes nothing.
 """
@@ -22,7 +26,7 @@ from typing import Any, Literal
 
 from takeoff.app import counts as COUNTS
 from takeoff.app import flags as F
-from takeoff.app.models import Device, Evidence, Flag, ModelVerdict, RunDetection
+from takeoff.app.models import BulkAction, BulkBefore, Device, Evidence, Flag, ModelVerdict, RunDetection
 from takeoff.app.rooms import propose_room
 from takeoff.app.store import TakeoffStore
 from takeoff.groundtruth import taxonomy as T
@@ -64,6 +68,10 @@ ACCEPTED_ON_CORRECTION = "accepted by reviewer (saved correction)"
 CLOSED_ON_CORRECTED_ACCEPT = tuple(t for t in F.DECISION_TYPES if t != "model_disagrees")
 # Closed only by accept, a saved correction or reject (spec §5.9.2(4), ruling R11); never acknowledged.
 NOT_ACKNOWLEDGEABLE = F.VALIDATION_TYPES + ("ai_only_candidate",)
+
+# ``BulkAction.sheet_id`` of a bulk accept that spans every sheet of the document.
+ALL_SHEETS = "*"
+SKIPPED_CHANGED = "changed_after_bulk"
 
 AI_ONLY_TEXT = "AI-proposed location: check position before accepting"
 FAKE_SUFFIX = " · test double, not a model"
@@ -296,6 +304,108 @@ class TakeoffService:
             self._close(conn, flag, actor, SEPARATE_DEVICE.format(new.id), now)
             self._sync(conn, sheet, actor, now)
             return new
+
+    # --- bulk accept and undo (spec 4.9) ---------------------------------------------------------------
+
+    def bulk_eligible_ids(self, document_id: str, sheet_id: str | None = None) -> list[str]:
+        """Ids a bulk accept would take now: ``len(...)`` is *W_unflagged*, the bulk button's N (spec 4.17)."""
+        self._bulk_scope(document_id, sheet_id)
+        return self._eligible(document_id, sheet_id)
+
+    def bulk_accept(self, document_id: str, actor: str, expected_count: int,
+                    sheet_id: str | None = None) -> BulkAction:
+        """Accept every unflagged proposal of the document (or one sheet), all or nothing.
+
+        ``expected_count`` is the N the reviewer confirmed. Eligibility is recomputed inside the transaction; if it
+        no longer equals ``expected_count`` nothing is written and ``bulk_count_changed`` (409) is raised, so a
+        flag or an edit that appeared after the dialog opened can never be accepted by surprise. One immutable
+        :class:`BulkAction` records the ids, the actor and each device's previous state; ``before[id].revision`` is
+        the device's revision *after* this bulk write, which is what :meth:`undo_bulk` compares. A failure
+        anywhere (including the audit insert) rolls back every device write.
+        """
+        if not _has_text(actor):
+            raise TakeoffError("invalid", "an actor is required")
+        if isinstance(expected_count, bool) or not isinstance(expected_count, int) or expected_count < 0:
+            raise TakeoffError("invalid", "expected_count must be a non-negative integer")
+        self._bulk_scope(document_id, sheet_id)
+        now = utcnow()
+        with self.store.transaction() as conn:
+            ids = self._eligible(document_id, sheet_id)  # recomputed inside the transaction
+            if len(ids) != expected_count:
+                raise TakeoffError("bulk_count_changed",
+                                   f"{len(ids)} proposals are eligible now, not the {expected_count} confirmed",
+                                   {"expected": expected_count, "current": len(ids)})
+            if not ids:
+                raise TakeoffError("invalid", "no unflagged proposals to accept")
+            before: dict[str, BulkBefore] = {}
+            for device_id in ids:
+                old = self._live_device(device_id)
+                new = old.model_copy(update={"review_state": "accepted", "accept_kind": "bulk_accepted",
+                                             "human_set": _human(old.human_set, "review_state")})
+                written = self._write(conn, old, new, actor, "bulk_accept", now)
+                before[device_id] = BulkBefore(review_state=old.review_state, accept_kind=old.accept_kind,
+                                               revision=written.revision)
+            # Accepting does not change any condition flag (duplicates and rooms ignore proposed vs accepted),
+            # so no flag sync is needed here.
+            action = BulkAction(document_id=document_id, sheet_id=sheet_id or ALL_SHEETS, kind="bulk_accept",
+                                device_ids=ids, before=before, actor=actor, created_at=now)
+            return self.store.insert("bulk_actions", action, actor, "bulk_accept", conn=conn)
+
+    def undo_bulk(self, bulk_id: str, actor: str) -> BulkAction:
+        """Undo a bulk accept as a whole, without losing history; a second undo of it is refused (``invalid``).
+
+        A device is restored to its recorded ``review_state`` / ``accept_kind`` only if its current revision still
+        equals ``before[id].revision``, the revision the bulk accept left it at. Any later write (a reject, a
+        correction, a notes-only save, a delete) bumps the revision, so that device keeps its newer state, is not
+        in ``device_ids`` and is listed in ``skipped`` with both revisions. Restoring is a new write (the revision
+        goes forward, the device's event log keeps the accept and the undo), and the undo is itself a new immutable
+        ``BulkAction(kind="undo", undo_of=bulk_id)``.
+        """
+        if not _has_text(actor):
+            raise TakeoffError("invalid", "an actor is required")
+        original = self.store.find("bulk_actions", bulk_id)
+        if original is None:
+            raise TakeoffError("not_found", f"bulk action {bulk_id} not found")
+        if original.kind != "bulk_accept":
+            raise TakeoffError("invalid", "only a bulk accept can be undone")
+        now = utcnow()
+        with self.store.transaction() as conn:
+            if any(a.undo_of == bulk_id for a in self.store.list("bulk_actions")):  # checked under the write lock
+                raise TakeoffError("invalid", f"bulk action {bulk_id} was already undone")
+            restored: list[str] = []
+            skipped: list[dict] = []
+            for device_id in original.device_ids:
+                recorded = original.before[device_id]
+                current = self.store.find("devices", device_id)
+                if current is None or current.document_id != original.document_id:
+                    skipped.append({"device_id": device_id, "reason": "missing",
+                                    "recorded_revision": recorded.revision, "current_revision": None})
+                elif current.revision != recorded.revision:
+                    skipped.append({"device_id": device_id, "reason": SKIPPED_CHANGED,
+                                    "recorded_revision": recorded.revision, "current_revision": current.revision})
+                else:
+                    human = current.human_set
+                    if recorded.review_state == "proposed":  # the bulk accept had added it
+                        human = [f for f in human if f != "review_state"]
+                    new = current.model_copy(update={"review_state": recorded.review_state,
+                                                     "accept_kind": recorded.accept_kind, "human_set": human})
+                    self._write(conn, current, new, actor, "bulk_undo", now)
+                    restored.append(device_id)
+            action = BulkAction(document_id=original.document_id, sheet_id=original.sheet_id, kind="undo",
+                                device_ids=restored, undo_of=bulk_id, skipped=skipped, actor=actor, created_at=now)
+            return self.store.insert("bulk_actions", action, actor, "undo", conn=conn)
+
+    def _bulk_scope(self, document_id: str, sheet_id: str | None) -> None:
+        if sheet_id is not None and not any(s.document_id == document_id for s in self.store.list("sheets", sheet_id)):
+            raise TakeoffError("not_found", f"sheet {sheet_id!r} of document {document_id[:12]} not found")
+
+    def _eligible(self, document_id: str, sheet_id: str | None) -> list[str]:
+        """Live proposals that pass :func:`flags.bulk_eligible` against the document's open flags, in store order."""
+        open_flags: dict[str, list[Flag]] = {}
+        for f in self.store.list("flags", sheet_id):
+            if f.document_id == document_id and f.open:
+                open_flags.setdefault(f.device_id, []).append(f)
+        return [d.id for d in self.devices(document_id, sheet_id) if F.bulk_eligible(d, open_flags.get(d.id, ()))]
 
     # --- internals: the edit ------------------------------------------------------------------------
 
