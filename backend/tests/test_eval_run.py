@@ -129,3 +129,58 @@ def test_writes_report_files_and_never_overwrites(ev, tmp_path):
     assert "not detector" in report.lower() or "not a detector" in report.lower()
     with pytest.raises(FileExistsError):
         EV.write(ev, out, PDF, cache_dir=tmp_path / "cache")
+
+
+# --- eval/1.1: detectors, subtype accuracy, sheet groups (det/0 experiment) ------------------------------------
+
+EVAL1 = ROOT / "reports" / "evaluation" / "gt_001_20261025T020009Z__eval1" / "metrics.json"
+GROUPS = {"dev": ["A1-111", "A2-111"], "held_out": ["A3-111", "A4-111"]}
+
+
+@pytest.fixture(scope="module")
+def ev_det(results):
+    from takeoff.detection import det0
+    return EV.evaluate(EXPORT, PDF, results=results, detectors={"det0": det0.detect}, groups=GROUPS)
+
+
+def test_generator_metrics_are_unchanged_from_eval1(ev_det):
+    old = json.loads(EVAL1.read_text(encoding="utf-8"))
+    assert ev_det.metrics["generators"] == old["generators"]
+    assert ev_det.metrics["union_recall"] == old["union_recall"]
+
+
+def test_detector_predictions_are_fully_accounted_for(ev_det):
+    d = ev_det.metrics["detectors"]["det0"]
+    t = d["primary"]["total"]
+    assert t["tp"] + t["fn"] == 300 and t["tp"] + t["fp"] == d["scope"]["in_scope"]
+    assert d["detector_version"] == "det/0" and d["params"]["site_radius_pt"] == 4.0
+    assert {r["generator"] for r in d["input_runs"]} == {"raster_thickened", "vector_signature"}
+    rows = [r for r in ev_det.matches if r["generator"] == "det0" and r["tolerance_pt"] == ev_det.metrics["tolerance_pt"]]
+    assert Counter(r["outcome"] for r in rows)["tp"] == t["tp"]
+
+
+def test_subtype_accuracy_is_over_category_matches(ev_det):
+    s = ev_det.metrics["detectors"]["det0"]["subtype"]
+    assert s["evaluated_on"] == ev_det.metrics["detectors"]["det0"]["primary"]["total"]["tp"]
+    assert s["correct"] + sum(c["n"] for c in s["confusions"]) == s["evaluated_on"]
+    assert set(s["by_category"]) <= set(ev_det.metrics["ground_truth"]["by_category"])
+
+
+def test_group_totals_add_up_to_the_sheet_totals(ev_det):
+    g = ev_det.metrics["groups"]
+    assert g["definition"] == GROUPS
+    for name, sys in [("det0", ev_det.metrics["detectors"]["det0"])] + list(ev_det.metrics["generators"].items()):
+        per = sys["primary"]["by_sheet_category"]
+        for grp, sheets in GROUPS.items():
+            want = sum(v["tp"] for s in sheets for v in per[s].values())
+            assert g["systems"][name][grp]["tp"] == want, (name, grp)
+        assert sum(g["systems"][name][grp]["n_gt"] for grp in GROUPS) == 300
+
+
+def test_detector_report_compares_against_the_baseline(ev_det, tmp_path):
+    out = tmp_path / "det_out"
+    EV.write(ev_det, out, PDF, cache_dir=tmp_path / "cache")
+    report = (out / "report.md").read_text(encoding="utf-8")
+    assert "`det0`" in report and "held_out" in report and "Subtype" in report
+    assert (out / "detections_det0.jsonl").stat().st_size > 0
+    assert sorted((out / "examples").glob("det0_*.png"))
