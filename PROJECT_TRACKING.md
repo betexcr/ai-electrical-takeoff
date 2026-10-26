@@ -197,7 +197,7 @@ Append dated entries for architecture changes, model/prompt/schema releases, eva
   - **Still In progress:**
     - R1-01: no live-model run, and upload is not in the recorded demo path (it is browser-tested separately).
     - B-06: rooms are nearest-label proposals only. They are 48.8% correct held out (`reports/takeoff/room_proposal_eval.md`); they are defaults the reviewer corrects, never an accuracy claim.
-  - **Full suite (`uv run pytest -q`, 2026-10-25, from `backend/`, after the final-review fixes):** 577 passed, 2 skipped (the `live` tests; `TAKEOFF_LIVE_AI` not set), in 11 min 51 s, including all Playwright e2e tests and both demo tests.
+  - **Full suite (`uv run pytest -q`, 2026-10-25, from `backend/`, after the final-review fixes):** 577 passed, 2 skipped (the `live` tests; `TAKEOFF_LIVE_AI` not set), in 13 min 6 s, including all Playwright e2e tests and both demo tests.
   - **Demo evidence is published only on request:** `TAKEOFF_DEMO_EVIDENCE=1`, after a passing run. Default test runs leave `reports/takeoff/demo/` untouched.
   - **Assessment compliance: the AI requirement is implemented but not yet demonstrated with a live model.** No Anthropic API credentials are configured for the app (`reports/takeoff/ai_preflight.json`: `credential_source` fail, nothing sent), so the demo ran with the test doubles, and no AI accuracy figure exists.
   - **Detection accuracy that does exist:** det/0 held-out F1 0.95 (P 0.92 / R 0.98), subtype 0.95 (`reports/evaluation/gt_001_20261025T020009Z__eval1.1__det0/report.md`). It is biased upward (R1-04): candidate-seeded ground truth, a single reviewer, one plan set.
