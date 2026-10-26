@@ -16,7 +16,7 @@ Assessment project: read the supplied electrical plans, find every electrical co
 | `backend/takeoff/ai/` | Non-authoritative AI stages: `ai-verify/1` (verifier), `ai-discover/1` (discovery), prompts, test doubles |
 | `backend/reviewer/static/`, `backend/app/static/`, `backend/shared/static/` | Ground-truth reviewer page, takeoff page, and shared plan-view code (vanilla JS) |
 | `backend/tools/` | `pdf_diagnostics.py`, `symbol_probe.py`, `gt_review.py`, `evaluate.py`, `takeoff_app.py`, `ai_preflight.py`, `eval_ai_verifier.py`, `eval_ai_discovery.py`, `eval_rooms.py` |
-| `docs/` | `design_document.md` (the 2-page design document), `pdf_feasibility_findings.md`, `ground_truth_protocol.md` |
+| `docs/` | `design_document.md` (the 2-page design document), `demo_script.md` (the interview demo run-of-show; start the app with `.\demo.ps1`), `pdf_feasibility_findings.md`, `ground_truth_protocol.md` |
 | `reports/` | Generated evidence (overlays, probe results, reviewer screenshots, `evaluation/` reports) |
 | `data/ground_truth/` | Working DB and cache (git-ignored); `exports/` holds immutable ground-truth exports |
 | `data/takeoff/` | Takeoff store, uploads, exports and render cache (git-ignored) |
@@ -81,6 +81,8 @@ uv run python tools/takeoff_app.py serve --ai-max-requests 150    # per-run AI r
   Both refuse the test doubles. Without credentials they exit 3 and print the reason.
 
 ### Demo path (AC-T13)
+For a presented demo, use [docs/demo_script.md](docs/demo_script.md) and the launcher `.\demo.ps1` (repo root, PowerShell): it keeps its own store in `data/takeoff/demo`, checks AI access first (`-IgnoreEnvFile` uses your `ant` login over a `.env` key; `-NoAI` for det/0 only; `-Fresh` moves the old store aside).
+
 1. **Analyze** all sheets and wait until every sheet is `done`. The status bar shows the run summary and each AI stage's status.
 2. Click a switch marker, then a receptacle marker, on A1. The panel shows:
    - category, legend subtype, and room with its source;
