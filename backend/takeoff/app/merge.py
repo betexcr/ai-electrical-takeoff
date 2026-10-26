@@ -14,9 +14,12 @@ Distances are Euclidean, in PDF points (``point_pt``), and the tolerance boundar
 **det/0 assignment is one-to-one, nearest first** (merge/2, final review): each detection looks at its
 nearest live device within the tolerance. Claims on a device are settled by (distance, detection id,
 device id); the winner matches it, and a detection whose nearest device went to a closer detection is
-``ambiguous_match``. A detection is also ambiguous when its two nearest candidates are tied (equal
-distance within :data:`TIE_PT`). So re-running the same detections over the devices they created adds
-nothing: each finds its own device at distance 0. (merge/1 called every detection with two candidates
+``ambiguous_match``. Candidates tied on distance (within :data:`TIE_PT`) are told apart by fit: one of
+the detection's category beats one of another, then the same subtype beats another. A detection is
+ambiguous when its nearest candidates are still tied after that; if they sit at the detection's own
+point (a ``separate_device`` resolution puts two devices there) it takes the first by id and flags it
+``ambiguous_match`` instead of creating a device that would join the tie on every later run. So
+re-running the same detections over the devices they created adds nothing. (merge/1 called every detection with two candidates
 ambiguous, so each re-run of two close detections added a device.)
 
 **A deleted detector or AI device blocks re-proposal** (delete is only for duplicates of those): a
@@ -71,6 +74,11 @@ def _possible(det: RunDetection, pool: list[Device], tol_pt: float) -> list[tupl
         if d <= tol_pt + _EPS:
             found.append((d, dev))
     return sorted(found, key=lambda t: (t[0], t[1].id))
+
+
+def _fit(det: RunDetection, dev: Device) -> tuple[bool, bool]:
+    """How badly a tied candidate fits a detection: (other category, other subtype); lower is better."""
+    return dev.category != det.category, dev.subtype != det.subtype
 
 
 def verify_usable_for(v: ModelVerdict, detection_id: str) -> bool:
@@ -168,9 +176,20 @@ def merge_sheet(
             if not blocked(det):
                 det_device[det.id] = create(det, "detector")  # rule 5
             continue
-        if len(poss) > 1 and poss[1][0] - poss[0][0] <= TIE_PT:
-            ambiguous(det, poss)  # rule 4: the nearest candidates are tied
-            continue
+        near = sorted((p for p in poss if p[0] - poss[0][0] <= TIE_PT), key=lambda p: (_fit(det, p[1]), p[1].id))
+        if len(near) > 1:
+            if _fit(det, near[0][1]) != _fit(det, near[1][1]):
+                poss = [near[0]] + [p for p in poss if p is not near[0]]  # a better fit breaks the tie
+            elif poss[0][0] <= TIE_PT:
+                # coincident devices that fit equally well: a new device would join the tie on every run,
+                # so the detection takes the first of them and the reviewer is told it was a guess
+                poss = [near[0]] + [p for p in poss if p is not near[0]]
+                add_flag(det.id, near[0][1], "ambiguous_match", "review",
+                         {"possible_device_ids": [d.id for _, d in near]})
+            else:
+                if not blocked(det):
+                    ambiguous(det, poss)  # rule 4: the nearest candidates are tied
+                continue
         dist, dev = poss[0]
         if dev.category != det.category:
             # rule 3: another category at the same spot; the reviewer decides, nothing new is created

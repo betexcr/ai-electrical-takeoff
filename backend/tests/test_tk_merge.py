@@ -140,7 +140,12 @@ def test_other_category_flags_conflict_without_new_device():
 
 
 def test_two_possible_devices_create_flagged_proposal():
-    a, b = dev("xa", pt=(100.0, 200.0)), dev("xb", pt=(104.0, 200.0), category="receptacle", subtype="duplex")
+    a, b = dev("xa", pt=(100.0, 200.0)), dev("xb", pt=(104.0, 200.0))
+    # tied on distance, but only one is a switch: the better fit is the match
+    other = b.model_copy(update={"category": "receptacle", "subtype": "duplex"})
+    res = run_merge([det("d1", pt=(102.0, 200.0))], [other, a])
+    assert res.new_devices == [] and outcomes(res) == {("d1", "xa"): "confirmed"}
+    # tied on distance and on fit: a new proposal flagged ambiguous
     res = run_merge([det("d1", pt=(102.0, 200.0))], [b, a])
     [new] = res.new_devices
     assert (new.id, new.review_state, new.origin) == ("run-002:d1", "proposed", "detector")
@@ -293,6 +298,39 @@ def test_tied_nearest_candidates_make_an_ambiguous_match():
     # just outside the tie tolerance: the nearer device is the match
     res = run_merge([det("d1", pt=(102.0 - 1e-3, 200.0))], [b, a])
     assert res.new_devices == [] and outcomes(res) == {("d1", "xa"): "confirmed"}
+
+
+def test_better_fit_breaks_a_tie_so_a_separated_device_does_not_grow_the_takeoff():
+    """After separate_device a corrected fan and a light sit at one point; the light detection keeps
+    matching the light on every run instead of creating a device that joins the tie."""
+    fan = dev("x1", category="ceiling_fan", subtype="optional_pre_wire", state="accepted")
+    light = dev("sep-1", category="light", subtype="recessed_downlight", state="accepted", origin="manual")
+    devices = [fan, light]
+    for _ in range(3):
+        res = run_merge([det("d1", category="light", subtype="recessed_downlight")], devices)
+        assert res.new_devices == []
+        assert outcomes(res) == {("d1", "sep-1"): "confirmed"}
+        assert flags_of(res, "ambiguous_match") == [] and flags_of(res, "classification_conflict") == []
+        devices = devices + res.new_devices
+
+
+def test_coincident_devices_that_fit_equally_take_the_first_and_flag_it():
+    a, b = dev("xb"), dev("xa")  # same point, same category and subtype
+    devices = [a, b]
+    for _ in range(3):
+        res = run_merge([det("d1")], devices)
+        assert res.new_devices == []
+        assert outcomes(res) == {("d1", "xa"): "confirmed"}
+        [amb] = flags_of(res, "ambiguous_match")
+        assert amb.device_id == "xa" and sorted(amb.details["possible_device_ids"]) == ["xa", "xb"]
+        devices = devices + res.new_devices
+
+
+def test_a_tie_beside_a_deleted_duplicate_creates_nothing():
+    a, b = dev("xa", pt=(100.0, 200.0)), dev("xb", pt=(104.0, 200.0))
+    gone = dev("xc", pt=(102.0, 200.0), deleted=True)
+    res = run_merge([det("d1", pt=(102.0, 200.0))], [a, b, gone])
+    assert res.new_devices == [] and flags_of(res, "ambiguous_match") == []
 
 
 def test_mixed_sheets_raise_and_empty_lists_are_fine():
