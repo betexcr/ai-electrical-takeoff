@@ -37,7 +37,7 @@ The result is an export of per-room and per-home counts, where each count traces
 
 **Today:** on the held-out sheets, det/0 scores precision **0.92**, recall **0.98** and subtype accuracy **0.95**. Across all four sheets it finds ceiling fans 8/8 and lights 61/63 (`reports/evaluation/gt_001_20261025T020009Z__eval1.1__det0/report.md`). These numbers are **biased upward**: 298 of the 300 ground-truth devices began as hints from the generators det/0 is built on, and two held-out sheets are too few to decide a release.
 
-**Ship criteria** *(proposed; tracker R1-05)*. Measure on at least 10 new sheets, hand-counted blind and never used for tuning. The release needs all of these:
+**Ship criteria** *(adopted 2026-10-25, tracker R1-05; not yet measured)*. Measure on at least 10 new sheets, hand-counted blind and never used for tuning. The release needs all of these:
 
 - Ceiling fans and lights: recall ≥ 0.98 and precision ≥ 0.95 (the priority categories).
 - Every other category: recall ≥ 0.95.
