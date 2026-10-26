@@ -816,7 +816,9 @@ def test_ai_second_opinion_and_disagreement_reason_prompt_flow(page, server):
                                                                          "corrected_and_accepted")
     actions = [e["action"] for e in server.device(d1["id"])["history"] if e["entity"] == "device"]
     assert actions.count("correct_and_accept") == 1 and "accept" not in actions, actions
-    assert [(m, u.rsplit("/api/", 1)[1]) for m, u, _ in writes] == [("PATCH", f"devices/{d1['id']}")]
+    from urllib.parse import unquote  # the page encodes ids in its routes (M-d)
+
+    assert [(m, unquote(u.rsplit("/api/", 1)[1])) for m, u, _ in writes] == [("PATCH", f"devices/{d1['id']}")]
     assert '"reason": "e2e: dimmer per legend"' in writes[0][2].replace('":"', '": "')
 
     # acknowledge with a reason: the flag closes, the device stays proposed
@@ -1005,7 +1007,8 @@ def test_refresh_never_applies_a_stale_detail_over_a_newer_selection(page, serve
         const real = window.fetch;
         window.__slowStarted = false;
         window.fetch = async (url, opts) => {  // the refresh's detail request for A is slow
-            if (String(url).endsWith('/api/devices/' + a)) { window.__slowStarted = true; await sleep(700); }
+            // ids are encoded in routes (M-d)
+            if (String(url).endsWith('/api/devices/' + encodeURIComponent(a))) { window.__slowStarted = true; await sleep(700); }
             return real(url, opts);
         };
         const pending = tk.refresh();
