@@ -1,6 +1,6 @@
 # AI Electrical Takeoff
 
-Assessment project: read the supplied electrical plans, find every electrical component, count it per room and let a user correct the result on the plan. The working record of status, evidence and decisions is [PROJECT_TRACKING.md](PROJECT_TRACKING.md).
+Assessment project: read the supplied electrical plans, find every electrical component, count it per room and let a user correct the result on the plan. The working record of status, evidence and decisions is [PROJECT_TRACKING.md](PROJECT_TRACKING.md). The 2-page design document (breakdown, first release, release, support, trade-offs) is [docs/design_document.md](docs/design_document.md).
 
 > **Status (2026-10-25):** The four sheets have hand-verified ground truth (`gt_001`, 300 devices). The evaluator (`eval/1.1`) has scored the Milestone 1 candidate generators and a first rule-based detector, `det/0`, which reaches F1 0.95 on the held-out sheets A3/A4 ([report](reports/evaluation/gt_001_20261025T020009Z__eval1.1__det0/report.md)). Those numbers are biased upward: the ground truth was built from the same candidates, and all 4 sheets come from one plan set. **The takeoff app works end to end on the supplied PDF** (analyze, review on the plan, correct/add/delete, totals, export; [demo evidence](reports/takeoff/demo/README.md)), with two qualifications: the AI stages ran as test doubles rather than a live model, and uploading a PDF is tested in the browser (Chromium) but is not part of the recorded demo path. **The AI stages are implemented but not yet demonstrated with a live model.** No Anthropic API credentials were configured for the app, so the demo ran with test doubles, and no AI accuracy figures exist. No detector is final.
 
@@ -16,7 +16,7 @@ Assessment project: read the supplied electrical plans, find every electrical co
 | `backend/takeoff/ai/` | Non-authoritative AI stages: `ai-verify/1` (verifier), `ai-discover/1` (discovery), prompts, test doubles |
 | `backend/reviewer/static/`, `backend/app/static/`, `backend/shared/static/` | Ground-truth reviewer page, takeoff page, and shared plan-view code (vanilla JS) |
 | `backend/tools/` | `pdf_diagnostics.py`, `symbol_probe.py`, `gt_review.py`, `evaluate.py`, `takeoff_app.py`, `ai_preflight.py`, `eval_ai_verifier.py`, `eval_ai_discovery.py`, `eval_rooms.py` |
-| `docs/` | `pdf_feasibility_findings.md`, `ground_truth_protocol.md` |
+| `docs/` | `design_document.md` (the 2-page design document), `pdf_feasibility_findings.md`, `ground_truth_protocol.md` |
 | `reports/` | Generated evidence (overlays, probe results, reviewer screenshots, `evaluation/` reports) |
 | `data/ground_truth/` | Working DB and cache (git-ignored); `exports/` holds immutable ground-truth exports |
 | `data/takeoff/` | Takeoff store, uploads, exports and render cache (git-ignored) |

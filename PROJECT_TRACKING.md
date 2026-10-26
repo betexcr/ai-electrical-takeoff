@@ -103,7 +103,7 @@ Maintain a short decision record for each material trade-off. Include what was c
 
 | ID | Deliverable | Acceptance evidence | Status | Evidence / notes |
 |---|---|---|---|---|
-| SUB-01 | 1–2 page design document | Covers breakdown, MVP and ship criteria, release/versioning, support/feedback, and trade-offs | Not started | |
+| SUB-01 | 1–2 page design document | Covers breakdown, MVP and ship criteria, release/versioning, support/feedback, and trade-offs | In progress | 2026-10-25: draft [`docs/design_document.md`](docs/design_document.md), covering the assessment's five questions (breakdown and build order, first release with *proposed* ship gates, release, support, trade-offs).<br>• Length checked: it renders to 2 US Letter pages (10 pt, Chromium print).<br>• Every figure is taken from a saved report (det/0 eval/1.1, room proposal eval, tracker); anything not built is marked *(proposed)*.<br>• Missing before Done: the user's review, and an update with the live-AI results once credentials exist (the doc states the AI stages have not run live). The proposed ship gates are not yet adopted (R1-05). |
 | SUB-02 | Repository and README | Code repository includes validated install/run/test instructions | In progress | `README.md` stub with the setup, test and ground-truth reviewer commands, each run in this session. Not yet verified from a clean clone (R1-07). The folder is a git repository (`main`) as of 2026-10-24. |
 | SUB-03 | Architecture and data-flow diagrams | Diagrams match the implemented system | Not started | |
 | SUB-04 | Evaluation report and plan overlays | Includes each plan and honest examples of incorrect/missed detections | Not started | |
