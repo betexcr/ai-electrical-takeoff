@@ -16,3 +16,4 @@ data/ground_truth/cache/
 # Brainstorming companion mockups (local only).
 .superpowers/
 data/takeoff/
+.env

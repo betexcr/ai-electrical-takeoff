@@ -393,4 +393,7 @@ def main(argv: list[str] | None = None, **inject: Any) -> int:
 
 
 if __name__ == "__main__":
+    from takeoff.envfile import load_for_cli
+
+    load_for_cli()
     sys.exit(main())

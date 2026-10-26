@@ -303,4 +303,7 @@ def main(argv=None, discoverer=None) -> int:
 
 
 if __name__ == "__main__":
+    from takeoff.envfile import load_for_cli
+
+    load_for_cli()
     raise SystemExit(main())

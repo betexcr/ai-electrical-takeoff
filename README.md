@@ -62,6 +62,7 @@ uv run python tools/takeoff_app.py serve --ai-max-requests 150    # per-run AI r
 
 ### Credentials for the AI stages
 - The app uses the official Anthropic SDK and resolves credentials the same way the SDK does: `ANTHROPIC_API_KEY` (or `ANTHROPIC_AUTH_TOKEN`), or an `ant auth login` profile. Credential values are never printed or stored.
+- The CLI tools (`takeoff_app.py`, `ai_preflight.py`, `eval_ai_verifier.py`, `eval_ai_discovery.py`) also load a repo-root `.env` (`ANTHROPIC_API_KEY=...`) when run as scripts. A variable already set in the shell wins, empty values are ignored, and only the loaded names are printed. `.env` is git-ignored; the tests never read it.
 - **A Claude subscription (Pro/Max) does not include API access.** The requests are billed to the Anthropic API account behind the credential.
 - Run the live preflight before relying on AI in a demo. It makes real, billed requests, so it runs only by explicit command:
   ```bash
