@@ -1379,7 +1379,8 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
                               for sid, s in run["sheets"].items()},
                       ai_usage_run=run["ai_usage"], review_after_analysis=srv.counts()["review"])
         ev.shot("analyzed", "all 4 sheets analyzed by det/0 in one background run; per-sheet progress, run summary "
-                            "and the AI stage lines (test double) in the status bar; A1 proposals on the plan")
+                            f"and the AI stage lines ({'test double' if impl == 'fake' else 'Claude, live'}) in the status "
+                            "bar; A1 proposals on the plan")
 
         # 2. inspect a switch and a receptacle on A1
         devs = srv.devices(A1)
@@ -1614,11 +1615,18 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
         assert totals == api_counts["official"]
         assert totals_from_csv(out / "devices_official.csv") == json.loads(json.dumps(totals, sort_keys=True))
         assert manifest["review"] == api_counts["review"]
-        # A2-A4 were never reviewed: every one of their detections is still awaiting review, and that is the reason
+        # A2-A4 were never reviewed: every device there (det/0's detections plus any AI-only candidates from a
+        # live discover pass) is still awaiting review, and that is the reason
         awaiting_by_sheet = dict(sorted(Counter(d["sheet_id"] for d in srv.devices()
                                                 if d["review_state"] == "proposed").items()))
+        ai_only_by_sheet = {}
         for sid in SHEETS[1:]:
-            assert awaiting_by_sheet[sid] == run["sheets"][sid]["n_detections"], sid
+            devs = srv.devices(sid)
+            assert all(d["review_state"] == "proposed" for d in devs), sid
+            ai_only_by_sheet[sid] = sum(1 for d in devs if d["origin"] == "ai")
+            assert awaiting_by_sheet[sid] == run["sheets"][sid]["n_detections"] + ai_only_by_sheet[sid], sid
+        if impl == "fake":
+            assert not any(ai_only_by_sheet.values())  # the fake discoverer proposes nothing
         awaiting = api_counts["review"]["awaiting"]
         assert awaiting == sum(awaiting_by_sheet.values())
         assert manifest["complete"] is False
@@ -1639,7 +1647,7 @@ def test_demo_path_end_to_end(page, tmp_path, cache_dir):
         shutil.copytree(out, ev.out / "export")
         record["export"] = {"source_dir_name": out.name, "copied_to": "export/ (next to this run.json)",
                             "complete": manifest["complete"], "incomplete_reasons": manifest["incomplete_reasons"],
-                            "awaiting_review_by_sheet": awaiting_by_sheet,
+                            "awaiting_review_by_sheet": awaiting_by_sheet, "ai_only_candidates_by_sheet": ai_only_by_sheet,
                             "totals_json_equals_api_counts": True, "totals_json_equals_csv_recomputation": True,
                             "manifest_ai_usage_equals_verdict_sums": True, "ai_usage_summed": summed,
                             "official_records": manifest["counts"]["official_records"],

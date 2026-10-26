@@ -26,21 +26,18 @@ The measured, run-specific facts are in `run.json`, not here:
 - the alignment errors (`alignment`);
 - the export's reasons (`export.incomplete_reasons`).
 
-## AI was a test double in this evidence, not a model
+## AI in this evidence: Claude, live
 
 The demo test uses Claude only when `reports/takeoff/ai_preflight.json` shows **every** check passed **and**
-`TAKEOFF_LIVE_AI=1` is set. The preflight committed with this evidence failed its first check, `credential_source`:
-no Anthropic API credentials were configured for the app, and no request was sent.
+`TAKEOFF_LIVE_AI=1` is set. Both held for the committed run (2026-10-26, `claude-opus-5-5`, through the user's
+`ant` login; `run.json` → `ai_implementation`, `ai_choice`, `ai_usage_run`). Both AI stages ran on all 4 sheets with
+no request errors. They produced `model_disagrees` flags and AI-only candidates, and the demo resolved one
+`model_disagrees` flag through the panel (`ai_flags_demo`, `05_ai_flag_resolved.png`). Neither stage changed a device
+or a total: every count is still from accepted and manual device records.
 
-The run therefore used the test doubles:
-- `FakeVerifier` agrees with every det/0 detection;
-- `FakeDiscoverer` proposes no points.
-
-They are labelled "test double, not a model" in the page, the run summary, the export manifest
-(`ai_test_double: true`) and `run.json` (`ai_implementation` and `ai_choice`). Their verdicts are **not** evidence
-of model performance. Because they agree and discover nothing, no `model_disagrees` or `ai_only_candidate` flag
-exists to resolve (`ai_flags_demo`). The assessment's AI requirement is therefore implemented but **not yet
-demonstrated with a live model**.
+The demo shows the workflow, not the model's accuracy, which is measured separately against `gt_001`
+(`reports/evaluation/…__ai-verify1/`, `__ai-verify1_b1_rerun/`, `__ai-discover1/`). Earlier evidence in this directory
+used the labelled test doubles (`FakeVerifier`, `FakeDiscoverer`); a test-double run can no longer replace this one.
 
 Detection here is the real `det/0` on the real Escondido PDF, all 4 sheets in one background run. Its accuracy is
 measured separately in `reports/evaluation/` and is never inferred from this demo.
@@ -50,14 +47,15 @@ measured separately in `reports/evaluation/` and is never inferred from this dem
 | File | What it is |
 |---|---|
 | `run.json` | The demo test's record. It covers the AI implementation and why; the preflight summary; the run id and versions; per-sheet status; the devices inspected and the score each panel showed; the fan branch; the correction; the alignment errors (programmatic views, a real mouse-wheel zoom, a real drag); bulk accept; the R1-03 marker check per sheet; the export checks; and whether it was published |
-| `01_analyzed.png` | All 4 sheets `done`, with the run summary and the AI stage lines (test double) |
-| `02_inspect_switch.png`, `03_inspect_receptacle.png` | An A1 switch, then a receptacle, selected. The panel shows category, legend subtype, room and its source, state, origin, "match score (not a probability)", run and versions, the AI line, evidence and history. A det/0 detection with no raster member shows "none (no raster score)" |
+| `01_analyzed.png` | All 4 sheets `done`, with the run summary, the AI request and token totals, and the live AI stage lines |
+| `02_inspect_switch.png`, `03_inspect_receptacle.png` | An A1 switch, then a receptacle, selected. The panel shows category, legend subtype, room and its source, state, origin, "match score (not a probability)", run and versions, the AI second opinion, evidence and history. A det/0 detection with no raster member shows "none (no raster score)" |
 | `04_fan_detected.png` (or `04_fan_manual_*.png`) | The fan step, in whichever branch the run took (see below) |
-| `05_corrected.png` | One proposal's category corrected (light → fan) and saved. It becomes `corrected_and_accepted`, and the totals update without a reload. This shows the correction flow; it is not a claim that det/0 was wrong there |
-| `06_reloaded.png` | After a reload, the correction persists with its history |
-| `07_zoomed.png`, `08_panned.png` | After a real mouse-wheel zoom, then a real mouse drag. The probed markers stay within 1.5 px of independently computed positions |
-| `09_bulk_accepted.png` | After the confirmation *Accept N unflagged proposals on sheet A1-111?*. The button is scoped to the sheet shown. The line under it ("This sheet (A1-111): awaiting X = U unflagged + F flagged", from `GET /counts`) now reads 0 unflagged, and A1's flagged proposals stay awaiting review. A2–A4 are untouched. The test first checks every sheet's N and line, and their sums (`bulk_accept.per_sheet_figures_before`) |
-| `10_exported.png` | Export: the status bar states *Export incomplete* with the manifest's reasons, chiefly every detection on A2–A4 still awaiting review. The local export path is shortened to its directory name for the screenshot |
+| `05_ai_flag_resolved.png` | A `model_disagrees` flag resolved through the panel. The reviewer kept det/0's classification, with the required reason, so the flag closes as `kept_over_ai`. The panel shows the AI's rationale and evidence |
+| `06_corrected.png` | One proposal's category corrected and saved. It becomes `corrected_and_accepted`, and the totals update without a reload. This shows the correction flow; it is not a claim that det/0 was wrong there |
+| `07_reloaded.png` | After a reload, the correction persists with its history |
+| `08_zoomed.png`, `09_panned.png` | After a real mouse-wheel zoom, then a real mouse drag. The probed markers stay within 1.5 px of independently computed positions |
+| `10_bulk_accepted.png` | After the confirmation *Accept N unflagged proposals on sheet A1-111?*. The button is scoped to the sheet shown. The line under it ("This sheet (A1-111): awaiting X = U unflagged + F flagged", from `GET /counts`) now reads 0 unflagged, and A1's flagged proposals stay awaiting review. A2–A4 are untouched. The test first checks every sheet's N and line, and their sums (`bulk_accept.per_sheet_figures_before`) |
+| `11_exported.png` | Export: the status bar states *Export incomplete* with the manifest's reasons: devices and AI-only candidates still awaiting review, and open flags. The local export path is shortened to its directory name for the screenshot |
 | `export/` | A byte-exact copy of that export: `devices_official.csv`, `devices_review.csv`, `totals.json`, `manifest.json`. The test checked three things: `totals.json` equals `GET /counts`; it equals the totals recomputed from `devices_official.csv`; and the manifest's AI usage equals the sums over the run's saved verdicts |
 | `fan_missed/` | The deterministic "fan missed" branch (below): its screenshots and its own `run.json` |
 

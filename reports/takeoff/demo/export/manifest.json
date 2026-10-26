@@ -1,52 +1,56 @@
 {
- "ai_note": "AI verdicts and AI-only candidates are suggestions; totals come from accepted and manual device records (test double, not a model)",
- "ai_test_double": true,
+ "ai_note": "AI verdicts and AI-only candidates are suggestions; totals come from accepted and manual device records",
+ "ai_test_double": false,
  "complete": false,
  "counts": {
-  "official_records": 43,
-  "review_records": 270
+  "official_records": 42,
+  "review_records": 278
  },
- "created_at": "2026-10-25T21:57:44.918+00:00",
+ "created_at": "2026-10-26T19:52:26.107+00:00",
  "created_by": "e2e",
  "document_name": "Escondido_Electrical_Plans_Ceiling_Fans.pdf",
  "document_sha256": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
  "export_format": "takeoff-export/1",
  "files": {
   "devices_official.csv": {
-   "bytes": 14604,
-   "sha256": "c8f9855605fa4ad3a0750b8a6b189e307af1329afcd4e77162ec26238cb27d55"
+   "bytes": 13169,
+   "sha256": "9ddf7b5580e82dd474638ec1d2554ff5b00b2b2452a99fdc11bfc78dcbeb93c8"
   },
   "devices_review.csv": {
-   "bytes": 86179,
-   "sha256": "e9714ae7ee6dcd31d7e8d0049ff185c93253672af8cae395342b729d03f14c29"
+   "bytes": 83117,
+   "sha256": "cb4b273ba7f8861e43a5112df5383365b861281214fab620f839f712129255a2"
   },
   "totals.json": {
-   "bytes": 2265,
-   "sha256": "dc600c3a8eb9299364b801113869d5b0a323d0cb07ddedd4e6956a308ff15fa5"
+   "bytes": 2243,
+   "sha256": "348dbf690577e5cf83dbe4aaa594f1d467be0e575727c60a356b5f3e6fc86557"
   }
  },
  "incomplete_reasons": [
-  "270 detected devices awaiting review",
-  "94 open room_ambiguous flags"
+  "278 detected devices awaiting review",
+  "7 AI-only candidates awaiting review",
+  "38 open model_disagrees flags",
+  "96 open room_ambiguous flags"
  ],
  "merge_version": "takeoff-merge/2",
  "open_flags_by_type": {
-  "room_ambiguous": 94
+  "ai_only_candidate": 7,
+  "model_disagrees": 38,
+  "room_ambiguous": 96
  },
  "origin_vocabulary": {
   "devices_official.csv": "origin_reported is the reported origin of an accepted device: detector_accepted | ai_accepted | manual",
   "devices_review.csv": "origin_reported is the internal origin: detector | ai | manual; none of these rows is in any total"
  },
  "review": {
-  "accepted_detected": 43,
+  "accepted_detected": 42,
   "accepted_with_open_flags": 0,
-  "awaiting": 270,
-  "awaiting_flagged": 94,
-  "awaiting_unflagged": 176,
-  "detected": 313,
-  "detected_ai_only": 0,
+  "awaiting": 278,
+  "awaiting_flagged": 117,
+  "awaiting_unflagged": 161,
+  "detected": 320,
+  "detected_ai_only": 7,
   "manual": 0,
-  "official_total": 43,
+  "official_total": 42,
   "rejected": 0
  },
  "runs": [
@@ -55,86 +59,86 @@
     "discover": {
      "ai_version": "ai-discover/1",
      "errors_by_code": {},
-     "implementation": "fake",
+     "implementation": "claude",
      "latency_ms": {
-      "p50": 0.0,
-      "p95": 0.0
+      "p50": 4255.356,
+      "p95": 9809.446
      },
-     "model": "fake-discoverer",
+     "model": "claude-opus-5-5",
      "n_items": 0,
      "prompt_version": "ai-discover-prompt/1",
      "requests": 84,
      "sheets": {
       "A1-111": {
        "errors_by_code": {},
-       "implementation": "fake",
+       "implementation": "claude",
        "latency_ms": {
-        "p50": 0.0,
-        "p95": 0.0
+        "p50": 3771.211,
+        "p95": 8832.431
        },
-       "n_items": 0,
+       "n_items": 56,
        "reason": null,
        "requests": 20,
        "status": "done",
        "tokens": {
         "cache_creation": 0,
         "cache_read": 0,
-        "input": 0,
-        "output": 0
+        "input": 163360,
+        "output": 5488
        }
       },
       "A2-111": {
        "errors_by_code": {},
-       "implementation": "fake",
+       "implementation": "claude",
        "latency_ms": {
-        "p50": 0.0,
-        "p95": 0.0
+        "p50": 3378.523,
+        "p95": 9159.421
        },
-       "n_items": 0,
+       "n_items": 70,
        "reason": null,
        "requests": 24,
        "status": "done",
        "tokens": {
         "cache_creation": 0,
         "cache_read": 0,
-        "input": 0,
-        "output": 0
+        "input": 198100,
+        "output": 6538
        }
       },
       "A3-111": {
        "errors_by_code": {},
-       "implementation": "fake",
+       "implementation": "claude",
        "latency_ms": {
-        "p50": 0.0,
-        "p95": 0.0
+        "p50": 4684.234,
+        "p95": 8978.563
        },
-       "n_items": 0,
+       "n_items": 83,
        "reason": null,
        "requests": 20,
        "status": "done",
        "tokens": {
         "cache_creation": 0,
         "cache_read": 0,
-        "input": 0,
-        "output": 0
+        "input": 164060,
+        "output": 7395
        }
       },
       "A4-111": {
        "errors_by_code": {},
-       "implementation": "fake",
+       "implementation": "claude",
        "latency_ms": {
-        "p50": 0.0,
-        "p95": 0.0
+        "p50": 4806.73,
+        "p95": 9809.446
        },
-       "n_items": 0,
+       "n_items": 100,
        "reason": null,
        "requests": 20,
        "status": "done",
        "tokens": {
         "cache_creation": 0,
         "cache_read": 0,
-        "input": 0,
-        "output": 0
+        "input": 165628,
+        "output": 8421
        }
       }
      },
@@ -142,30 +146,30 @@
      "tokens": {
       "cache_creation": 0,
       "cache_read": 0,
-      "input": 0,
-      "output": 0
+      "input": 691148,
+      "output": 27842
      }
     },
-    "model": "fake-verifier",
+    "model": "claude-opus-5-5",
     "verify": {
      "ai_version": "ai-verify/1",
      "errors_by_code": {},
-     "implementation": "fake",
+     "implementation": "claude",
      "latency_ms": {
-      "p50": 0.0,
-      "p95": 0.0
+      "p50": 10291.184,
+      "p95": 14673.834
      },
-     "model": "fake-verifier",
+     "model": "claude-opus-5-5",
      "n_items": 313,
      "prompt_version": "ai-verify-prompt/1",
      "requests": 41,
      "sheets": {
       "A1-111": {
        "errors_by_code": {},
-       "implementation": "fake",
+       "implementation": "claude",
        "latency_ms": {
-        "p50": 0.0,
-        "p95": 0.0
+        "p50": 10390.401,
+        "p95": 15607.314
        },
        "n_items": 55,
        "reason": null,
@@ -174,16 +178,16 @@
        "tokens": {
         "cache_creation": 0,
         "cache_read": 0,
-        "input": 0,
-        "output": 0
+        "input": 27568,
+        "output": 7552
        }
       },
       "A2-111": {
        "errors_by_code": {},
-       "implementation": "fake",
+       "implementation": "claude",
        "latency_ms": {
-        "p50": 0.0,
-        "p95": 0.0
+        "p50": 7764.404,
+        "p95": 11743.897
        },
        "n_items": 67,
        "reason": null,
@@ -192,16 +196,16 @@
        "tokens": {
         "cache_creation": 0,
         "cache_read": 0,
-        "input": 0,
-        "output": 0
+        "input": 35027,
+        "output": 7470
        }
       },
       "A3-111": {
        "errors_by_code": {},
-       "implementation": "fake",
+       "implementation": "claude",
        "latency_ms": {
-        "p50": 0.0,
-        "p95": 0.0
+        "p50": 9263.932,
+        "p95": 18541.273
        },
        "n_items": 82,
        "reason": null,
@@ -210,16 +214,16 @@
        "tokens": {
         "cache_creation": 0,
         "cache_read": 0,
-        "input": 0,
-        "output": 0
+        "input": 42587,
+        "output": 10646
        }
       },
       "A4-111": {
        "errors_by_code": {},
-       "implementation": "fake",
+       "implementation": "claude",
        "latency_ms": {
-        "p50": 0.0,
-        "p95": 0.0
+        "p50": 11106.17,
+        "p95": 13519.834
        },
        "n_items": 109,
        "reason": null,
@@ -228,8 +232,8 @@
        "tokens": {
         "cache_creation": 0,
         "cache_read": 0,
-        "input": 0,
-        "output": 0
+        "input": 55096,
+        "output": 15263
        }
       }
      },
@@ -237,16 +241,16 @@
      "tokens": {
       "cache_creation": 0,
       "cache_read": 0,
-      "input": 0,
-      "output": 0
+      "input": 160278,
+      "output": 40931
      }
     }
    },
-   "created_at": "2026-10-25T21:56:09.639+00:00",
+   "created_at": "2026-10-26T19:46:24.862+00:00",
    "created_by": "e2e",
    "detector": "det0",
    "detector_version": "det/0",
-   "finished_at": "2026-10-25T21:57:40.801+00:00",
+   "finished_at": "2026-10-26T19:52:18.402+00:00",
    "id": "run-001",
    "merge_version": "takeoff-merge/2",
    "sheets": {

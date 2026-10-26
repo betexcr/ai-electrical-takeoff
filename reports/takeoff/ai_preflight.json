@@ -1,56 +1,152 @@
 {
   "tool": "tools/ai_preflight.py",
   "version": "ai-preflight/1",
-  "created_at": "2026-10-25T16:08:33.565+00:00",
+  "created_at": "2026-10-26T18:32:58.767+00:00",
   "model": "claude-opus-5-5",
   "sheet": "A1-111",
-  "sheet_run": false,
+  "sheet_run": true,
   "ai_versions": {
     "verify": "ai-verify/1",
     "verify_prompt": "ai-verify-prompt/1",
     "discover": "ai-discover/1",
     "discover_prompt": "ai-discover-prompt/1"
   },
-  "ok": false,
-  "all_passed": false,
+  "ok": true,
+  "all_passed": true,
   "checks": [
     {
       "name": "credential_source",
-      "status": "fail",
-      "reason": "no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)",
+      "status": "pass",
+      "reason": null,
       "details": {
         "present": {
           "ANTHROPIC_API_KEY": false,
           "ANTHROPIC_AUTH_TOKEN": false,
-          "ant_profile": false
+          "ant_profile": true
         },
-        "mechanism": null,
+        "mechanism": "ant_profile",
         "also_present": [],
-        "api_host": null,
+        "api_host": "api.anthropic.com",
         "env_host": "api.anthropic.com",
-        "resolved_host": null,
+        "resolved_host": "api.anthropic.com",
         "host_source": "ANTHROPIC_BASE_URL",
-        "needs_confirmation": null,
-        "confirmed": false
+        "needs_confirmation": false,
+        "confirmed": false,
+        "host_mismatch": false
       }
     },
     {
       "name": "model_available",
-      "status": "not_run",
-      "reason": "not run: credential_source failed",
-      "details": {}
+      "status": "pass",
+      "reason": null,
+      "details": {
+        "model": "claude-opus-5-5",
+        "id": "claude-opus-5-5",
+        "image_input": true
+      }
     },
     {
       "name": "vision_request",
-      "status": "not_run",
-      "reason": "not run: credential_source failed",
-      "details": {}
+      "status": "pass",
+      "reason": null,
+      "details": {
+        "sheet": "A1-111",
+        "implementation": "claude",
+        "model": "claude-opus-5-5",
+        "n_items": 1,
+        "n_images": 9,
+        "answered": [
+          "preflight:A1-111:det0-0000"
+        ],
+        "stop_reason": "end_turn",
+        "input_tokens": 3233,
+        "output_tokens": 128,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "latency_ms": 4121.176
+      }
     },
     {
       "name": "stages_on_sheet",
-      "status": "not_run",
-      "reason": "not run: credential_source failed",
-      "details": {}
+      "status": "pass",
+      "reason": null,
+      "details": {
+        "run_id": "run-001",
+        "sheet_status": "done",
+        "sheet_message": null,
+        "n_detections": 55,
+        "max_requests": 200,
+        "ai_verify": {
+          "status": "done",
+          "reason": null,
+          "implementation": "claude",
+          "requests": 7,
+          "errors_by_code": {},
+          "tokens": {
+            "input": 27568,
+            "output": 7403,
+            "cache_creation": 0,
+            "cache_read": 0
+          },
+          "latency_ms": {
+            "p50": 11020.905,
+            "p95": 14062.046
+          },
+          "n_items": 55
+        },
+        "ai_discover": {
+          "status": "done",
+          "reason": null,
+          "implementation": "claude",
+          "requests": 20,
+          "errors_by_code": {},
+          "tokens": {
+            "input": 163360,
+            "output": 5652,
+            "cache_creation": 0,
+            "cache_read": 0
+          },
+          "latency_ms": {
+            "p50": 4611.979,
+            "p95": 9416.7
+          },
+          "n_items": 57
+        },
+        "usage": {
+          "verify": {
+            "implementation": "claude",
+            "requests": 7,
+            "errors_by_code": {},
+            "tokens": {
+              "input": 27568,
+              "output": 7403,
+              "cache_creation": 0,
+              "cache_read": 0
+            },
+            "latency_ms": {
+              "p50": 11020.905,
+              "p95": 14062.046
+            },
+            "n_items": 55
+          },
+          "discover": {
+            "implementation": "claude",
+            "requests": 20,
+            "errors_by_code": {},
+            "tokens": {
+              "input": 163360,
+              "output": 5652,
+              "cache_creation": 0,
+              "cache_read": 0
+            },
+            "latency_ms": {
+              "p50": 4611.979,
+              "p95": 9416.7
+            },
+            "n_items": 0
+          }
+        }
+      }
     }
   ],
   "notes": [

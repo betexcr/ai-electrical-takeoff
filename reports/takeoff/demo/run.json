@@ -1,36 +1,36 @@
 {
   "test": "backend/tests/test_tk_e2e.py::test_demo_path_end_to_end",
   "pdf_sha256": "714af7da3154a1152c21656a7ef515daa1eb985998cdaaadcd7ac3f642fe2587",
-  "ai_implementation": "fake",
-  "ai_choice": "ai_preflight.json did not pass every check: credential_source: fail (no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)); model_available: not_run (not run: credential_source failed); vision_request: not_run (not run: credential_source failed); stages_on_sheet: not_run (not run: credential_source failed). The AI stages ran with FakeVerifier (agrees with det/0) and FakeDiscoverer (no points): test doubles, not a model; nothing here is evidence of model performance.",
+  "ai_implementation": "claude",
+  "ai_choice": "ai_preflight.json: every check passed, and TAKEOFF_LIVE_AI=1",
   "ai_preflight": {
     "path": "reports/takeoff/ai_preflight.json",
     "present": true,
-    "created_at": "2026-10-25T16:08:33.565+00:00",
+    "created_at": "2026-10-26T18:32:58.767+00:00",
     "model": "claude-opus-5-5",
-    "sheet_run": false,
-    "ok": false,
-    "all_passed": false,
+    "sheet_run": true,
+    "ok": true,
+    "all_passed": true,
     "checks": [
       {
         "name": "credential_source",
-        "status": "fail",
-        "reason": "no credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an ant profile)"
+        "status": "pass",
+        "reason": null
       },
       {
         "name": "model_available",
-        "status": "not_run",
-        "reason": "not run: credential_source failed"
+        "status": "pass",
+        "reason": null
       },
       {
         "name": "vision_request",
-        "status": "not_run",
-        "reason": "not run: credential_source failed"
+        "status": "pass",
+        "reason": null
       },
       {
         "name": "stages_on_sheet",
-        "status": "not_run",
-        "reason": "not run: credential_source failed"
+        "status": "pass",
+        "reason": null
       }
     ]
   },
@@ -38,7 +38,7 @@
   "screenshots": [
     {
       "file": "01_analyzed.png",
-      "shows": "all 4 sheets analyzed by det/0 in one background run; per-sheet progress, run summary and the AI stage lines (test double) in the status bar; A1 proposals on the plan"
+      "shows": "all 4 sheets analyzed by det/0 in one background run; per-sheet progress, run summary and the AI stage lines (Claude, live) in the status bar; A1 proposals on the plan"
     },
     {
       "file": "02_inspect_switch.png",
@@ -53,31 +53,35 @@
       "shows": "the A1 bedroom ceiling fan, detected by det/0 0.395 pt from the J hub, selected and inspected"
     },
     {
-      "file": "05_corrected.png",
+      "file": "05_ai_flag_resolved.png",
+      "shows": "an AI model_disagrees flag resolved through the panel: kept_over_ai: demo: reviewed on the plan, keeping det/0's classification"
+    },
+    {
+      "file": "06_corrected.png",
       "shows": "one proposal's category corrected (light -> fan) and saved: accepted as corrected_and_accepted; the official totals updated without a reload"
     },
     {
-      "file": "06_reloaded.png",
+      "file": "07_reloaded.png",
       "shows": "after a page reload: the corrected device is still accepted (corrected_and_accepted), with its history; the totals and review figures equal GET /counts"
     },
     {
-      "file": "07_zoomed.png",
+      "file": "08_zoomed.png",
       "shows": "after a real mouse-wheel zoom at the bedroom fan hub (scale x2.46): markers sit on their symbols (worst 0.000 px)"
     },
     {
-      "file": "08_panned.png",
+      "file": "09_panned.png",
       "shows": "after a real mouse drag of (120, -70) px: every probed marker stayed within 1.5 px (worst 0.000 px)"
     },
     {
-      "file": "09_bulk_accepted.png",
-      "shows": "after confirming 'Accept 42 unflagged proposals on sheet A1-111?': A1's flagged proposals stay awaiting review; A2-A4 untouched; the per-sheet line under the button reads 'This sheet (A1-111): awaiting 12 = 0 unflagged + 12 flagged'; official totals 43"
+      "file": "10_bulk_accepted.png",
+      "shows": "after confirming 'Accept 40 unflagged proposals on sheet A1-111?': A1's flagged proposals stay awaiting review; A2-A4 untouched; the per-sheet line under the button reads 'This sheet (A1-111): awaiting 13 = 0 unflagged + 13 flagged'; official totals 42"
     },
     {
-      "file": "10_exported.png",
+      "file": "11_exported.png",
       "shows": "Export: the status bar states 'Export incomplete' with the manifest's reasons (A1's flagged proposals and every A2-A4 detection still await review); the local export path is shortened to its directory name for this screenshot"
     }
   ],
-  "analysis_seconds": 91.6,
+  "analysis_seconds": 354.1,
   "run_id": "run-001",
   "detector": "det0",
   "detector_version": "det/0",
@@ -110,46 +114,46 @@
   },
   "ai_usage_run": {
     "verify": {
-      "implementation": "fake",
+      "implementation": "claude",
       "requests": 41,
       "errors_by_code": {},
       "tokens": {
-        "input": 0,
-        "output": 0,
+        "input": 160278,
+        "output": 40931,
         "cache_creation": 0,
         "cache_read": 0
       },
       "latency_ms": {
-        "p50": 0.0,
-        "p95": 0.0
+        "p50": 10291.184,
+        "p95": 14673.834
       },
       "n_items": 313
     },
     "discover": {
-      "implementation": "fake",
+      "implementation": "claude",
       "requests": 84,
       "errors_by_code": {},
       "tokens": {
-        "input": 0,
-        "output": 0,
+        "input": 691148,
+        "output": 27842,
         "cache_creation": 0,
         "cache_read": 0
       },
       "latency_ms": {
-        "p50": 0.0,
-        "p95": 0.0
+        "p50": 4255.356,
+        "p95": 9809.446
       },
       "n_items": 0
     }
   },
   "review_after_analysis": {
-    "detected": 313,
-    "detected_ai_only": 0,
+    "detected": 320,
+    "detected_ai_only": 7,
     "accepted_detected": 0,
     "rejected": 0,
-    "awaiting": 313,
-    "awaiting_unflagged": 219,
-    "awaiting_flagged": 94,
+    "awaiting": 320,
+    "awaiting_unflagged": 202,
+    "awaiting_flagged": 118,
     "manual": 0,
     "official_total": 0,
     "accepted_with_open_flags": 0
@@ -163,7 +167,7 @@
         1081.92,
         252.48
       ],
-      "ai_line": "AI second opinion: agrees \u00b7 test double, not a model",
+      "ai_line": "AI second opinion: agrees",
       "score_shown": "0.83",
       "open_flags": []
     },
@@ -175,7 +179,7 @@
         1151.94,
         197.46
       ],
-      "ai_line": "AI second opinion: agrees \u00b7 test double, not a model",
+      "ai_line": "AI second opinion: agrees",
       "score_shown": "none (no raster score)",
       "open_flags": []
     }
@@ -206,9 +210,13 @@
     "distance_to_hub_pt": 0.395,
     "review_state": "proposed",
     "room": "BEDROOM / STUDIO",
-    "ai_line": "AI second opinion: agrees \u00b7 test double, not a model"
+    "ai_line": "AI second opinion: agrees"
   },
-  "ai_flags_demo": "none produced",
+  "ai_flags_demo": {
+    "flag": "model_disagrees",
+    "device_id": "run-001:run-001:A1-111:det0-0027",
+    "resolution": "kept_over_ai: demo: reviewed on the plan, keeping det/0's classification"
+  },
   "correction": {
     "device_id": "run-001:run-001:A1-111:det0-0015",
     "from": [
@@ -220,8 +228,8 @@
       "exhaust_fan"
     ],
     "accept_kind": "corrected_and_accepted",
-    "official_total_before": 0,
-    "official_total_after": 1,
+    "official_total_before": 1,
+    "official_total_after": 2,
     "note": "a demonstration of the correction flow on an unflagged proposal; it is not a claim that det/0 classified this device wrongly"
   },
   "alignment": {
@@ -260,67 +268,67 @@
     }
   },
   "bulk_accept": {
-    "confirmation": "Accept 42 unflagged proposals on sheet A1-111? Official totals will update.",
-    "accepted": 42,
+    "confirmation": "Accept 40 unflagged proposals on sheet A1-111? Official totals will update.",
+    "accepted": 40,
     "sheet": "A1-111",
     "scope": "the sheet shown (A1-111); flagged proposals excluded",
     "eligible_before": {
-      "A1-111": 42,
-      "A2-111": 56,
-      "A3-111": 49,
-      "A4-111": 71
+      "A1-111": 40,
+      "A2-111": 52,
+      "A3-111": 46,
+      "A4-111": 63
     },
     "eligible_after": {
       "A1-111": 0,
-      "A2-111": 56,
-      "A3-111": 49,
-      "A4-111": 71
+      "A2-111": 52,
+      "A3-111": 46,
+      "A4-111": 63
     },
     "per_sheet_figures_before": {
       "A1-111": {
-        "button_n": 42,
-        "awaiting": 54,
-        "unflagged": 42,
-        "flagged": 12
+        "button_n": 40,
+        "awaiting": 53,
+        "unflagged": 40,
+        "flagged": 13
       },
       "A2-111": {
-        "button_n": 56,
-        "awaiting": 67,
-        "unflagged": 56,
-        "flagged": 11
+        "button_n": 52,
+        "awaiting": 69,
+        "unflagged": 52,
+        "flagged": 17
       },
       "A3-111": {
-        "button_n": 49,
-        "awaiting": 82,
-        "unflagged": 49,
-        "flagged": 33
+        "button_n": 46,
+        "awaiting": 83,
+        "unflagged": 46,
+        "flagged": 37
       },
       "A4-111": {
-        "button_n": 71,
-        "awaiting": 109,
-        "unflagged": 71,
-        "flagged": 38
+        "button_n": 63,
+        "awaiting": 113,
+        "unflagged": 63,
+        "flagged": 50
       }
     },
-    "a1_line_after": "This sheet (A1-111): awaiting 12 = 0 unflagged + 12 flagged",
-    "official_total_after": 43,
+    "a1_line_after": "This sheet (A1-111): awaiting 13 = 0 unflagged + 13 flagged",
+    "official_total_after": 42,
     "review_after": {
-      "detected": 313,
-      "detected_ai_only": 0,
-      "accepted_detected": 43,
+      "detected": 320,
+      "detected_ai_only": 7,
+      "accepted_detected": 42,
       "rejected": 0,
-      "awaiting": 270,
-      "awaiting_unflagged": 176,
-      "awaiting_flagged": 94,
+      "awaiting": 278,
+      "awaiting_unflagged": 161,
+      "awaiting_flagged": 117,
       "manual": 0,
-      "official_total": 43,
+      "official_total": 42,
       "accepted_with_open_flags": 0
     }
   },
   "r1_03_counted_have_markers": {
     "A1-111": {
-      "official": 43,
-      "counted_markers": 43
+      "official": 42,
+      "counted_markers": 42
     },
     "A2-111": {
       "official": 0,
@@ -336,18 +344,25 @@
     }
   },
   "export": {
-    "source_dir_name": "tk_001_20261025T215744Z",
+    "source_dir_name": "tk_001_20261026T195226Z",
     "copied_to": "export/ (next to this run.json)",
     "complete": false,
     "incomplete_reasons": [
-      "270 detected devices awaiting review",
-      "94 open room_ambiguous flags"
+      "278 detected devices awaiting review",
+      "7 AI-only candidates awaiting review",
+      "38 open model_disagrees flags",
+      "96 open room_ambiguous flags"
     ],
     "awaiting_review_by_sheet": {
-      "A1-111": 12,
-      "A2-111": 67,
-      "A3-111": 82,
-      "A4-111": 109
+      "A1-111": 13,
+      "A2-111": 69,
+      "A3-111": 83,
+      "A4-111": 113
+    },
+    "ai_only_candidates_by_sheet": {
+      "A2-111": 2,
+      "A3-111": 1,
+      "A4-111": 4
     },
     "totals_json_equals_api_counts": true,
     "totals_json_equals_csv_recomputation": true,
@@ -357,39 +372,39 @@
         "requests": 41,
         "errors_by_code": {},
         "tokens": {
-          "input": 0,
-          "output": 0,
+          "input": 160278,
+          "output": 40931,
           "cache_creation": 0,
           "cache_read": 0
         },
         "n_items": 313,
         "implementations": [
-          "fake"
+          "claude"
         ]
       },
       "discover": {
         "requests": 84,
         "errors_by_code": {},
         "tokens": {
-          "input": 0,
-          "output": 0,
+          "input": 691148,
+          "output": 27842,
           "cache_creation": 0,
           "cache_read": 0
         },
         "n_items": 0,
         "implementations": [
-          "fake"
+          "claude"
         ]
       }
     },
-    "official_records": 43,
-    "review_records": 270,
-    "official_total": 43,
+    "official_records": 42,
+    "review_records": 278,
+    "official_total": 42,
     "fan_row": {
       "origin_reported": "detector_accepted",
       "room_key": "BEDROOM / STUDIO"
     }
   },
-  "finished_at": "2026-10-25T21:57:45Z",
+  "finished_at": "2026-10-26T19:52:26Z",
   "evidence": "published to reports/takeoff/demo/"
 }

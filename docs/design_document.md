@@ -5,7 +5,7 @@ This covers the Stage 3 assessment, using the 4 Escondido ADU sheets A1-111 to A
 **Status on 2026-10-25:**
 
 - The required workflow runs end to end, with 577 automated tests, including tests in a real browser.
-- The AI stages are implemented. They have **not yet run against a live model**, because no API credentials are configured.
+- The AI stages ran against a live model (`claude-opus-5-5`) on 2026-10-26: the preflight passed, both stages were evaluated against the ground truth, and the browser demo ran with live AI on all 4 sheets.
 - Figures come from saved reports in this repository. Plans not yet built are marked *(proposed)*.
 
 **Governing rule:** *detectors propose, reviewers decide, saved device records determine the official totals.* Every number is a count of saved devices, each drawn as a marker on the plan; a detection counts only once a reviewer accepts it, and re-analysis never overwrites a reviewer's work.
@@ -20,7 +20,7 @@ In build order; each piece was tested before the next started.
 | 2 | Ground truth, built before any detector | A review tool with coverage cells, a blind re-scan and reconciliation. Its verified export, `gt_001`, holds 300 devices. | Done; single reviewer |
 | 3 | Evaluator | One-to-one matching within 6 pt. Precision, recall, subtype and localization per category and sheet group. | Done (`eval/1.1`) |
 | 4 | Symbol detection (`det/0`) | Templates are cut from **each sheet's own legend**. Raster and vector-geometry matches merge into one device per site. Subtype comes from the letters beside a symbol (`D`, `3`, `GFI`, `WP`, …). | Done; tuned on A1 and A2, with A3 and A4 held out |
-| 5 | AI stages (Claude vision) | **Verify:** a second opinion on each detection, checked against the legend icons; a disagreement opens a flag. **Discover:** reads the plan in tiles and proposes devices det/0 missed. Neither stage can change a device or a total. | Built, with a request budget; **not run live yet** |
+| 5 | AI stages (Claude vision) | **Verify:** a second opinion on each detection, checked against the legend icons; a disagreement opens a flag. **Discover:** reads the plan in tiles and proposes devices det/0 missed. Neither stage can change a device or a total. | Evaluated live: verify flags catch 20 of det/0's 26 errors (32 flags); discover finds 294/300 devices, precision 0.96 |
 | 6 | Room assignment | Nearest room label, flagged when ambiguous; the reviewer corrects it on the plan. | Weak: 48.8% correct on the held-out sheets |
 | 7 | Store and merge | Runs are immutable; device changes go to an append-only event log. A re-run only adds evidence and flags, never changes a reviewer's field, and adds nothing on an unchanged plan. | Done |
 | 8 | Review UI | Markers and room leader lines. Create, read, update and delete on the plan, plus reject, bulk accept of unflagged proposals, and undo. Counts per room and per home update on every save. | Done |
@@ -65,7 +65,7 @@ The result is an export of per-room and per-home counts, where each count traces
 ## 5. Trade-offs, and what I would do with more time or a team
 
 - **Rules before a trained detector.** With 4 sheets, rules can be inspected, versioned and honestly evaluated on a held-out pair. With more plans, I would train a detector on audited corrections and keep det/0 as the baseline it must beat.
-- **AI as second opinion, not decision-maker.** Totals never depend on a model whose accuracy is unmeasured. Once the live evaluations exist, the per-category evidence decides whether the AI's role grows.
+- **AI as second opinion, not decision-maker.** Totals never depend on a model. The first live evaluation is promising (discover alone reaches recall 0.97 held out) but covers one plan set; the gate set in §2 decides whether the AI's role grows.
 - **Rooms are the weakest piece.** The next investment is room polygons from walls and door gaps, plus a building outline for automatic Exterior assignment.
 - **Ground truth from one reviewer.** With a team, two blind annotators would measure agreement and hand-count new plans, giving an unbiased recall figure.
 - **Then the bill of materials:** gang boxes, cable runs measured at 1/4" = 1'-0" with a stated routing allowance, and a priced total, all drawn on the plan and traceable like every count.

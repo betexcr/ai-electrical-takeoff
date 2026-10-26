@@ -18,7 +18,7 @@
     "recessed_downlight": 6
    },
    "receptacle": {
-    "afi_duplex": 7,
+    "afi_duplex": 6,
     "fan_coil_dedicated": 2,
     "gfi": 4,
     "gfi_240v": 2,
@@ -36,7 +36,7 @@
   },
   "by_origin": {
    "ai_accepted": 0,
-   "detector_accepted": 43,
+   "detector_accepted": 42,
    "manual": 0
   },
   "by_room": {
@@ -99,7 +99,6 @@
      "recessed_downlight": 4
     },
     "receptacle": {
-     "afi_duplex": 1,
      "gfi": 2,
      "gfi_microwave": 1
     },
@@ -132,6 +131,6 @@
     }
    }
   },
-  "total": 43
+  "total": 42
  }
 }
