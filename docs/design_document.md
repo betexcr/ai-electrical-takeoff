@@ -39,7 +39,7 @@ The result is an export of per-room and per-home counts, where each count traces
 
 ## 3. Release
 
-- **Pilot**. 2 or 3 estimators use it on live bids alongside their usual manual takeoff. For each bid, compare the counts and the review time.
+- **Pilot** *(proposed)*. 2 or 3 estimators use it on live bids alongside their usual manual takeoff. For each bid, compare the counts and the review time.
 - **Versioning**. Each analysis creates a new immutable run that records the detector version and parameters, the merge-rule version, the AI stage, prompt and model versions, and the PDF's SHA-256; the export manifest repeats them. Still missing: an application version.
 - **Shipping a model or prompt change without breaking finished takeoffs.**
     - A finished takeoff is never recomputed in place. A new model produces a new run, which can only add evidence and flags.
