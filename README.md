@@ -2,7 +2,73 @@
 
 Assessment project: read the supplied electrical plans, find every electrical component, count it per room and let a user correct the result on the plan. The working record of status, evidence and decisions is [PROJECT_TRACKING.md](PROJECT_TRACKING.md). The 2-page design document (breakdown, first release, release, support, trade-offs) is [docs/design_document.md](docs/design_document.md).
 
-> **Status (2026-10-25):** The four sheets have hand-verified ground truth (`gt_001`, 300 devices). The evaluator (`eval/1.1`) has scored the Milestone 1 candidate generators and a first rule-based detector, `det/0`, which reaches F1 0.95 on the held-out sheets A3/A4 ([report](reports/evaluation/gt_001_20261025T020009Z__eval1.1__det0/report.md)). Those numbers are biased upward: the ground truth was built from the same candidates, and all 4 sheets come from one plan set. **The takeoff app works end to end on the supplied PDF** (analyze, review on the plan, correct/add/delete, totals, export; [demo evidence](reports/takeoff/demo/README.md)), with two qualifications: the AI stages ran as test doubles rather than a live model, and uploading a PDF is tested in the browser (Chromium) but is not part of the recorded demo path. **The AI stages have run against a live model** (2026-10-26, `claude-opus-5-5`): the live preflight passed, and against `gt_001` the verifier's flags catch 20 of det/0's 26 errors (32 flags, batches of 8) while discovery finds 294 of 300 devices at precision 0.96 ([verify](reports/evaluation/gt_001_20261025T020009Z__ai-verify1/report.md), [discover](reports/evaluation/gt_001_20261025T020009Z__ai-discover1/report.md)). Same caveat: one plan set. The recorded [demo](reports/takeoff/demo/README.md) ran with live AI on all 4 sheets, including resolving a `model_disagrees` flag on the plan. No detector is final.
+> **Status (2026-10-26):** The four sheets have hand-verified ground truth (`gt_001`, 300 devices). The evaluator (`eval/1.1`) has scored the Milestone 1 candidate generators and a first rule-based detector, `det/0`, which reaches F1 0.95 on the held-out sheets A3/A4 ([report](reports/evaluation/gt_001_20261025T020009Z__eval1.1__det0/report.md)). Those numbers are biased upward: the ground truth was built from the same candidates, and all 4 sheets come from one plan set. **The takeoff app works end to end on the supplied PDF** (analyze, review on the plan, correct/add/delete, totals, export; [demo evidence](reports/takeoff/demo/README.md)). Uploading a PDF is tested in the browser (Chromium) but is not part of the recorded demo path. **The AI stages have run against a live model** (2026-10-26, `claude-opus-5-5`): the live preflight passed, and against `gt_001` the verifier's flags catch 20 of det/0's 26 errors (32 flags, batches of 8) while discovery finds 294 of 300 devices at precision 0.96 ([verify](reports/evaluation/gt_001_20261025T020009Z__ai-verify1/report.md), [discover](reports/evaluation/gt_001_20261025T020009Z__ai-discover1/report.md)). Same caveat: one plan set. The recorded [demo](reports/takeoff/demo/README.md) ran with live AI on all 4 sheets, including resolving a `model_disagrees` flag on the plan. No detector is final.
+
+## Quick start
+### 1. Prerequisites
+- **Git**.
+- **[uv](https://docs.astral.sh/uv/getting-started/installation/)** (Python package and project manager). It installs Python 3.12 for the project if you don't have it.
+  ```powershell
+  # Windows (PowerShell)
+  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  ```
+  ```bash
+  # macOS / Linux
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+- **Optional:** an Anthropic API key, only for the AI second-opinion stages. Without one, run with `--ai off` (step 4); the detector, review, corrections, counts and export all work without it.
+
+Verified on Windows 11 from a fresh clone (2026-10-26). macOS and Linux have not been tried; the code has no Windows-only dependency except the optional `demo.ps1` launcher.
+
+### 2. Get the code
+```bash
+git clone https://github.com/betexcr/ai-electrical-takeoff.git
+cd ai-electrical-takeoff
+```
+The supplied plans, symbol images and verified ground truth are in the repository; nothing else needs downloading.
+
+### 3. Install
+```bash
+cd backend
+uv sync
+```
+This creates `backend/.venv` from the locked dependencies (`uv.lock`).
+
+### 4. Run the takeoff app
+From `backend/`:
+```bash
+uv run python tools/takeoff_app.py serve --ai off
+```
+Open http://127.0.0.1:8766 and:
+1. Click **Analyze** and wait until every sheet shows `done` (about 20 seconds per sheet with AI off; several minutes with AI on).
+2. Pick a sheet (press **F** to fit the plan to the view), click a marker to inspect it, and correct, accept, reject or add devices (**C** adds a device). Wheel zooms and drag pans.
+3. Official totals count only accepted and manually added devices, so they start at 0 and update as you review. Reload the page: corrections persist.
+4. Click **Export** to write `devices_official.csv`, `devices_review.csv`, `totals.json` and `manifest.json` to a new `data/takeoff/exports/tk_NNN_<UTC>/` folder. The status bar says whether the takeoff is complete (no device awaiting review, no open flag) or why not.
+
+Stop the server with Ctrl+C. Use `--port N` if 8766 is taken. Everything is stored under `data/takeoff/` (git-ignored); delete that folder to start over.
+
+### 5. Run with the AI stages (optional, billed)
+Put your key in a `.env` file at the repository root (git-ignored):
+```
+ANTHROPIC_API_KEY=sk-ant-...
+```
+Then, from `backend/`:
+```bash
+uv run python tools/ai_preflight.py --no-sheet-run   # checks the key, host and model with one small request
+uv run python tools/takeoff_app.py serve             # AI on
+```
+A full 4-sheet analysis makes about 125 Claude requests. A Claude Pro/Max subscription does not include API access. Details: [Credentials for the AI stages](#credentials-for-the-ai-stages).
+
+On Windows, `.\demo.ps1` (repo root) does the preflight and starts the app on a separate demo store; `.\demo.ps1 -NoAI` skips AI. If PowerShell blocks the script, run `powershell -ExecutionPolicy Bypass -File .\demo.ps1`.
+
+### 6. Run the tests
+From `backend/`:
+```bash
+uv run pytest -q -m "not e2e"          # 546 tests, about 7 minutes; no browser, no API key
+uv run playwright install chromium     # once, for the browser tests
+uv run pytest -q -m e2e                # browser end-to-end tests (Chromium)
+```
+Tests that call the real API are skipped unless `TAKEOFF_LIVE_AI=1`. More in [Tests](#tests).
 
 ## Layout
 | Path | Contents |
@@ -20,14 +86,6 @@ Assessment project: read the supplied electrical plans, find every electrical co
 | `reports/` | Generated evidence (overlays, probe results, reviewer screenshots, `evaluation/` reports) |
 | `data/ground_truth/` | Working DB and cache (git-ignored); `exports/` holds immutable ground-truth exports |
 | `data/takeoff/` | Takeoff store, uploads, exports and render cache (git-ignored) |
-
-## Setup
-Requires Python 3.12 and [uv](https://docs.astral.sh/uv/).
-```bash
-cd backend
-uv sync
-```
-The browser tests use Playwright's Chromium (`uv run playwright install chromium` if it isn't already in the local Playwright cache).
 
 ## Tests
 ```bash
